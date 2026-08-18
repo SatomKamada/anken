@@ -314,3 +314,13 @@ body {
 @media (max-width: 640px) {
   .kt-ph-row { grid-template-columns: 1fr; }
 }
+
+/* ================= 追加：商品規格情報（共通）================= */
+.kt-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  padding-top: 6px;
+}
+.kt-caution { display: flex; flex-direction: column; gap: 8px; }
+.kt-date { max-width: 200px; }

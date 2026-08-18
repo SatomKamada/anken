@@ -1,4 +1,4 @@
-import Field from './Field.jsx'
+import Field, { Row } from './Field.jsx'
 import {
   postChannelOptions,
   postAttrOptions,
@@ -6,20 +6,6 @@ import {
   tagOptions,
   priceChannels,
 } from './fields.js'
-
-// ラベル＋任意コントロールの1行（横並び）
-function Row({ label, required, help, children }) {
-  return (
-    <div className="kt-ph-row">
-      <div className="kt-ph-label">
-        {label}
-        {required && <span className="kt-badge-req">必須</span>}
-        {help && <span className="kt-help" title={help}>?</span>}
-      </div>
-      <div className="kt-ph-control">{children}</div>
-    </div>
-  )
-}
 
 // 日時レンジ（〜）
 function DateRange({ from, to, onFrom, onTo }) {

@@ -1,6 +1,21 @@
+// ラベル（左）＋コントロール（右）の1行レイアウト。掲載履歴情報・商品規格情報（共通）で共用。
+export function Row({ label, required, help, children }) {
+  return (
+    <div className="kt-ph-row">
+      <div className="kt-ph-label">
+        {label}
+        {required && <span className="kt-badge-req">必須</span>}
+        {help && <span className="kt-help" title={help}>?</span>}
+      </div>
+      <div className="kt-ph-control">{children}</div>
+    </div>
+  )
+}
+
 // 汎用フィールド描画コンポーネント
 // type: text | number | checkbox | select | datetime | checkboxGroup | textarea
-export default function Field({ def, value, onChange, disabled = false }) {
+// layout: 'stack'（ラベル上）| 'row'（ラベル左・掲載履歴と同じUI）
+export default function Field({ def, value, onChange, disabled = false, layout = 'stack' }) {
   const { label, type, options, required, readOnly, note, boolLabel = 'あり' } = def
 
   let control
@@ -77,6 +92,15 @@ export default function Field({ def, value, onChange, disabled = false }) {
           readOnly={readOnly} disabled={disabled}
           onChange={(e) => onChange(e.target.value)} />
       )
+  }
+
+  if (layout === 'row') {
+    return (
+      <Row label={label} required={required} help={def.help}>
+        {control}
+        {note && <div className="kt-note">{note}</div>}
+      </Row>
+    )
   }
 
   return (

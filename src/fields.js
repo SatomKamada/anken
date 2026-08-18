@@ -47,10 +47,6 @@ export const specGroups = [
       { key: 'specProductName',label: '商品規格名',            type: 'text',   note: '現行：掲載名' },
       { key: 'applyLimit',     label: '申込み回数制限',         type: 'number' },
       { key: 'applyCount',     label: '申込み可能数',           type: 'number' },
-      { key: 'memberOnly',     label: '会員限定（会員のみ）',    type: 'checkbox' },
-      { key: 'advTicketFlag',  label: '先行チケット利用フラグ',   type: 'checkbox' },
-      { key: 'noSearchFlag',   label: '検索対象外フラグ',       type: 'checkbox' },
-      { key: 'notifyFlag',     label: '通知フラグ',            type: 'checkbox' },
       { key: 'targetChannel',  label: '対象チャネル', type: 'checkboxGroup', options: ['web','アプリ','実店舗'] },
       {
         key: 'postChannel', label: '掲載チャンネル', type: 'checkboxGroup', required: true,
@@ -61,7 +57,6 @@ export const specGroups = [
   {
     title: '抽選',
     fields: [
-      { key: 'autoLottery',   label: '自動抽選フラグ',   type: 'checkbox' },
       { key: 'lotteryPeople', label: '抽選人数',        type: 'number' },
       { key: 'lotteryTotal',  label: '抽選合計',        type: 'number' },
       { key: 'winConfirmAt',  label: '当選確定日時',     type: 'datetime' },
@@ -109,6 +104,31 @@ export function makeEmptyPostHistory() {
   }
 }
 
+// ============================================================
+// 商品規格情報（共通）※商品規格情報の直上
+// ============================================================
+export const salesRepOptions       = ['担当A', '担当B', '担当C']                              // 営業担当（ダミー）
+export const companyCodeOptions     = ['C001 / 花王株式会社', 'C002 / ○○商事', 'C003 / △△食品'] // 企業マスタ.企業コード（ダミー）
+export const tempZoneOptions        = ['未設定', '常温', '冷蔵', '冷凍', 'チルド', '超冷凍', 'その他']
+export const noticeInfoOptions      = ['告知A', '告知B', '告知C']                              // 商品告知情報（ダミー）
+export const deliveryMethodOptions  = ['通常', 'ゆうパケット', 'ゆうメール', 'メール便', 'クール便'] // 汎用コードマスタ.配送種別
+export const deliveryExcludeOptions = ['北海道', '東北', '中国', '四国', '九州', '沖縄', '離島']    // 配送除外地域
+export const shippingLeadOptions    = ['即日', '1日', '2日', '3日', '5日', '1週間']              // 発送日目安（最短発送日数）※デフォルト3日
+export const cautionPresetOptions   = ['なし', '要冷蔵', '割れ物注意', '熨斗対応不可']            // 注意事項プリセット
+
+export function makeEmptySpecCommon() {
+  return {
+    salesRep: '', companyCode: '', ownItemNo: '',
+    tempZone: '未設定', dryIce: false,
+    noticeInfo: '',
+    deliveryMethod: '', deliveryExcludeArea: '',
+    firstShipDate: '', shippingLead: '3日',
+    cautionPreset: '', cautionText: '',
+    memberOnlyFlag: false, advTicketFlag: false,
+    noSearchFlag: false, autoLotteryFlag: false, notifyFlag: false,
+  }
+}
+
 // --- 各種初期値 -----------------------------------------------
 export const allSpecFields = specGroups.flatMap((g) => g.fields)
 
@@ -117,6 +137,7 @@ export function makeEmptySpec() {
   for (const f of allSpecFields) {
     row[f.key] = f.type === 'checkbox' ? false : f.type === 'checkboxGroup' ? [] : ''
   }
+  row.postHistory = makeEmptyPostHistory() // 掲載履歴を規格ごとに保持（＋で一緒に増える）
   return row
 }
 
