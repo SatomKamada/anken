@@ -324,3 +324,28 @@ body {
 }
 .kt-caution { display: flex; flex-direction: column; gap: 8px; }
 .kt-date { max-width: 200px; }
+
+/* ================= 追加：商品情報（共通）================= */
+.kt-stack { display: flex; flex-direction: column; gap: 8px; }
+.kt-inline { display: flex; align-items: center; gap: 8px; }
+.kt-inline-label { font-size: 12px; color: #666; min-width: 72px; }
+.kt-inline .kt-input { max-width: 320px; }
+
+.kt-check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 6px 12px;
+  padding: 4px 0 8px;
+}
+.kt-check-grid-label { font-size: 12px; color: #555; font-weight: 700; margin-top: 4px; }
+
+/* 掲載履歴内の抽選・アンケート見出し */
+.kt-ph-subheading {
+  margin: 14px 0 4px;
+  padding: 6px 10px;
+  background: #eef2f7;
+  border-left: 3px solid #2f80ed;
+  font-size: 12px;
+  font-weight: 700;
+  color: #446;
+}

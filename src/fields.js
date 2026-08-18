@@ -1,36 +1,65 @@
 // ============================================================
 // 画面項目定義
-//   データ連携（ECC,LMS,KIN).xlsx / kintone_案件管理 シート＋添付モックより
-//   商品情報（共通） / 商品規格設定 / 商品規格情報（明細） / 掲載履歴情報
+//   商品情報（共通） / 商品規格設定 / 商品規格情報（共通） / 商品規格・掲載履歴（個別）
 //   type: text | number | checkbox | select | datetime | checkboxGroup | textarea
 // ============================================================
 
 const UNITS = ['本','杯','箱','個','袋','食','枚','包','日','粒','種類','セット','100g','人前','なし']
 
-// --- 商品情報（共通・1件）--------------------------------------
-export const productInfoFields = [
-  { key: 'jan',              label: 'JAN',                   type: 'text',   note: '商品マスタ／JAN基本情報マスタから参照' },
-  { key: 'alcohol',          label: '酒類',                   type: 'checkbox' },
-  { key: 'medicine',         label: '医薬',                   type: 'checkbox' },
-  { key: 'categoryCode',     label: 'カテゴリーコード',           type: 'text' },
-  { key: 'categoryName',     label: 'カテゴリ名',              type: 'text' },
-  { key: 'makerCode',        label: 'メーカーコード',           type: 'text' },
-  { key: 'maker',            label: 'メーカー',                type: 'text' },
-  { key: 'provideCount',     label: '提供数',                  type: 'number', note: '現行：セット数' },
-  { key: 'childSpec',        label: '子商品規格',              type: 'text',   note: 'セット商品の場合のみ' },
-  { key: 'pieceInCount',     label: '販売ピース入数',           type: 'number' },
-  { key: 'pieceInUnit',      label: 'ピース入数単位',           type: 'select', options: UNITS },
-  { key: 'minTotal',         label: '最小単位総数（単価計算用）',  type: 'number', readOnly: true, note: '販売ピース数×ピース入数（自動）' },
-]
+// ============================================================
+// 商品情報（共通）※添付画像1〜3の内容。先頭に商品コード。
+// ============================================================
+export const makerOptions          = ['メーカーA', 'メーカーB', 'メーカーC']
+export const medicineTypeOptions   = ['対象外','要指導医薬品','第1類医薬品','第2類医薬品','第3類医薬品','医薬部外品','医薬品未分類']
+export const questionnaireOptions  = ['問診票A', '問診票B']
+export const alcoholOptions        = ['対象外','お酒','ノンアルコール','みりん']
+export const brandOptions          = ['ブランドA','ブランドB','ブランドC']
+export const seriesOptions         = ['シリーズA','シリーズB','シリーズC']
+export const genderOptions         = ['対象外','WOMEN','UNISEX','MEN','KIDS','BABY']
+export const productUnitOptions    = UNITS
+export const productTagOptions     = ['タグA','タグB','タグC','季節限定']
+export const taxTypeOptions        = ['基本税率','軽減税率','非課税']
+export const productTempZoneOptions = ['常温','冷蔵','冷凍','チルド','超冷凍','その他']
+export const allergyMainOptions    = ['卵','乳','小麦','えび','かに','くるみ','そば','落花生','カシューナッツ']
+export const allergySubOptions     = ['アーモンド','あわび','いか','いくら','オレンジ','キウイフルーツ','牛肉','ごま','さけ','さば','大豆','鶏肉','バナナ','豚肉','マカダミアナッツ','もも','やまいも','りんご','ゼラチン','ピスタチオ']
 
-// --- 商品規格設定：販売形態ごとの ON/OFF ＋上限数 ----------------
+export function makeEmptyProductInfo() {
+  return {
+    productCode: '',           // 商品コード（先頭）
+    janCode: '', maker: '', companyUrl: '',
+    productName: '', subtitle: '', catchCopy: '',
+    medicineOn: false, medicineType: '対象外', questionnaire: '',
+    alcohol: '対象外', brand: '', series: '', gender: '対象外',
+    jicfsCode: '', jicfsKanji: '', jicfsKana: '', jicfsAbbr: '', itfCode: '',
+    caseQty: '0', bowlQty: '0', netContent: '', unit: '',
+    tags: [{ tag: '' }],
+    keyword: '',
+    taxType: '基本税率', tempZone: '常温', dryIce: false,
+    allergyMain: [], allergySub: [],
+    makerPrice: '',
+    bestChoice: false, functionalFood: false, specificHealthFood: false,
+  }
+}
+
+// ============================================================
+// 商品規格設定：販売形態ごとの ON/OFF ＋上限数
+// ============================================================
 export const salesFormRows = [
   { key: 'piece', label: 'ピース' },
   { key: 'ball',  label: 'ボール' },
   { key: 'case',  label: 'ケース' },
 ]
 
-// --- 商品規格情報（明細・1:多）--------------------------------
+export function makeEmptySalesForm() {
+  const obj = {}
+  for (const sf of salesFormRows) obj[sf.key] = { enabled: false, limit: '' }
+  return obj
+}
+
+// ============================================================
+// 商品規格・掲載履歴（個別）明細（1:多）
+//   基本 ＋ 掲載履歴（抽選・アンケートを内包）。先頭に商品規格コード。
+// ============================================================
 export const specGroups = [
   {
     title: '基本',
@@ -75,13 +104,13 @@ export const specGroups = [
 ]
 
 // ============================================================
-// 掲載履歴情報（一番下・添付3枚を参照）
+// 掲載履歴（各規格に内包・添付3枚を参照）
 // ============================================================
-export const postChannelOptions   = ['Web', 'アプリ', '実店舗']
-export const postAttrOptions      = ['うま博フラグ', 'イチオシフラグ', '日替わり限定フラグ', 'CM掲載フラグ']
+export const postChannelOptions    = ['Web', 'アプリ', '実店舗']
+export const postAttrOptions       = ['うま博フラグ', 'イチオシフラグ', '日替わり限定フラグ', 'CM掲載フラグ']
 export const bestBeforeTypeOptions = ['賞味期限', '消費期限', '製造日', 'なし']
-export const tagOptions           = ['キャンペーン', '季節限定', 'おすすめ', 'セール']
-export const priceChannels        = ['本店', 'dショッピング店', 'd払い店', 'Yahoo店', '外部1', '外部2', '外部3']
+export const tagOptions            = ['キャンペーン', '季節限定', 'おすすめ', 'セール']
+export const priceChannels         = ['本店', 'dショッピング店', 'd払い店', 'Yahoo店', '外部1', '外部2', '外部3']
 
 export function makeEmptyPostHistory() {
   const prices = {}
@@ -105,16 +134,16 @@ export function makeEmptyPostHistory() {
 }
 
 // ============================================================
-// 商品規格情報（共通）※商品規格情報の直上
+// 商品規格情報（共通）※商品規格の直上
 // ============================================================
-export const salesRepOptions       = ['担当A', '担当B', '担当C']                              // 営業担当（ダミー）
-export const companyCodeOptions     = ['C001 / 花王株式会社', 'C002 / ○○商事', 'C003 / △△食品'] // 企業マスタ.企業コード（ダミー）
-export const tempZoneOptions        = ['未設定', '常温', '冷蔵', '冷凍', 'チルド', '超冷凍', 'その他']
-export const noticeInfoOptions      = ['告知A', '告知B', '告知C']                              // 商品告知情報（ダミー）
-export const deliveryMethodOptions  = ['通常', 'ゆうパケット', 'ゆうメール', 'メール便', 'クール便'] // 汎用コードマスタ.配送種別
-export const deliveryExcludeOptions = ['北海道', '東北', '中国', '四国', '九州', '沖縄', '離島']    // 配送除外地域
-export const shippingLeadOptions    = ['即日', '1日', '2日', '3日', '5日', '1週間']              // 発送日目安（最短発送日数）※デフォルト3日
-export const cautionPresetOptions   = ['なし', '要冷蔵', '割れ物注意', '熨斗対応不可']            // 注意事項プリセット
+export const salesRepOptions        = ['担当A', '担当B', '担当C']
+export const companyCodeOptions      = ['C001 / 花王株式会社', 'C002 / ○○商事', 'C003 / △△食品']
+export const tempZoneOptions         = ['未設定', '常温', '冷蔵', '冷凍', 'チルド', '超冷凍', 'その他']
+export const noticeInfoOptions       = ['告知A', '告知B', '告知C']
+export const deliveryMethodOptions   = ['通常', 'ゆうパケット', 'ゆうメール', 'メール便', 'クール便']
+export const deliveryExcludeOptions  = ['北海道', '東北', '中国', '四国', '九州', '沖縄', '離島']
+export const shippingLeadOptions     = ['即日', '1日', '2日', '3日', '5日', '1週間']
+export const cautionPresetOptions    = ['なし', '要冷蔵', '割れ物注意', '熨斗対応不可']
 
 export function makeEmptySpecCommon() {
   return {
@@ -129,26 +158,14 @@ export function makeEmptySpecCommon() {
   }
 }
 
-// --- 各種初期値 -----------------------------------------------
+// --- 明細（商品規格）初期値 -----------------------------------
 export const allSpecFields = specGroups.flatMap((g) => g.fields)
 
 export function makeEmptySpec() {
-  const row = {}
+  const row = { specCode: '' } // 商品規格コード（先頭）
   for (const f of allSpecFields) {
     row[f.key] = f.type === 'checkbox' ? false : f.type === 'checkboxGroup' ? [] : ''
   }
-  row.postHistory = makeEmptyPostHistory() // 掲載履歴を規格ごとに保持（＋で一緒に増える）
+  row.postHistory = makeEmptyPostHistory() // 掲載履歴を規格ごとに保持
   return row
-}
-
-export function makeEmptyProductInfo() {
-  const obj = {}
-  for (const f of productInfoFields) obj[f.key] = f.type === 'checkbox' ? false : ''
-  return obj
-}
-
-export function makeEmptySalesForm() {
-  const obj = {}
-  for (const sf of salesFormRows) obj[sf.key] = { enabled: false, limit: '' }
-  return obj
 }

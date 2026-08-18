@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import Field from './Field.jsx'
-import PostHistory from './PostHistory.jsx'
+import ProductInfo from './ProductInfo.jsx'
 import SpecCommon from './SpecCommon.jsx'
+import PostHistory from './PostHistory.jsx'
 import {
-  productInfoFields,
   salesFormRows,
   specGroups,
   makeEmptySpec,
@@ -11,6 +11,10 @@ import {
   makeEmptySalesForm,
   makeEmptySpecCommon,
 } from './fields.js'
+
+const basicGroup   = specGroups.find((g) => g.title === '基本')
+const lotteryGroup = specGroups.find((g) => g.title === '抽選')
+const surveyGroup  = specGroups.find((g) => g.title === 'アンケート')
 
 // ---- 開閉できるセクション（アコーディオン）------------------------
 function Accordion({ title, extra, defaultOpen = true, children }) {
@@ -41,6 +45,18 @@ function SubAccordion({ title, defaultOpen = true, children }) {
   )
 }
 
+// 掲載履歴内の項目群（Row形式）
+function FieldRows({ fields, row, onChange }) {
+  return (
+    <div className="kt-ph">
+      {fields.map((def) => (
+        <Field key={def.key} def={def} layout="row" value={row[def.key]}
+          onChange={(v) => onChange(def.key, v)} />
+      ))}
+    </div>
+  )
+}
+
 // ---- アプリ本体 --------------------------------------------------
 export default function App() {
   const [ankenNo] = useState('000000000153971')
@@ -51,16 +67,14 @@ export default function App() {
 
   const updateProductInfo = (key, val) => setProductInfo((p) => ({ ...p, [key]: val }))
   const updateSalesForm = (key, patch) => setSalesForm((s) => ({ ...s, [key]: { ...s[key], ...patch } }))
+  const updateSpecCommon = (key, val) => setSpecCommon((p) => ({ ...p, [key]: val }))
   const updateSpec = (index, key, val) =>
     setSpecs((rows) => rows.map((r, i) => (i === index ? { ...r, [key]: val } : r)))
+  const updateSpecPostHistory = (index, key, val) =>
+    setSpecs((rows) => rows.map((r, i) => (i === index ? { ...r, postHistory: { ...r.postHistory, [key]: val } } : r)))
   const addSpec = () => setSpecs((rows) => [...rows, makeEmptySpec()])
   const removeSpec = (index) =>
     setSpecs((rows) => (rows.length === 1 ? rows : rows.filter((_, i) => i !== index)))
-  const updateSpecCommon = (key, val) => setSpecCommon((p) => ({ ...p, [key]: val }))
-  // 規格ごとの掲載履歴を更新
-  const updateSpecPostHistory = (index, key, val) =>
-    setSpecs((rows) =>
-      rows.map((r, i) => (i === index ? { ...r, postHistory: { ...r.postHistory, [key]: val } } : r)))
 
   return (
     <div className="kt-app">
@@ -83,12 +97,7 @@ export default function App() {
 
         {/* ===== 商品情報（共通） ===== */}
         <Accordion title="商品情報（共通）">
-          <div className="kt-grid">
-            {productInfoFields.map((def) => (
-              <Field key={def.key} def={def} value={productInfo[def.key]}
-                onChange={(v) => updateProductInfo(def.key, v)} />
-            ))}
-          </div>
+          <ProductInfo data={productInfo} onChange={updateProductInfo} />
         </Accordion>
 
         {/* ===== 商品規格設定 ===== */}
@@ -133,8 +142,8 @@ export default function App() {
           <SpecCommon data={specCommon} onChange={updateSpecCommon} />
         </Accordion>
 
-        {/* ===== 商品規格情報（1:多） ===== */}
-        <Accordion title="商品規格情報" extra={<span className="kt-count">{specs.length} 件</span>}>
+        {/* ===== 商品規格・掲載履歴（個別）※1:多 ===== */}
+        <Accordion title="商品規格・掲載履歴（個別）" extra={<span className="kt-count">{specs.length} 件</span>}>
           {specs.map((row, i) => (
             <div className="kt-detail-row" key={i}>
               <div className="kt-detail-row-head">
@@ -146,20 +155,30 @@ export default function App() {
                 </div>
               </div>
 
-              {specGroups.map((group) => (
-                <SubAccordion key={group.title} title={group.title}>
-                  <div className="kt-ph">
-                    {group.fields.map((def) => (
-                      <Field key={def.key} def={def} layout="row" value={row[def.key]}
-                        onChange={(v) => updateSpec(i, def.key, v)} />
-                    ))}
-                  </div>
-                </SubAccordion>
-              ))}
+              {/* 先頭：商品規格コード */}
+              <div className="kt-ph">
+                <Field def={{ label: '商品規格コード', type: 'text' }} layout="row"
+                  value={row.specCode} onChange={(v) => updateSpec(i, 'specCode', v)} />
+              </div>
 
+              {/* 基本 */}
+              <SubAccordion title="基本">
+                <FieldRows fields={basicGroup.fields} row={row}
+                  onChange={(key, val) => updateSpec(i, key, val)} />
+              </SubAccordion>
+
+              {/* 掲載履歴（抽選・アンケートを内包） */}
               <SubAccordion title="掲載履歴">
                 <PostHistory data={row.postHistory}
                   onChange={(key, val) => updateSpecPostHistory(i, key, val)} />
+
+                <div className="kt-ph-subheading">抽選</div>
+                <FieldRows fields={lotteryGroup.fields} row={row}
+                  onChange={(key, val) => updateSpec(i, key, val)} />
+
+                <div className="kt-ph-subheading">アンケート</div>
+                <FieldRows fields={surveyGroup.fields} row={row}
+                  onChange={(key, val) => updateSpec(i, key, val)} />
               </SubAccordion>
             </div>
           ))}
