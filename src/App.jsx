@@ -6,8 +6,10 @@ import PostHistory from './PostHistory.jsx'
 import {
   salesFormRows,
   specGroups,
+  productAttrFields,
   makeEmptySpec,
   makeEmptyProductInfo,
+  makeEmptyProductAttr,
   makeEmptySalesForm,
   makeEmptySpecCommon,
 } from './fields.js'
@@ -61,11 +63,13 @@ function FieldRows({ fields, row, onChange }) {
 export default function App() {
   const [ankenNo] = useState('000000000153971')
   const [productInfo, setProductInfo] = useState(makeEmptyProductInfo())
+  const [productAttr, setProductAttr] = useState(makeEmptyProductAttr())
   const [salesForm, setSalesForm] = useState(makeEmptySalesForm())
   const [specCommon, setSpecCommon] = useState(makeEmptySpecCommon())
   const [specs, setSpecs] = useState([makeEmptySpec()])
 
   const updateProductInfo = (key, val) => setProductInfo((p) => ({ ...p, [key]: val }))
+  const updateProductAttr = (key, val) => setProductAttr((p) => ({ ...p, [key]: val }))
   const updateSalesForm = (key, patch) => setSalesForm((s) => ({ ...s, [key]: { ...s[key], ...patch } }))
   const updateSpecCommon = (key, val) => setSpecCommon((p) => ({ ...p, [key]: val }))
   const updateSpec = (index, key, val) =>
@@ -95,9 +99,14 @@ export default function App() {
           </div>
         </div>
 
-        {/* ===== 商品情報（共通） ===== */}
-        <Accordion title="商品情報（共通）">
+        {/* ===== 商品情報 ===== */}
+        <Accordion title="商品情報">
           <ProductInfo data={productInfo} onChange={updateProductInfo} />
+        </Accordion>
+
+        {/* ===== 商品属性情報 ===== */}
+        <Accordion title="商品属性情報">
+          <FieldRows fields={productAttrFields} row={productAttr} onChange={updateProductAttr} />
         </Accordion>
 
         {/* ===== 商品規格設定 ===== */}
@@ -189,7 +198,7 @@ export default function App() {
         {/* ===== 確認用：現在の入力値 (JSON) ===== */}
         <details className="kt-debug">
           <summary>入力値プレビュー（開発確認用）</summary>
-          <pre>{JSON.stringify({ ankenNo, productInfo, salesForm, specCommon, specs }, null, 2)}</pre>
+          <pre>{JSON.stringify({ ankenNo, productInfo, productAttr, salesForm, specCommon, specs }, null, 2)}</pre>
         </details>
       </main>
     </div>

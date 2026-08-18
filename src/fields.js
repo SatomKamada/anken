@@ -42,6 +42,21 @@ export function makeEmptyProductInfo() {
 }
 
 // ============================================================
+// 商品属性情報（商品情報の直下）
+// ============================================================
+export const productAttrFields = [
+  { key: 'attrCode',    label: '商品属性情報コード', type: 'text' },
+  { key: 'newFlag',     label: '新規作成フラグ',     type: 'checkbox', boolLabel: 'ON' },
+  { key: 'defaultFlag', label: 'デフォルトフラグ',   type: 'checkbox', boolLabel: 'ON' },
+]
+
+export function makeEmptyProductAttr() {
+  const o = {}
+  for (const f of productAttrFields) o[f.key] = f.type === 'checkbox' ? false : ''
+  return o
+}
+
+// ============================================================
 // 商品規格設定：販売形態ごとの ON/OFF ＋上限数
 // ============================================================
 export const salesFormRows = [
