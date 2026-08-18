@@ -227,3 +227,90 @@ body {
   user-select: none;
 }
 .kt-subgroup-body { padding: 12px; }
+
+/* ================= 追加：必須バッジ / ヘルプ ================= */
+.kt-badge-req {
+  display: inline-block;
+  background: #2f80ed;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.kt-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px; height: 15px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: #333;
+  color: #fff;
+  font-size: 10px;
+  cursor: help;
+  vertical-align: middle;
+}
+.kt-textarea { resize: vertical; font-family: inherit; }
+
+/* ================= 追加：掲載履歴情報（横並びレイアウト）========= */
+.kt-ph-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.kt-ph-label {
+  font-size: 13px;
+  color: #444;
+  padding-top: 6px;
+}
+.kt-ph-control { min-width: 0; }
+
+.kt-daterange { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.kt-daterange .kt-input { max-width: 240px; }
+.kt-tilde { color: #666; }
+
+.kt-vertical { flex-direction: column; align-items: flex-start; gap: 6px; }
+.kt-radio { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; margin-right: 12px; }
+
+.kt-bestbefore { display: flex; flex-direction: column; gap: 8px; }
+.kt-bestbefore-inputs { display: flex; gap: 8px; }
+.kt-bestbefore-inputs .kt-input { max-width: 240px; }
+
+/* 価格テーブル */
+.kt-price-wrap { overflow-x: auto; }
+.kt-price-table { border-collapse: collapse; min-width: 720px; }
+.kt-price-table th, .kt-price-table td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+.kt-price-table thead th { background: #fff; font-weight: 700; color: #444; }
+.kt-price-rowhead { background: #fafafa; text-align: left; font-weight: 700; color: #555; }
+.kt-price-input { width: 72px; display: inline-block; }
+.kt-yen { margin-right: 2px; color: #666; }
+.kt-price-auto { color: #888; background: #fafafa; }
+
+/* タグ */
+.kt-tags { display: flex; flex-direction: column; gap: 8px; }
+.kt-tag-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.kt-tag-row .kt-input { max-width: 220px; }
+.kt-add-row-btn.kt-sm { align-self: flex-start; padding: 5px 20px; }
+
+/* セグメント */
+.kt-segment { display: flex; flex-direction: column; gap: 8px; }
+.kt-segment-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+
+/* 入力無効時 */
+.kt-input:disabled { background: #eee; color: #999; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+  .kt-ph-row { grid-template-columns: 1fr; }
+}

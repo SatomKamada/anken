@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import Field from './Field.jsx'
+import PostHistory from './PostHistory.jsx'
 import {
   productInfoFields,
   salesFormRows,
@@ -6,6 +8,7 @@ import {
   makeEmptySpec,
   makeEmptyProductInfo,
   makeEmptySalesForm,
+  makeEmptyPostHistory,
 } from './fields.js'
 
 // ---- 開閉できるセクション（アコーディオン）------------------------
@@ -37,104 +40,22 @@ function SubAccordion({ title, defaultOpen = true, children }) {
   )
 }
 
-// ---- 汎用フィールド描画 ------------------------------------------
-function Field({ def, value, onChange }) {
-  const { label, type, options, required, readOnly, note } = def
-
-  let control
-  switch (type) {
-    case 'checkbox':
-      control = (
-        <label className="kt-checkbox">
-          <input type="checkbox" checked={!!value} onChange={(e) => onChange(e.target.checked)} />
-          <span>あり</span>
-        </label>
-      )
-      break
-
-    case 'checkboxGroup':
-      control = (
-        <div className="kt-checkbox-group">
-          {options.map((opt) => (
-            <label key={opt} className="kt-checkbox">
-              <input
-                type="checkbox"
-                checked={Array.isArray(value) && value.includes(opt)}
-                onChange={(e) => {
-                  const set = new Set(Array.isArray(value) ? value : [])
-                  e.target.checked ? set.add(opt) : set.delete(opt)
-                  onChange([...set])
-                }}
-              />
-              <span>{opt}</span>
-            </label>
-          ))}
-        </div>
-      )
-      break
-
-    case 'select':
-      control = (
-        <select className="kt-input" value={value} onChange={(e) => onChange(e.target.value)}>
-          <option value="">選択してください</option>
-          {options.map((opt) => (
-            <option key={opt} value={opt}>{opt}</option>
-          ))}
-        </select>
-      )
-      break
-
-    case 'number':
-      control = (
-        <input className="kt-input" type="number" value={value} readOnly={readOnly}
-          onChange={(e) => onChange(e.target.value)} />
-      )
-      break
-
-    case 'datetime':
-      control = (
-        <input className="kt-input" type="datetime-local" value={value}
-          onChange={(e) => onChange(e.target.value)} />
-      )
-      break
-
-    default: // text
-      control = (
-        <input className="kt-input" type="text" value={value} readOnly={readOnly}
-          onChange={(e) => onChange(e.target.value)} />
-      )
-  }
-
-  return (
-    <div className="kt-field">
-      <div className="kt-label">
-        {label}
-        {required && <span className="kt-required">*</span>}
-      </div>
-      {control}
-      {note && <div className="kt-note">{note}</div>}
-    </div>
-  )
-}
-
 // ---- アプリ本体 --------------------------------------------------
 export default function App() {
   const [ankenNo] = useState('000000000153971')
   const [productInfo, setProductInfo] = useState(makeEmptyProductInfo())
-  const [salesForm, setSalesForm] = useState(makeEmptySalesForm()) // 商品規格設定
-  const [specs, setSpecs] = useState([makeEmptySpec()])            // 商品規格情報（1:多）
+  const [salesForm, setSalesForm] = useState(makeEmptySalesForm())
+  const [specs, setSpecs] = useState([makeEmptySpec()])
+  const [postHistory, setPostHistory] = useState(makeEmptyPostHistory())
 
   const updateProductInfo = (key, val) => setProductInfo((p) => ({ ...p, [key]: val }))
-
-  const updateSalesForm = (key, patch) =>
-    setSalesForm((s) => ({ ...s, [key]: { ...s[key], ...patch } }))
-
+  const updateSalesForm = (key, patch) => setSalesForm((s) => ({ ...s, [key]: { ...s[key], ...patch } }))
   const updateSpec = (index, key, val) =>
     setSpecs((rows) => rows.map((r, i) => (i === index ? { ...r, [key]: val } : r)))
-
   const addSpec = () => setSpecs((rows) => [...rows, makeEmptySpec()])
   const removeSpec = (index) =>
     setSpecs((rows) => (rows.length === 1 ? rows : rows.filter((_, i) => i !== index)))
+  const updatePostHistory = (key, val) => setPostHistory((p) => ({ ...p, [key]: val }))
 
   return (
     <div className="kt-app">
@@ -155,7 +76,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* ===== 共通エリア：商品情報 ===== */}
+        {/* ===== 商品情報（共通） ===== */}
         <Accordion title="商品情報（共通）">
           <div className="kt-grid">
             {productInfoFields.map((def) => (
@@ -165,12 +86,8 @@ export default function App() {
           </div>
         </Accordion>
 
-        {/* ===== 商品規格設定：販売形態 ON/OFF ＋上限数 ===== */}
+        {/* ===== 商品規格設定 ===== */}
         <Accordion title="商品規格設定">
-          <p className="kt-desc">
-            販売形態ごとに起票せず、1つの商品発注を起点に販売したい商品規格をON/OFFしてECへ発信します。
-            販売したい販売形態のみONにし、必要なものだけ上限数を指定します。
-          </p>
           <table className="kt-form-table">
             <thead>
               <tr>
@@ -187,25 +104,17 @@ export default function App() {
                     <td className="kt-form-name">{sf.label}</td>
                     <td>
                       <label className="kt-toggle">
-                        <input
-                          type="checkbox"
-                          checked={cur.enabled}
-                          onChange={(e) => updateSalesForm(sf.key, { enabled: e.target.checked })}
-                        />
+                        <input type="checkbox" checked={cur.enabled}
+                          onChange={(e) => updateSalesForm(sf.key, { enabled: e.target.checked })} />
                         <span className={cur.enabled ? 'kt-toggle-on' : 'kt-toggle-off'}>
                           {cur.enabled ? 'ON' : 'OFF'}
                         </span>
                       </label>
                     </td>
                     <td>
-                      <input
-                        className="kt-input kt-limit"
-                        type="number"
-                        placeholder="－"
-                        value={cur.limit}
-                        disabled={!cur.enabled}
-                        onChange={(e) => updateSalesForm(sf.key, { limit: e.target.value })}
-                      />
+                      <input className="kt-input kt-limit" type="number" placeholder="－"
+                        value={cur.limit} disabled={!cur.enabled}
+                        onChange={(e) => updateSalesForm(sf.key, { limit: e.target.value })} />
                     </td>
                   </tr>
                 )
@@ -214,7 +123,7 @@ export default function App() {
           </table>
         </Accordion>
 
-        {/* ===== 明細：商品規格情報（1:多） ===== */}
+        {/* ===== 商品規格情報（1:多） ===== */}
         <Accordion title="商品規格情報" extra={<span className="kt-count">{specs.length} 件</span>}>
           {specs.map((row, i) => (
             <div className="kt-detail-row" key={i}>
@@ -243,10 +152,15 @@ export default function App() {
           <button className="kt-add-row-btn" onClick={addSpec}>＋ 商品規格を追加</button>
         </Accordion>
 
+        {/* ===== 掲載履歴情報（一番下） ===== */}
+        <Accordion title="掲載履歴情報">
+          <PostHistory data={postHistory} onChange={updatePostHistory} />
+        </Accordion>
+
         {/* ===== 確認用：現在の入力値 (JSON) ===== */}
         <details className="kt-debug">
           <summary>入力値プレビュー（開発確認用）</summary>
-          <pre>{JSON.stringify({ ankenNo, productInfo, salesForm, specs }, null, 2)}</pre>
+          <pre>{JSON.stringify({ ankenNo, productInfo, salesForm, specs, postHistory }, null, 2)}</pre>
         </details>
       </main>
     </div>
