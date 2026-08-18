@@ -1,0 +1,165 @@
+:root {
+  --kt-yellow: #f7d64a;
+  --kt-dark: #3b3b3b;
+  --kt-border: #d0d0d0;
+  --kt-field-bg: #f5f5f5;
+  --kt-blue: #3498db;
+  --kt-text: #333;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+  color: var(--kt-text);
+  background: #fff;
+}
+
+/* ---- ヘッダー ---- */
+.kt-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 16px;
+  background: var(--kt-yellow);
+}
+.kt-logo { font-weight: 700; font-size: 15px; }
+.kt-user {
+  background: var(--kt-dark);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+.kt-breadcrumb {
+  font-size: 12px;
+  color: #666;
+  padding: 8px 24px;
+  border-bottom: 1px solid var(--kt-border);
+}
+
+/* ---- 本体 ---- */
+.kt-main { max-width: 1080px; margin: 0 auto; padding: 24px; }
+.kt-record-head { margin-bottom: 20px; }
+
+/* ---- グループ（枠付きセクション） ---- */
+.kt-group {
+  border: 1px solid var(--kt-border);
+  border-radius: 6px;
+  padding: 16px 20px 20px;
+  margin-bottom: 24px;
+  background: #fff;
+}
+.kt-group-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.kt-group-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #555;
+  margin: 0 0 12px;
+}
+.kt-group-header .kt-group-title { margin: 0; }
+.kt-count {
+  font-size: 12px;
+  color: #888;
+  background: #eee;
+  padding: 2px 10px;
+  border-radius: 10px;
+}
+
+/* ---- フィールドグリッド ---- */
+.kt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px 18px;
+}
+.kt-field { display: flex; flex-direction: column; }
+.kt-label { font-size: 12px; color: #555; margin-bottom: 4px; }
+.kt-required { color: #e74c3c; margin-left: 4px; }
+.kt-note { font-size: 11px; color: #999; margin-top: 3px; }
+
+.kt-input {
+  border: 1px solid var(--kt-border);
+  background: var(--kt-field-bg);
+  border-radius: 3px;
+  padding: 7px 8px;
+  font-size: 13px;
+  width: 100%;
+}
+.kt-input:focus { outline: none; border-color: var(--kt-blue); background: #fff; }
+.kt-input[readonly] { color: #777; }
+
+.kt-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  margin-right: 12px;
+}
+.kt-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  padding: 6px 0;
+}
+
+/* ---- 明細行 ---- */
+.kt-detail-row {
+  border: 1px solid #e2e2e2;
+  border-left: 3px solid var(--kt-yellow);
+  border-radius: 4px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  background: #fcfcfc;
+}
+.kt-detail-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.kt-detail-index { font-weight: 700; font-size: 13px; color: #666; }
+.kt-row-actions { display: flex; gap: 6px; }
+
+.kt-icon-btn {
+  width: 28px; height: 28px;
+  border: 1px solid var(--kt-border);
+  background: #fff;
+  border-radius: 50%;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  color: #555;
+}
+.kt-icon-btn:hover { background: #f0f0f0; }
+.kt-icon-btn.kt-add { color: #27ae60; border-color: #27ae60; }
+.kt-icon-btn.kt-remove { color: #e74c3c; border-color: #e74c3c; }
+.kt-icon-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+.kt-add-row-btn {
+  margin-top: 6px;
+  padding: 9px 18px;
+  border: 1px dashed var(--kt-blue);
+  background: #fff;
+  color: var(--kt-blue);
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.kt-add-row-btn:hover { background: #f0f8ff; }
+
+/* ---- デバッグ ---- */
+.kt-debug { margin-top: 24px; font-size: 12px; }
+.kt-debug summary { cursor: pointer; color: #666; }
+.kt-debug pre {
+  background: #2b2b2b; color: #ddd;
+  padding: 14px; border-radius: 6px;
+  overflow: auto; font-size: 11px;
+  max-height: 360px;
+}
