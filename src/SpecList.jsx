@@ -3,7 +3,7 @@ import Accordion from './Accordion.jsx'
 import Field from './Field.jsx'
 import PostHistory from './PostHistory.jsx'
 import { BranchBar, branchCode } from './RecordHeader.jsx'
-import { specGroups, makeEmptySpec } from './fields.js'
+import { specGroups, specTopFields, makeEmptySpec } from './fields.js'
 
 // 商品規格・掲載履歴（個別）明細（1:多）
 // props: rows, setRows, headerNo（ヘッダー番号：枝番採番用）
@@ -69,6 +69,13 @@ export default function SpecList({ rows, setRows, headerNo }) {
               <div className="fbody">
                 <input className="inp" value={row.specCode} onChange={(e) => setField(i, 'specCode', e.target.value)} placeholder="共通の参照で仮入力されます" />
               </div>
+            </div>
+
+            {/* 規格区分・販売形態・販売数（縦並び） */}
+            <div className="vstack">
+              {specTopFields.map((f) => (
+                <Field key={f.key} field={f} value={row[f.key]} onChange={(k, val) => setField(i, k, val)} />
+              ))}
             </div>
 
             {specGroups.map((g) => (

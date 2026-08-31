@@ -80,10 +80,6 @@ export const specGroups = [
     title: '基本',
     fields: [
       {
-        key: 'saleType', label: '販売区分', type: 'select', required: true,
-        options: ['通常','わけあり（B品）','わけあり（期限）','抽選・発送あり','抽選・発送なし','先着・発送あり','先着・発送なし','イベント・発送あり','イベント・発送なし','代品','初試し','企画1','企画2','企画3'],
-      },
-      {
         key: 'choppleType', label: 'ちょっプル種別', type: 'select',
         options: ['通常','仕入（通常）','仕入（プロパー）','仕入（アウトレット）','直送MD（通常）','直送MD（プロパー）','直送PF','受発注（通常）','受発注（プロパー）'],
       },
@@ -175,7 +171,17 @@ export function makeEmptySpecCommon() {
 }
 
 // --- 明細（商品規格）初期値 -----------------------------------
-export const allSpecFields = specGroups.flatMap((g) => g.fields)
+// 個別明細の先頭に「縦並び」で表示する主要3項目（規格区分・販売形態・販売数）
+export const specTopFields = [
+  {
+    key: 'saleType', label: '規格区分', type: 'select', required: true,
+    options: ['通常','わけあり（B品）','わけあり（期限）','抽選・発送あり','抽選・発送なし','先着・発送あり','先着・発送なし','イベント・発送あり','イベント・発送なし','代品','初試し','企画1','企画2','企画3'],
+  },
+  { key: 'salesForm', label: '販売形態', type: 'select', options: ['ケース売り','ボール売り','ピース売り'] },
+  { key: 'salesQty',  label: '販売数',   type: 'number' },
+]
+
+export const allSpecFields = [...specTopFields, ...specGroups.flatMap((g) => g.fields)]
 
 export function makeEmptySpec() {
   const row = { specCode: '' } // 商品規格コード（先頭）

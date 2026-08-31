@@ -44,38 +44,38 @@ body {
 
 .tab-panel { display: flex; flex-direction: column; gap: 12px; }
 
-/* レコードヘッダーバー（最上部・自動採番番号） */
+/* レコードヘッダーバー（最上部・自動採番番号／控えめ表示） */
 .record-bar {
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  background: linear-gradient(#eef4fb, #e3edf8);
-  border: 1px solid var(--line-strong); border-left: 4px solid var(--brand);
-  border-radius: 8px; padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: #f7f9fb;
+  border: 1px solid var(--line); border-left: 3px solid var(--line-strong);
+  border-radius: 8px; padding: 8px 12px;
 }
 .record-bar .rec-badge {
-  background: var(--brand); color: #fff; font-size: 11px; font-weight: 700;
-  padding: 2px 9px; border-radius: 999px;
+  background: #eceff2; color: var(--ink-soft); font-size: 11px; font-weight: 600;
+  padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line);
 }
 .record-bar .rec-label { color: var(--ink-soft); font-weight: 600; }
 .record-bar .rec-no {
-  font-size: 17px; font-weight: 700; color: var(--brand-d);
-  letter-spacing: .04em; font-variant-numeric: tabular-nums;
+  font-size: 14px; font-weight: 600; color: var(--ink-soft);
+  letter-spacing: .02em; font-variant-numeric: tabular-nums;
 }
 .record-bar .rec-auto { color: var(--auto); font-size: 11px; }
 
-/* 明細の枝番タグ（行見出し内） */
+/* 明細の枝番タグ（行見出し内・控えめ） */
 .branch-tag {
-  display: inline-block; background: #eef2f5; color: var(--brand-d);
-  border: 1px solid var(--line-strong); border-radius: 4px;
-  font-size: 11px; font-weight: 700; padding: 1px 7px; margin-right: 8px;
+  display: inline-block; background: #f0f2f4; color: var(--ink-soft);
+  border: 1px solid var(--line); border-radius: 4px;
+  font-size: 11px; font-weight: 600; padding: 1px 7px; margin-right: 8px;
   font-variant-numeric: tabular-nums;
 }
 .branch-bar {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  background: #f3f7fb; border: 1px dashed var(--line-strong);
-  border-radius: 6px; padding: 6px 10px; margin-bottom: 8px;
+  background: #f7f9fb; border: 1px dashed var(--line);
+  border-radius: 6px; padding: 5px 10px; margin-bottom: 8px;
 }
 .branch-bar .bb-label { color: var(--ink-soft); font-weight: 600; font-size: 12px; }
-.branch-bar .bb-no { font-weight: 700; color: var(--brand-d); font-variant-numeric: tabular-nums; }
+.branch-bar .bb-no { font-weight: 600; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 .branch-bar .bb-auto { color: var(--auto); font-size: 11px; }
 
 /* Accordion */
@@ -111,7 +111,10 @@ body {
   background: #fff; color: var(--ink); font-size: 13px; font-family: inherit;
 }
 .inp:focus { outline: 2px solid rgba(43,108,176,.35); outline-offset: 0; border-color: var(--brand); }
-.inp:read-only, .inp:disabled { background: #f0f2f4; color: var(--auto); cursor: not-allowed; }
+.inp:read-only { background: #f7f9fb; color: var(--ink); }
+.inp:disabled { background: #f7f9fb; color: var(--ink-soft); }
+/* プルダウンはグレーアウトしない（白背景・通常文字色） */
+select.inp, select.inp:disabled { background: #fff; color: var(--ink); opacity: 1; -webkit-text-fill-color: var(--ink); cursor: pointer; }
 select.inp { min-width: 120px; }
 textarea.inp { resize: vertical; }
 
@@ -133,12 +136,24 @@ textarea.inp { resize: vertical; }
   font-weight: 700; color: var(--brand-d); border-bottom: 1px solid var(--line);
 }
 .subhead.sub2 { color: var(--ink-soft); }
-/* 基本情報内の主要セクション見出し（統合された旧アコーディオン相当） */
+/* 基本情報内の主要セクション見出し（統合された旧アコーディオン相当・薄水色） */
 .subhead.lead {
-  margin-top: 20px; padding: 6px 10px; font-size: 14px;
-  color: #fff; background: var(--brand); border: none; border-radius: 5px;
+  margin-top: 20px; padding: 7px 12px; font-size: 14px;
+  color: var(--brand-d); background: #e3f0fb; border: 1px solid #bcd9f2;
+  border-left: 4px solid var(--brand); border-radius: 5px;
 }
 .subhead.lead:first-child { margin-top: 4px; }
+
+/* チェックボックスの列揃え（縦列がそろう） */
+.chk-grid.cols {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+  gap: 2px 6px;
+}
+.chk-grid.cols .chk-inline { padding: 4px 6px 4px 0; }
+
+/* 縦並びブロック（規格区分・販売形態・販売数など） */
+.vstack { display: flex; flex-direction: column; }
+.vstack .frow { padding: 6px 0; }
 
 /* 案件番号リンク行（発注明細・複数可） */
 .caselink { display: grid; grid-template-columns: 150px auto 1fr auto; gap: 8px; align-items: center; margin: 4px 0; }

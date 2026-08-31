@@ -129,13 +129,13 @@ export default function ProductInfo({ value, onChange, defaultOpen = false, bare
       <label className="chk-inline"><input type="checkbox" checked={v.dryIce} onChange={(e) => set('dryIce', e.target.checked)} /><span>ドライアイス</span></label>
 
       <div className="subhead">アレルギー（特定原材料等）</div>
-      <div className="chk-grid">
+      <div className="chk-grid cols">
         {allergyMainOptions.map((o) => (
           <label key={o} className="chk-inline"><input type="checkbox" checked={(v.allergyMain || []).includes(o)} onChange={(e) => toggleArr('allergyMain', o, e.target.checked)} /><span>{o}</span></label>
         ))}
       </div>
       <div className="subhead sub2">準ずるもの</div>
-      <div className="chk-grid">
+      <div className="chk-grid cols">
         {allergySubOptions.map((o) => (
           <label key={o} className="chk-inline"><input type="checkbox" checked={(v.allergySub || []).includes(o)} onChange={(e) => toggleArr('allergySub', o, e.target.checked)} /><span>{o}</span></label>
         ))}
