@@ -13,12 +13,12 @@ export function RecordHeader({ badge, label, no }) {
 }
 
 // 明細行の先頭に表示する枝番バー（自動採番）
-export function BranchBar({ no, code }) {
+export function BranchBar({ no, code, codeLabel = '明細キー' }) {
   return (
     <div className="branch-bar">
       <span className="bb-label">明細番号（枝番）</span>
       <span className="bb-no">{no}</span>
-      {code && <span className="bb-label">/ 明細キー</span>}
+      {code && <span className="bb-label">/ {codeLabel}</span>}
       {code && <span className="bb-no">{code}</span>}
       <span className="bb-auto">（自動採番）</span>
     </div>

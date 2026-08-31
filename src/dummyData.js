@@ -138,9 +138,9 @@ export const specMaster = {
 // ---- 案件マスタ（発注明細の案件番号 参照用）------------------
 // key = 案件番号（数値連番）。参照で案件種別・参考価格を返す。
 export const caseMaster = {
-  '000045': { caseNo: '000045', caseTypeL: '食品',   caseTypeM: '飲料',       caseTypeS: '緑茶',     refPriceEx: '120' },
-  '000046': { caseNo: '000046', caseTypeL: '日用品', caseTypeM: 'スキンケア', caseTypeS: 'クリーム', refPriceEx: '1100' },
-  '000047': { caseNo: '000047', caseTypeL: '食品',   caseTypeM: '冷凍食品',   caseTypeS: '果実',     refPriceEx: '450' },
+  '000045': { caseNo: '000045', caseTypeL: '在庫',   caseTypeM: '試算あり',   caseTypeS: 'メーカー滞留品', refPriceEx: '120' },
+  '000046': { caseNo: '000046', caseTypeL: '受発注', caseTypeM: '試算なし',   caseTypeS: 'NBプロパー',     refPriceEx: '1100' },
+  '000047': { caseNo: '000047', caseTypeL: '通常',   caseTypeM: '倉庫間移動', caseTypeS: 'TC',            refPriceEx: '450' },
 }
 
 export function lookupCaseByNo(caseNo) {
@@ -153,6 +153,19 @@ export function lookupCaseByNo(caseNo) {
       refPriceEx: c.refPriceEx,
     },
   }
+}
+
+// ---- 企業マスタ（発注ヘッダー 企業コード 参照用）-------------
+export const companyMaster = {
+  '001': { companyName: '花王株式会社' },
+  '002': { companyName: 'よつ葉乳業' },
+  '003': { companyName: '△△食品' },
+}
+
+export function lookupCompany(code) {
+  const c = companyMaster[(code || '').trim()]
+  if (!c) return { found: false, values: {} }
+  return { found: true, values: { companyName: c.companyName } }
 }
 
 // ---- 発注明細 参照用（商品マスタ→発注明細の項目へ）----------

@@ -8,54 +8,34 @@
 // ---- ヘッダー（発注書単位・共通）----------------------------
 export const orderHeaderGroups = [
   {
-    title: 'ヘッダー情報',
+    // 最上位分類（ラベル非表示）：ヘッダー番号＋プロモ＋発注情報＋システム情報
+    title: null,
     fields: [
-      { key: 'orderRecordNo', label: '発注書レコードNo', type: 'text', auto: true },
-      { key: 'orderNo',       label: '発注番号',         type: 'text', auto: true },
+      { key: 'orderNo',       label: 'ヘッダー番号',       type: 'text', auto: true },
       { key: 'promotionCode', label: 'プロモーションコード', type: 'text', note: '例：25年5月提案6月納品' },
-    ],
-  },
-  {
-    title: '企業情報',
-    fields: [
-      { key: 'companyId',   label: 'Company ID', type: 'text', ref: '企業マスタ.id' },
-      { key: 'companyName', label: '企業名',     type: 'text', auto: true, ref: '企業マスタ.企業名' },
-      { key: 'shopName',    label: '屋号',       type: 'text' },
-    ],
-  },
-  {
-    title: '発注情報',
-    fields: [
-      { key: 'orderFrom',   label: '発注元', type: 'text', note: '例：ちょっプル、オールアバウトストア' },
+      { key: 'orderFrom',     label: '発注元', type: 'text', note: '例：ちょっプル、オールアバウトストア' },
       {
         key: 'orderStatus', label: '発注ステータス', type: 'select',
         options: ['入力中','登録済','申請中','承認済','発注済','一部入荷','全部入荷','差戻','NG'],
         note: '登録済の段階で倉庫に連携',
       },
       { key: 'orderCategory', label: '受発注発注区分', type: 'select', options: ['-','個別発注','一斉発注'] },
+      { key: 'ecLinkFlag',    label: 'EC基盤自動連携フラグ', type: 'select', options: ['未済','済'], note: '現行：Spica登録状況' },
     ],
   },
   {
-    title: '案件情報',
+    title: '企業情報',
     fields: [
-      { key: 'caseNo',     label: '案件No',      type: 'text', ref: '案件管理.id' },
-      { key: 'caseTypeL',  label: '案件種別（大）', type: 'text', auto: true },
-      { key: 'caseTypeM',  label: '案件種別（中）', type: 'text', auto: true },
-      { key: 'caseTypeS',  label: '案件種別（小）', type: 'text', auto: true },
+      { key: 'companyId',   label: '企業コード', type: 'text', reflink: 'company', ref: '企業マスタ.id' },
+      { key: 'companyName', label: '企業名',     type: 'text', auto: true, ref: '企業マスタ.企業名' },
+      { key: 'shopName',    label: '屋号',       type: 'text' },
     ],
   },
   {
-    title: '商品情報（集計）',
+    title: '発注情報', // 旧：商品情報（集計）
     fields: [
       { key: 'totalCase',  label: 'ケース数合計', type: 'number', auto: true, note: '明細の合計' },
       { key: 'totalPiece', label: 'ピース数合計', type: 'number', auto: true, note: 'ピース合計' },
-    ],
-  },
-  {
-    title: '倉庫情報',
-    fields: [
-      { key: 'sagawaType',     label: '佐川入荷区分',       type: 'text', note: '倉庫に連携' },
-      { key: 'sagawaTypeCode', label: '佐川入荷区分コード', type: 'text', note: '倉庫に連携' },
     ],
   },
   {
@@ -65,7 +45,10 @@ export const orderHeaderGroups = [
       { key: 'tax8',          label: '消費税（8%）',        type: 'number', auto: true },
       { key: 'tax10',         label: '消費税（10%）',       type: 'number', auto: true },
       { key: 'amountInTotal', label: '発注金額合計（税込み）', type: 'number', auto: true, note: '税抜＋消費税' },
-      { key: 'paymentTerms',  label: '支払条件',            type: 'text' },
+      {
+        key: 'paymentTerms', label: '支払条件', type: 'select',
+        options: ['末締め翌月末払い','15日締め払い','末締め翌月15日払い','日付指定'],
+      },
       { key: 'paymentDue',    label: '支払期日',            type: 'date' },
     ],
   },
@@ -74,12 +57,6 @@ export const orderHeaderGroups = [
     fields: [
       { key: 'assignee',  label: '担当者',   type: 'text',     auto: true },
       { key: 'createdAt', label: '作成日時', type: 'datetime', auto: true },
-    ],
-  },
-  {
-    title: 'システム情報',
-    fields: [
-      { key: 'ecLinkFlag', label: 'EC基盤自動連携フラグ', type: 'select', options: ['未済','済'], note: '現行：Spica登録状況' },
     ],
   },
   {
@@ -98,8 +75,7 @@ export function makeEmptyOrderHeader() {
     o[f.key] = f.type === 'checkbox' ? false : ''
   }
   // 自動付与のダミー値
-  o.orderRecordNo = '000123'
-  o.orderNo = '000123'
+  o.orderNo = '000123'          // ヘッダー番号
   o.assignee = '営業担当A'
   o.createdAt = '2026-08-31T10:00'
   o.orderStatus = '入力中'
@@ -107,6 +83,11 @@ export function makeEmptyOrderHeader() {
   o.ecLinkFlag = '未済'
   return o
 }
+
+// ---- 案件種別 選択肢（発注明細の案件リンク）------------------
+export const caseTypeLOptions = ['在庫','受発注','通常','その他']
+export const caseTypeMOptions = ['試算あり','試算なし','倉庫間移動','その他']
+export const caseTypeSOptions = ['メーカー滞留品','NBプロパー','TC','AAS','キャンペーン・抽選','代品・過受注','代品']
 
 // ---- 明細（1:多）--------------------------------------------
 export const orderDetailGroups = [
@@ -168,6 +149,8 @@ export const orderDetailGroups = [
     fields: [
       { key: 'warehouseCode',  label: '倉庫コード',       type: 'text', ref: '倉庫マスタ.id' },
       { key: 'warehouse',      label: '倉庫',             type: 'text', auto: true, ref: '倉庫マスタ.倉庫業者名' },
+      { key: 'sagawaType',     label: '佐川入荷区分',     type: 'text', note: '倉庫に連携' },
+      { key: 'sagawaTypeCode', label: '佐川入荷区分コード', type: 'text', note: '倉庫に連携' },
       { key: 'deliveryDate',   label: '納品日',           type: 'date' },
       { key: 'deliveryDateActual', label: '納品日（実績）', type: 'date', auto: true, ref: 'WMS.納品日' },
       { key: 'arrivalStatus',  label: '入荷ステータス',   type: 'text', auto: true, ref: 'WMS' },
