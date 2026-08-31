@@ -1,12 +1,12 @@
 import React from 'react'
 import Accordion from './Accordion.jsx'
 import {
-  postAttrOptions, bestBeforeTypeOptions, tagOptions, priceChannels,
+  postAttrOptions, bestBeforeTypeOptions, priceChannels,
 } from './fields.js'
 
 // 掲載履歴（各規格に内包）
-// props: value(postHistory object), onChange(nextObject)
-export default function PostHistory({ value, onChange }) {
+// props: value(postHistory object), onChange(nextObject), afterPrices(チャネル別価格の下に差し込むnode)
+export default function PostHistory({ value, onChange, afterPrices }) {
   const v = value
   const set = (patch) => onChange({ ...v, ...patch })
 
@@ -18,13 +18,6 @@ export default function PostHistory({ value, onChange }) {
   const setPrice = (ch, patch) => {
     set({ prices: { ...v.prices, [ch]: { ...v.prices[ch], ...patch } } })
   }
-
-  const setTag = (i, patch) => {
-    const tags = v.tags.map((t, idx) => (idx === i ? { ...t, ...patch } : t))
-    set({ tags })
-  }
-  const addTag = () => set({ tags: [...v.tags, { tag: '', from: '', to: '' }] })
-  const delTag = (i) => set({ tags: v.tags.filter((_, idx) => idx !== i) })
 
   return (
     <Accordion title="掲載履歴" level="sub" defaultOpen={false}>
@@ -68,7 +61,6 @@ export default function PostHistory({ value, onChange }) {
         </L>
         <L label="期限日"><input className="inp" type="date" value={v.bestBeforeDate} onChange={(e) => set({ bestBeforeDate: e.target.value })} /></L>
         <L label="表示提供数"><input className="inp" type="number" value={v.displayProvideCount} onChange={(e) => set({ displayProvideCount: e.target.value })} /></L>
-        <L label="EC在庫"><input className="inp" type="number" value={v.ecStock} onChange={(e) => set({ ecStock: e.target.value })} /></L>
       </div>
 
       {/* チャネル別価格 */}
@@ -89,27 +81,9 @@ export default function PostHistory({ value, onChange }) {
         </tbody>
       </table>
 
-      {/* タグ */}
-      <div className="subhead">
-        タグ
-        <button type="button" className="btn-mini" onClick={addTag}>＋ 追加</button>
-      </div>
-      {v.tags.map((t, i) => (
-        <div className="tagrow" key={i}>
-          <select className="inp" value={t.tag} onChange={(e) => setTag(i, { tag: e.target.value })}>
-            <option value=""></option>
-            {tagOptions.map((o) => <option key={o}>{o}</option>)}
-          </select>
-          <input className="inp" type="date" value={t.from} onChange={(e) => setTag(i, { from: e.target.value })} />
-          <input className="inp" type="date" value={t.to} onChange={(e) => setTag(i, { to: e.target.value })} />
-          <button type="button" className="btn-del" onClick={() => delTag(i)} disabled={v.tags.length <= 1}>削除</button>
-        </div>
-      ))}
+      {/* チャネル別価格の下に抽選・アンケートを配置 */}
+      {afterPrices}
 
-      <div className="grid2">
-        <L label="重み1"><input className="inp" type="number" value={v.weight1} onChange={(e) => set({ weight1: e.target.value })} /></L>
-        <L label="重み2"><input className="inp" type="number" value={v.weight2} onChange={(e) => set({ weight2: e.target.value })} /></L>
-      </div>
       <L label="メモ"><textarea className="inp" rows={2} value={v.memo} onChange={(e) => set({ memo: e.target.value })} /></L>
     </Accordion>
   )

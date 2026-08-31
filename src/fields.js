@@ -46,7 +46,6 @@ export function makeEmptyProductInfo() {
 // 商品属性情報（商品情報の直下）
 // ============================================================
 export const productAttrFields = [
-  { key: 'attrCode',    label: '商品属性情報コード', type: 'text' },
   { key: 'newFlag',     label: '新規作成フラグ',     type: 'checkbox', boolLabel: 'ON' },
   { key: 'defaultFlag', label: 'デフォルトフラグ',   type: 'checkbox', boolLabel: 'ON' },
 ]
@@ -90,7 +89,7 @@ export const specGroups = [
       { key: 'applyCount',     label: '申込み可能数',           type: 'number' },
       { key: 'targetChannel',  label: '対象チャネル', type: 'checkboxGroup', options: ['web','アプリ','実店舗'] },
       {
-        key: 'postChannel', label: '掲載チャンネル', type: 'checkboxGroup', required: true,
+        key: 'postChannel', label: '掲載チャンネル', type: 'checkboxGroup', required: true, vertical: true,
         options: ['本店','d店','d払い店','うま博','バリューマルシェ','生活市場','社販.com','Y店'],
       },
     ],
@@ -137,11 +136,10 @@ export function makeEmptyPostHistory() {
     applyCountLimit: false, applyableCount: '',
     postName: '', subtitle1: '', subtitle2: '', catchCopy: '',
     bestBeforeExcluded: false, bestBeforeType: '賞味期限', bestBeforeDate: '',
-    displayProvideCount: '', ecStock: '',
+    displayProvideCount: '',
     prices,
-    tags: [{ tag: '', from: '', to: '' }],
     segmentOn: false, segmentType: 'セグメント', segmentValue: '',
-    weight1: '', weight2: '', memo: '',
+    memo: '',
   }
 }
 

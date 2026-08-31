@@ -80,7 +80,7 @@ body {
 
 /* Accordion */
 .acc { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-.acc-sub { border-color: var(--line); border-radius: 6px; margin-top: 10px; background: #fbfcfd; }
+.acc-sub { border-color: var(--line); border-radius: 6px; margin-top: 10px; background: #fff; }
 .acc-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 10px 0 0; }
 .acc-section > .acc-head { background: linear-gradient(#f6f8fa, #eef2f5); border-bottom: 1px solid var(--line); }
 .acc-section.open > .acc-head { }
@@ -154,6 +154,19 @@ textarea.inp { resize: vertical; }
 /* 縦並びブロック（規格区分・販売形態・販売数など） */
 .vstack { display: flex; flex-direction: column; }
 .vstack .frow { padding: 6px 0; }
+
+/* グループ枠（明細を白背景＋薄グレーの箱で直感的に） */
+.fgroup {
+  background: #fafbfc; border: 1px solid var(--line-strong); border-radius: 8px;
+  padding: 6px 14px 12px; margin: 12px 0;
+}
+.fgroup > .subhead:first-child,
+.fgroup > .subhead.lead:first-child { margin-top: 6px; }
+.fgroup .subhead { border-bottom-color: #e2e7ec; }
+
+/* 縦配置チェックボックス（掲載チャンネル等） */
+.chk-grid.vcol { flex-direction: column; align-items: flex-start; gap: 2px; }
+.chk-grid.vcol .chk-inline { padding: 3px 0; }
 
 /* ヘルプアイコン */
 .help {

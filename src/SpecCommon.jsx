@@ -34,7 +34,7 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
         <div className="fbody has-right">
           <input className="inp" value={v.specCode} onChange={(e) => set('specCode', e.target.value)} placeholder="例：20000001" />
           <button type="button" className="btn-ref" onClick={refBySpecCode}>参照</button>
-          <div className="fnote">商品規格マスタから連携（20000001 / 20000002）</div>
+          <div className="fnote">商品規格マスタから連携</div>
         </div>
       </div>
 
@@ -50,7 +50,6 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
         <Sel label="出荷リードタイム" val={v.shippingLead} opts={shippingLeadOptions} onChange={(x) => set('shippingLead', x)} />
         <Sel label="注意事項プリセット" val={v.cautionPreset} opts={cautionPresetOptions} onChange={(x) => set('cautionPreset', x)} />
       </div>
-      <label className="chk-inline"><input type="checkbox" checked={v.dryIce} onChange={(e) => set('dryIce', e.target.checked)} /><span>ドライアイス</span></label>
 
       <div className="frow"><div className="flabel">注意事項</div>
         <div className="fbody"><textarea className="inp" rows={2} value={v.cautionText} onChange={(e) => set('cautionText', e.target.value)} /></div>
@@ -58,6 +57,7 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
 
       <div className="subhead">各種フラグ</div>
       <div className="chk-grid">
+        <Chk label="ドライアイス" on={v.dryIce} onChange={(c) => set('dryIce', c)} />
         <Chk label="会員限定" on={v.memberOnlyFlag} onChange={(c) => set('memberOnlyFlag', c)} />
         <Chk label="前売り券" on={v.advTicketFlag} onChange={(c) => set('advTicketFlag', c)} />
         <Chk label="検索非表示" on={v.noSearchFlag} onChange={(c) => set('noSearchFlag', c)} />

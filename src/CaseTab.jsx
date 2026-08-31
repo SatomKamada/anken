@@ -36,7 +36,7 @@ export default function CaseTab() {
   return (
     <div className="tab-panel">
       {/* 最上部：基本情報番号（1件・自動採番） */}
-      <RecordHeader badge="基本情報" label="案件番号" no={CASE_NO} />
+      <RecordHeader badge="基本情報" label="案件ヘッダー番号" no={CASE_NO} />
 
       {/* ① 基本情報（商品情報＋商品属性情報＋商品規格設定＋商品規格情報（共通）を統合） */}
       <Accordion title="基本情報" defaultOpen={false}>

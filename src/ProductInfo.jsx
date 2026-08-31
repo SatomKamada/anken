@@ -68,8 +68,7 @@ export default function ProductInfo({ value, onChange, defaultOpen = false, bare
           <input className="inp inp-code" value={v.productCode} onChange={(e) => set('productCode', e.target.value)} placeholder="例：10000001" />
           <button type="button" className="btn-icon" title="コピー" onClick={copyCode}>⧉</button>
           <button type="button" className="btn-ref" onClick={refByProductCode}>参照</button>
-          <span className="id-box"><span className="id-label">ID</span><Help /><span className="id-val">{v.recordId || '—'}</span></span>
-          <div className="fnote">商品マスタから連携（10000001〜10000003）</div>
+          <div className="fnote">商品マスタから連携</div>
         </div>
       </div>
 
@@ -79,7 +78,7 @@ export default function ProductInfo({ value, onChange, defaultOpen = false, bare
         <div className="fbody has-right">
           <input className="inp" value={v.janCode} onChange={(e) => set('janCode', e.target.value)} placeholder="例：4908013230864" />
           <button type="button" className="btn-ref" onClick={refByJan}>参照</button>
-          <div className="fnote">商品マスタ→無ければJICFS（4909999999990 等）</div>
+          <div className="fnote">商品マスタ→無ければJICFSから連携</div>
         </div>
       </div>
 

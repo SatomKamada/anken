@@ -27,7 +27,7 @@ export default function Field({ field, value, onChange, right }) {
       break
     case 'checkboxGroup':
       input = (
-        <div className="chk-grid">
+        <div className={'chk-grid' + (field.vertical ? ' vcol' : '')}>
           {options.map((opt) => {
             const arr = Array.isArray(value) ? value : []
             const on = arr.includes(opt)

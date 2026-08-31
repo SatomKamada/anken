@@ -78,13 +78,13 @@ export default function OrderTab() {
   return (
     <div className="tab-panel">
       {/* 最上部：ヘッダー番号（1件・自動採番） */}
-      <RecordHeader badge="基本情報" label="ヘッダー番号" no={header.orderNo || HEADER_NO} />
+      <RecordHeader badge="基本情報" label="発注ヘッダー番号" no={header.orderNo || HEADER_NO} />
 
       {/* ① 基本情報（分類はサブ見出しで統合／最上位分類はラベル非表示） */}
       <Accordion title="基本情報" defaultOpen={false}>
         {hmsg && <div className={'notice ' + hmsg.t}>{hmsg.m}</div>}
         {orderHeaderGroups.map((g, gi) => (
-          <div key={g.title || `g${gi}`}>
+          <div className="fgroup" key={g.title || `g${gi}`}>
             {g.title && <div className="subhead lead">{g.title}</div>}
             <div className="grid2">
               {g.fields.map((f) => {
@@ -133,8 +133,8 @@ export default function OrderTab() {
                 </>
               }
             >
-              {/* 枝番（自動採番）：発注番号 = ヘッダー番号 + 明細番号（枝番） */}
-              <BranchBar no={i + 1} code={code} codeLabel="発注番号" />
+              {/* 枝番（自動採番）：発注番号 = 発注ヘッダー番号 + 発注明細番号（枝番） */}
+              <BranchBar no={i + 1} code={code} numberLabel="発注明細番号（枝番）" codeLabel="発注番号" />
 
               {/* 案件情報（複数紐づけ可） */}
               <div className="subhead">
@@ -162,7 +162,7 @@ export default function OrderTab() {
               ))}
 
               {orderDetailGroups.map((g) => (
-                <div key={g.title}>
+                <div className="fgroup" key={g.title}>
                   <div className="subhead">{g.title}</div>
                   <div className="grid2">
                     {g.fields.filter((f) => f.key !== 'branchMaxNo').map((f) => {
