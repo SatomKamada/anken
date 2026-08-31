@@ -8,7 +8,7 @@ import { specMaster } from './dummyData.js'
 
 // 商品規格情報（共通）+ 商品規格コード 参照ボタン
 // props: value, onChange(nextObj), onSeedSpec(seedSpecObj)
-export default function SpecCommon({ value, onChange, onSeedSpec }) {
+export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = false }) {
   const v = value
   const [msg, setMsg] = useState(null)
   const set = (k, val) => onChange({ ...v, [k]: val })
@@ -26,7 +26,7 @@ export default function SpecCommon({ value, onChange, onSeedSpec }) {
   }
 
   return (
-    <Accordion title="商品規格情報（共通）" defaultOpen={true}>
+    <Accordion title="商品規格情報（共通）" defaultOpen={defaultOpen}>
       {msg && <div className={'notice ' + msg.t}>{msg.m}</div>}
 
       <div className="frow">

@@ -8,7 +8,7 @@ import {
 import { productMaster, productMasterByJan, jicfsMaster } from './dummyData.js'
 
 // 商品情報（共通）+ 商品コード/JANコード 参照ボタン
-export default function ProductInfo({ value, onChange }) {
+export default function ProductInfo({ value, onChange, defaultOpen = false }) {
   const v = value
   const [msg, setMsg] = useState(null)
   const set = (k, val) => onChange({ ...v, [k]: val })
@@ -53,7 +53,7 @@ export default function ProductInfo({ value, onChange }) {
   }
 
   return (
-    <Accordion title="商品情報" defaultOpen={true}>
+    <Accordion title="商品情報（ヘッダー）" defaultOpen={defaultOpen}>
       {msg && <div className={'notice ' + msg.t}>{msg.m}</div>}
 
       {/* コード + 参照ボタン */}

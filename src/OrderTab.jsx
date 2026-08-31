@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import Accordion from './Accordion.jsx'
 import Field from './Field.jsx'
+import { RecordHeader, BranchBar, branchCode } from './RecordHeader.jsx'
 import {
   orderHeaderGroups, makeEmptyOrderHeader,
   orderDetailGroups, makeEmptyOrderDetail,
@@ -51,21 +52,27 @@ export default function OrderTab() {
 
   return (
     <div className="tab-panel">
-      {/* ヘッダー */}
-      {orderHeaderGroups.map((g) => (
-        <Accordion key={g.title} title={g.title} defaultOpen={g.title === 'ヘッダー情報' || g.title === '発注情報'}>
-          <div className="grid2">
-            {g.fields.map((f) => (
-              <Field key={f.key} field={f} value={header[f.key]} onChange={setHeaderField} />
-            ))}
-          </div>
-        </Accordion>
-      ))}
+      {/* 最上部：ヘッダー番号（1件・自動採番） */}
+      <RecordHeader badge="ヘッダー" label="発注番号" no={header.orderNo || '000123'} />
 
-      {/* 明細 */}
+      {/* ① ヘッダー（旧・分類別アコーディオンをサブ見出しで統合） */}
+      <Accordion title="ヘッダー" defaultOpen={false}>
+        {orderHeaderGroups.map((g) => (
+          <div key={g.title}>
+            <div className="subhead">{g.title}</div>
+            <div className="grid2">
+              {g.fields.map((f) => (
+                <Field key={f.key} field={f} value={header[f.key]} onChange={setHeaderField} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </Accordion>
+
+      {/* ② 明細（1:多・枝番を自動採番） */}
       <Accordion
         title="明細（発注商品）"
-        defaultOpen={true}
+        defaultOpen={false}
         right={
           <>
             <button type="button" className="btn-plus" title="直前の行を複製して追加" onClick={duplicateLast}>＋ 複製追加</button>
@@ -75,12 +82,18 @@ export default function OrderTab() {
       >
         {rows.length === 0 && <div className="empty">明細がありません。</div>}
         {rows.map((row, i) => {
-          const title = `#${i + 1} ${row.productName || row.janCode || row.productCode || '（未設定）'}`
+          const code = branchCode(header.orderNo || '000123', i)
+          const title = (
+            <>
+              <span className="branch-tag">明細 #{i + 1}</span>
+              {row.productName || row.janCode || row.productCode || '（未設定）'}
+            </>
+          )
           return (
             <Accordion
               key={i}
               level="sub"
-              defaultOpen={i === rows.length - 1}
+              defaultOpen={false}
               title={title}
               right={
                 <>
@@ -89,11 +102,14 @@ export default function OrderTab() {
                 </>
               }
             >
+              {/* 枝番（自動採番） */}
+              <BranchBar no={i + 1} code={code} />
+
               {orderDetailGroups.map((g) => (
                 <div key={g.title}>
                   <div className="subhead">{g.title}</div>
                   <div className="grid2">
-                    {g.fields.map((f) => {
+                    {g.fields.filter((f) => f.key !== 'branchMaxNo').map((f) => {
                       const right = f.reflink
                         ? <button type="button" className="btn-ref" onClick={() => refDetail(i, f.reflink)}>参照</button>
                         : null

@@ -98,8 +98,8 @@ export function makeEmptyOrderHeader() {
     o[f.key] = f.type === 'checkbox' ? false : ''
   }
   // 自動付与のダミー値
-  o.orderRecordNo = 'OR-000123'
-  o.orderNo = 'PO-2026-000123'
+  o.orderRecordNo = '000123'
+  o.orderNo = '000123'
   o.assignee = '営業担当A'
   o.createdAt = '2026-08-31T10:00'
   o.orderStatus = '入力中'

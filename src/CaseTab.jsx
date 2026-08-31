@@ -3,10 +3,14 @@ import Accordion from './Accordion.jsx'
 import ProductInfo from './ProductInfo.jsx'
 import SpecCommon from './SpecCommon.jsx'
 import SpecList from './SpecList.jsx'
+import { RecordHeader } from './RecordHeader.jsx'
 import {
   makeEmptyProductInfo, makeEmptyProductAttr, productAttrFields,
   makeEmptySalesForm, salesFormRows, makeEmptySpecCommon, makeEmptySpec,
 } from './fields.js'
+
+// 案件ヘッダー番号（自動採番のダミー・数値のみ）
+const CASE_NO = '000045'
 
 export default function CaseTab() {
   const [product, setProduct] = useState(makeEmptyProductInfo)
@@ -22,7 +26,6 @@ export default function CaseTab() {
         const r = makeEmptySpec()
         return [{ ...r, ...seed }]
       }
-      // 先頭行へ仮入力（掲載履歴は保持）
       return rows.map((r, idx) => (idx === 0 ? { ...r, ...seed } : r))
     })
   }
@@ -32,9 +35,13 @@ export default function CaseTab() {
 
   return (
     <div className="tab-panel">
-      <ProductInfo value={product} onChange={setProduct} />
+      {/* 最上部：ヘッダー番号（1件・自動採番） */}
+      <RecordHeader badge="ヘッダー" label="案件番号" no={CASE_NO} />
 
-      <Accordion title="商品属性情報" defaultOpen={true}>
+      {/* ヘッダー側（商品情報＝ヘッダー） */}
+      <ProductInfo value={product} onChange={setProduct} defaultOpen={false} />
+
+      <Accordion title="商品属性情報" defaultOpen={false}>
         <div className="grid2">
           {productAttrFields.map((f) => (
             <div className="frow" key={f.key}>
@@ -51,7 +58,7 @@ export default function CaseTab() {
         </div>
       </Accordion>
 
-      <Accordion title="商品規格設定" defaultOpen={true}>
+      <Accordion title="商品規格設定" defaultOpen={false}>
         <table className="ptable">
           <thead><tr><th>販売形態</th><th>利用</th><th>上限数</th></tr></thead>
           <tbody>
@@ -66,9 +73,10 @@ export default function CaseTab() {
         </table>
       </Accordion>
 
-      <SpecCommon value={specCommon} onChange={setSpecCommon} onSeedSpec={seedSpec} />
+      <SpecCommon value={specCommon} onChange={setSpecCommon} onSeedSpec={seedSpec} defaultOpen={false} />
 
-      <SpecList rows={specRows} setRows={setSpecRows} />
+      {/* 明細側（商品規格・掲載履歴＝明細、枝番を自動採番） */}
+      <SpecList rows={specRows} setRows={setSpecRows} headerNo={CASE_NO} />
     </div>
   )
 }

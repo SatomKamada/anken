@@ -2,11 +2,12 @@ import React from 'react'
 import Accordion from './Accordion.jsx'
 import Field from './Field.jsx'
 import PostHistory from './PostHistory.jsx'
+import { BranchBar, branchCode } from './RecordHeader.jsx'
 import { specGroups, makeEmptySpec } from './fields.js'
 
 // 商品規格・掲載履歴（個別）明細（1:多）
-// props: rows, setRows
-export default function SpecList({ rows, setRows }) {
+// props: rows, setRows, headerNo（ヘッダー番号：枝番採番用）
+export default function SpecList({ rows, setRows, headerNo }) {
   const updateRow = (i, next) => setRows(rows.map((r, idx) => (idx === i ? next : r)))
   const setField = (i, key, val) => updateRow(i, { ...rows[i], [key]: val })
   const setPostHistory = (i, ph) => updateRow(i, { ...rows[i], postHistory: ph })
@@ -27,8 +28,8 @@ export default function SpecList({ rows, setRows }) {
 
   return (
     <Accordion
-      title="商品規格・掲載履歴（個別）"
-      defaultOpen={true}
+      title="商品規格・掲載履歴（個別）［明細］"
+      defaultOpen={false}
       right={
         <>
           <button type="button" className="btn-plus" title="直前の行を複製して追加" onClick={duplicateLast}>＋ 複製追加</button>
@@ -39,12 +40,18 @@ export default function SpecList({ rows, setRows }) {
       {rows.length === 0 && <div className="empty">行がありません。「＋ 複製追加」または「空行追加」で明細を追加してください。</div>}
 
       {rows.map((row, i) => {
-        const title = `#${i + 1} ${row.specCode || '（規格コード未設定）'}${row.specProductName ? ' / ' + row.specProductName : ''}`
+        const code = branchCode(headerNo, i)
+        const title = (
+          <>
+            <span className="branch-tag">明細 #{i + 1}</span>
+            {row.specCode || '（規格コード未設定）'}{row.specProductName ? ' / ' + row.specProductName : ''}
+          </>
+        )
         return (
           <Accordion
             key={i}
             level="sub"
-            defaultOpen={i === rows.length - 1}
+            defaultOpen={false}
             title={title}
             right={
               <>
@@ -53,6 +60,9 @@ export default function SpecList({ rows, setRows }) {
               </>
             }
           >
+            {/* 枝番（自動採番） */}
+            <BranchBar no={i + 1} code={code} />
+
             {/* 商品規格コード（先頭） */}
             <div className="frow">
               <div className="flabel">商品規格コード</div>

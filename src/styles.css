@@ -44,6 +44,40 @@ body {
 
 .tab-panel { display: flex; flex-direction: column; gap: 12px; }
 
+/* レコードヘッダーバー（最上部・自動採番番号） */
+.record-bar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: linear-gradient(#eef4fb, #e3edf8);
+  border: 1px solid var(--line-strong); border-left: 4px solid var(--brand);
+  border-radius: 8px; padding: 10px 14px;
+}
+.record-bar .rec-badge {
+  background: var(--brand); color: #fff; font-size: 11px; font-weight: 700;
+  padding: 2px 9px; border-radius: 999px;
+}
+.record-bar .rec-label { color: var(--ink-soft); font-weight: 600; }
+.record-bar .rec-no {
+  font-size: 17px; font-weight: 700; color: var(--brand-d);
+  letter-spacing: .04em; font-variant-numeric: tabular-nums;
+}
+.record-bar .rec-auto { color: var(--auto); font-size: 11px; }
+
+/* 明細の枝番タグ（行見出し内） */
+.branch-tag {
+  display: inline-block; background: #eef2f5; color: var(--brand-d);
+  border: 1px solid var(--line-strong); border-radius: 4px;
+  font-size: 11px; font-weight: 700; padding: 1px 7px; margin-right: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.branch-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: #f3f7fb; border: 1px dashed var(--line-strong);
+  border-radius: 6px; padding: 6px 10px; margin-bottom: 8px;
+}
+.branch-bar .bb-label { color: var(--ink-soft); font-weight: 600; font-size: 12px; }
+.branch-bar .bb-no { font-weight: 700; color: var(--brand-d); font-variant-numeric: tabular-nums; }
+.branch-bar .bb-auto { color: var(--auto); font-size: 11px; }
+
 /* Accordion */
 .acc { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
 .acc-sub { border-color: var(--line); border-radius: 6px; margin-top: 10px; background: #fbfcfd; }
