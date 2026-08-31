@@ -9,7 +9,7 @@ const UNITS = ['本','杯','箱','個','袋','食','枚','包','日','粒','種�
 // ============================================================
 // 商品情報（共通）※先頭に商品コード。
 // ============================================================
-export const makerOptions          = ['メーカーA', 'メーカーB', 'メーカーC']
+export const makerOptions          = ['よつ葉乳業', '伊藤園', '明治']
 export const medicineTypeOptions   = ['対象外','要指導医薬品','第1類医薬品','第2類医薬品','第3類医薬品','医薬部外品','医薬品未分類']
 export const questionnaireOptions  = ['問診票A', '問診票B']
 export const alcoholOptions        = ['対象外','お酒','ノンアルコール','みりん']
@@ -19,12 +19,13 @@ export const genderOptions         = ['対象外','WOMEN','UNISEX','MEN','KIDS',
 export const productUnitOptions    = UNITS
 export const productTagOptions     = ['タグA','タグB','タグC','季節限定']
 export const taxTypeOptions        = ['基本税率','軽減税率','非課税']
-export const productTempZoneOptions = ['常温','冷蔵','冷凍','チルド','超冷凍','その他']
+export const productTempZoneOptions = ['未設定','常温','冷蔵','冷凍','チルド','超冷凍','その他']
 export const allergyMainOptions    = ['卵','乳','小麦','えび','かに','くるみ','そば','落花生','カシューナッツ']
 export const allergySubOptions     = ['アーモンド','あわび','いか','いくら','オレンジ','キウイフルーツ','牛肉','ごま','さけ','さば','大豆','鶏肉','バナナ','豚肉','マカダミアナッツ','もも','やまいも','りんご','ゼラチン','ピスタチオ']
 
 export function makeEmptyProductInfo() {
   return {
+    recordId: '',             // 内部ID（参照時にセット）
     productCode: '',           // 商品コード（先頭）
     janCode: '', maker: '', companyUrl: '',
     productName: '', subtitle: '', catchCopy: '',
@@ -32,9 +33,9 @@ export function makeEmptyProductInfo() {
     alcohol: '対象外', brand: '', series: '', gender: '対象外',
     jicfsCode: '', jicfsKanji: '', jicfsKana: '', jicfsAbbr: '', itfCode: '',
     caseQty: '0', bowlQty: '0', netContent: '', unit: '',
-    tags: [{ tag: '' }],
+    tags: [],
     keyword: '',
-    taxType: '基本税率', tempZone: '常温', dryIce: false,
+    taxType: '基本税率', tempZone: '未設定', dryIce: false,
     allergyMain: [], allergySub: [],
     makerPrice: '',
     bestChoice: false, functionalFood: false, specificHealthFood: false,

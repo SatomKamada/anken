@@ -32,9 +32,9 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
       <div className="frow">
         <div className="flabel">商品規格コード</div>
         <div className="fbody has-right">
-          <input className="inp" value={v.specCode} onChange={(e) => set('specCode', e.target.value)} placeholder="例：SPC0001" />
+          <input className="inp" value={v.specCode} onChange={(e) => set('specCode', e.target.value)} placeholder="例：20000001" />
           <button type="button" className="btn-ref" onClick={refBySpecCode}>参照</button>
-          <div className="fnote">商品規格マスタから連携（SPC0001 / SPC0002）</div>
+          <div className="fnote">商品規格マスタから連携（20000001 / 20000002）</div>
         </div>
       </div>
 

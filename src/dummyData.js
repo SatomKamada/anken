@@ -7,13 +7,14 @@
 // ============================================================
 
 // ---- 商品マスタ（商品情報 共通へ流し込む値）----------------
-// key = 商品コード。jan で JAN 検索も可能。
+// key = 商品コード（数字のみ）。jan で JAN 検索も可能。
 export const productMaster = {
-  'P0001': {
-    productCode: 'P0001',
+  '10000001': {
+    recordId: '1',
+    productCode: '10000001',
     janCode: '4901234567894',
-    maker: 'メーカーA',
-    companyUrl: 'https://example.com/makerA',
+    maker: '伊藤園',
+    companyUrl: 'https://example.com/itoen',
     productName: 'オーガニック緑茶 500ml',
     subtitle: '国産茶葉100%',
     catchCopy: 'すっきり飲みやすい定番の緑茶',
@@ -26,28 +27,30 @@ export const productMaster = {
     makerPrice: '150',
     functionalFood: false, specificHealthFood: false,
   },
-  'P0002': {
-    productCode: 'P0002',
-    janCode: '4902345678905',
-    maker: 'メーカーB',
-    companyUrl: 'https://example.com/makerB',
-    productName: 'しっとり保湿クリーム 50g',
-    subtitle: '乾燥肌向け',
-    catchCopy: '毎日のスキンケアに',
-    medicineOn: true, medicineType: '医薬部外品',
-    alcohol: '対象外', brand: 'ブランドB', series: 'シリーズB', gender: 'WOMEN',
-    jicfsCode: '120305', jicfsKanji: 'スキンクリーム', jicfsKana: 'スキンクリーム', jicfsAbbr: 'クリーム', itfCode: '14902345678902',
-    netContent: '50', unit: '個',
-    taxType: '基本税率', tempZone: '常温', dryIce: false,
-    allergyMain: [], allergySub: [],
-    makerPrice: '1200',
+  '10000002': {
+    recordId: '2',
+    productCode: '10000002',
+    janCode: '4908013230864',
+    maker: 'よつ葉乳業',
+    companyUrl: '',
+    productName: 'クリーム仕立てよつ葉カフェオレ',
+    subtitle: '',
+    catchCopy: '',
+    medicineOn: false, medicineType: '対象外',
+    alcohol: '対象外', brand: '', series: '', gender: '対象外',
+    jicfsCode: '140307', jicfsKanji: 'コーヒードリンク', jicfsKana: 'コ-ヒ-ドリンク', jicfsAbbr: 'コーヒードリンク', itfCode: '14908013230861',
+    netContent: '500', unit: '本',
+    taxType: '軽減税率', tempZone: '冷蔵', dryIce: false,
+    allergyMain: ['乳'], allergySub: [],
+    makerPrice: '170',
     functionalFood: false, specificHealthFood: false,
   },
-  'P0003': {
-    productCode: 'P0003',
+  '10000003': {
+    recordId: '3',
+    productCode: '10000003',
     janCode: '4903456789016',
-    maker: 'メーカーC',
-    companyUrl: 'https://example.com/makerC',
+    maker: '明治',
+    companyUrl: 'https://example.com/meiji',
     productName: '冷凍ミックスベリー 300g',
     subtitle: '4種のベリー',
     catchCopy: '朝食やスムージーに',
@@ -80,14 +83,14 @@ export const jicfsMaster = {
 }
 
 // ---- 商品規格マスタ（商品規格情報 共通へ流し込む値）---------
-// key = 商品規格コード。seedSpec で個別明細（基本）へ仮入力する値も保持。
+// key = 商品規格コード（数字のみ）。seedSpec で個別明細へ仮入力する値も保持。
 export const specMaster = {
-  'SPC0001': {
+  '20000001': {
     common: {
-      specCode: 'SPC0001',
+      specCode: '20000001',
       salesRep: '担当A',
       companyCode: 'C001 / 花王株式会社',
-      ownItemNo: 'OWN-1001',
+      ownItemNo: '1001',
       tempZone: '常温', dryIce: false,
       noticeInfo: '告知A',
       deliveryMethod: '通常', deliveryExcludeArea: '沖縄',
@@ -96,9 +99,8 @@ export const specMaster = {
       memberOnlyFlag: false, advTicketFlag: false,
       noSearchFlag: false, autoLotteryFlag: false, notifyFlag: true,
     },
-    // 商品規格・掲載履歴（個別）の「商品規格（基本）」へ仮入力される値
     seedSpec: {
-      specCode: 'SPC0001',
+      specCode: '20000001',
       saleType: '通常',
       choppleType: '仕入（通常）',
       specProductName: 'オーガニック緑茶 500ml 24本ケース',
@@ -107,12 +109,12 @@ export const specMaster = {
       postChannel: ['本店','d店'],
     },
   },
-  'SPC0002': {
+  '20000002': {
     common: {
-      specCode: 'SPC0002',
+      specCode: '20000002',
       salesRep: '担当B',
       companyCode: 'C003 / △△食品',
-      ownItemNo: 'OWN-2002',
+      ownItemNo: '2002',
       tempZone: '冷凍', dryIce: true,
       noticeInfo: '告知C',
       deliveryMethod: 'クール便', deliveryExcludeArea: '離島',
@@ -122,7 +124,7 @@ export const specMaster = {
       noSearchFlag: false, autoLotteryFlag: true, notifyFlag: true,
     },
     seedSpec: {
-      specCode: 'SPC0002',
+      specCode: '20000002',
       saleType: '抽選・発送あり',
       choppleType: '直送MD（通常）',
       specProductName: '冷凍ミックスベリー 300g 抽選セット',
@@ -176,7 +178,7 @@ export function lookupOrderDetailByProduct({ productCode, janCode }) {
         dryIce: p.dryIce,
         netContent: p.netContent,
         unit: p.unit,
-        makerCode: p.maker === 'メーカーA' ? 'M001' : p.maker === 'メーカーB' ? 'M002' : 'M003',
+        makerCode: p.maker === '伊藤園' ? '001' : p.maker === 'よつ葉乳業' ? '002' : '003',
         makerName: p.maker,
       },
     }
