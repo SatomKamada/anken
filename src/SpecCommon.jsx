@@ -1,104 +1,94 @@
-import { Row } from './Field.jsx'
+import React, { useState } from 'react'
+import Accordion from './Accordion.jsx'
 import {
-  salesRepOptions,
-  companyCodeOptions,
-  tempZoneOptions,
-  noticeInfoOptions,
-  deliveryMethodOptions,
-  deliveryExcludeOptions,
-  shippingLeadOptions,
-  cautionPresetOptions,
+  salesRepOptions, companyCodeOptions, tempZoneOptions, noticeInfoOptions,
+  deliveryMethodOptions, deliveryExcludeOptions, shippingLeadOptions, cautionPresetOptions,
 } from './fields.js'
+import { specMaster } from './dummyData.js'
 
-// セレクト（プレースホルダ付き）
-function Select({ value, options, placeholder = '選択してください', disabled, onChange }) {
+// 商品規格情報（共通）+ 商品規格コード 参照ボタン
+// props: value, onChange(nextObj), onSeedSpec(seedSpecObj)
+export default function SpecCommon({ value, onChange, onSeedSpec }) {
+  const v = value
+  const [msg, setMsg] = useState(null)
+  const set = (k, val) => onChange({ ...v, [k]: val })
+
+  const refBySpecCode = () => {
+    const code = (v.specCode || '').trim()
+    if (!code) { setMsg({ t: 'warn', m: '商品規格コードを入力してください' }); return }
+    const m = specMaster[code]
+    if (!m) { setMsg({ t: 'warn', m: `商品規格マスタに該当なし（${code}）` }); return }
+    // 共通へ流し込み
+    onChange({ ...v, ...m.common })
+    // 個別明細（基本）へ仮入力
+    if (onSeedSpec) onSeedSpec(m.seedSpec)
+    setMsg({ t: 'ok', m: `商品規格マスタから連携しました（${code}）。個別明細の商品規格欄にも仮入力しました。` })
+  }
+
   return (
-    <select className="kt-input" value={value} disabled={disabled}
-      onChange={(e) => onChange(e.target.value)}>
-      <option value="">{placeholder}</option>
-      {options.map((o) => <option key={o} value={o}>{o}</option>)}
-    </select>
+    <Accordion title="商品規格情報（共通）" defaultOpen={true}>
+      {msg && <div className={'notice ' + msg.t}>{msg.m}</div>}
+
+      <div className="frow">
+        <div className="flabel">商品規格コード</div>
+        <div className="fbody has-right">
+          <input className="inp" value={v.specCode} onChange={(e) => set('specCode', e.target.value)} placeholder="例：SPC0001" />
+          <button type="button" className="btn-ref" onClick={refBySpecCode}>参照</button>
+          <div className="fnote">商品規格マスタから連携（SPC0001 / SPC0002）</div>
+        </div>
+      </div>
+
+      <div className="grid2">
+        <Sel label="営業担当" val={v.salesRep} opts={salesRepOptions} onChange={(x) => set('salesRep', x)} />
+        <Sel label="企業コード" val={v.companyCode} opts={companyCodeOptions} onChange={(x) => set('companyCode', x)} />
+        <Txt label="自社品番" val={v.ownItemNo} onChange={(x) => set('ownItemNo', x)} />
+        <Sel label="温度帯" val={v.tempZone} opts={tempZoneOptions} onChange={(x) => set('tempZone', x)} />
+        <Sel label="告知情報" val={v.noticeInfo} opts={noticeInfoOptions} onChange={(x) => set('noticeInfo', x)} />
+        <Sel label="配送方法" val={v.deliveryMethod} opts={deliveryMethodOptions} onChange={(x) => set('deliveryMethod', x)} />
+        <Sel label="配送除外エリア" val={v.deliveryExcludeArea} opts={deliveryExcludeOptions} onChange={(x) => set('deliveryExcludeArea', x)} />
+        <Txt label="初回出荷日" val={v.firstShipDate} onChange={(x) => set('firstShipDate', x)} type="date" />
+        <Sel label="出荷リードタイム" val={v.shippingLead} opts={shippingLeadOptions} onChange={(x) => set('shippingLead', x)} />
+        <Sel label="注意事項プリセット" val={v.cautionPreset} opts={cautionPresetOptions} onChange={(x) => set('cautionPreset', x)} />
+      </div>
+      <label className="chk-inline"><input type="checkbox" checked={v.dryIce} onChange={(e) => set('dryIce', e.target.checked)} /><span>ドライアイス</span></label>
+
+      <div className="frow"><div className="flabel">注意事項</div>
+        <div className="fbody"><textarea className="inp" rows={2} value={v.cautionText} onChange={(e) => set('cautionText', e.target.value)} /></div>
+      </div>
+
+      <div className="subhead">各種フラグ</div>
+      <div className="chk-grid">
+        <Chk label="会員限定" on={v.memberOnlyFlag} onChange={(c) => set('memberOnlyFlag', c)} />
+        <Chk label="前売り券" on={v.advTicketFlag} onChange={(c) => set('advTicketFlag', c)} />
+        <Chk label="検索非表示" on={v.noSearchFlag} onChange={(c) => set('noSearchFlag', c)} />
+        <Chk label="自動抽選" on={v.autoLotteryFlag} onChange={(c) => set('autoLotteryFlag', c)} />
+        <Chk label="通知" on={v.notifyFlag} onChange={(c) => set('notifyFlag', c)} />
+      </div>
+    </Accordion>
   )
 }
 
-// ON チェックボックス
-function OnCheck({ checked, onChange }) {
+function Txt({ label, val, onChange, type = 'text' }) {
   return (
-    <label className="kt-checkbox">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-      <span>ON</span>
-    </label>
-  )
-}
-
-export default function SpecCommon({ data, onChange }) {
-  const set = (key, val) => onChange(key, val)
-
-  return (
-    <div className="kt-ph">
-      <Row label="営業担当">
-        <Select value={data.salesRep} options={salesRepOptions} onChange={(v) => set('salesRep', v)} />
-      </Row>
-
-      <Row label="企業コード" help="企業マスタの企業コードから選択します">
-        <Select value={data.companyCode} options={companyCodeOptions} onChange={(v) => set('companyCode', v)} />
-      </Row>
-
-      <Row label="自社品番">
-        <input className="kt-input" value={data.ownItemNo} onChange={(e) => set('ownItemNo', e.target.value)} />
-      </Row>
-
-      <Row label="商品温度帯">
-        <div className="kt-radio-group">
-          {tempZoneOptions.map((o) => (
-            <label key={o} className="kt-radio">
-              <input type="radio" name="tempZone" value={o}
-                checked={data.tempZone === o} onChange={(e) => set('tempZone', e.target.value)} />
-              <span>{o}</span>
-            </label>
-          ))}
-        </div>
-      </Row>
-
-      <Row label="ドライアイス設定">
-        <OnCheck checked={data.dryIce} onChange={(v) => set('dryIce', v)} />
-      </Row>
-
-      <Row label="商品告知情報の紐づけ">
-        <Select value={data.noticeInfo} options={noticeInfoOptions}
-          placeholder="商品告知情報を選択してください" onChange={(v) => set('noticeInfo', v)} />
-      </Row>
-
-      <Row label="配送方法">
-        <Select value={data.deliveryMethod} options={deliveryMethodOptions} onChange={(v) => set('deliveryMethod', v)} />
-      </Row>
-
-      <Row label="配送除外地域">
-        <Select value={data.deliveryExcludeArea} options={deliveryExcludeOptions} onChange={(v) => set('deliveryExcludeArea', v)} />
-      </Row>
-
-      <Row label="初回出荷予定日">
-        <input className="kt-input kt-date" type="date" value={data.firstShipDate}
-          onChange={(e) => set('firstShipDate', e.target.value)} />
-      </Row>
-
-      <Row label="発送日目安">
-        <Select value={data.shippingLead} options={shippingLeadOptions} onChange={(v) => set('shippingLead', v)} />
-      </Row>
-
-      <Row label="注意事項">
-        <div className="kt-caution">
-          <Select value={data.cautionPreset} options={cautionPresetOptions} onChange={(v) => set('cautionPreset', v)} />
-          <textarea className="kt-input kt-textarea" rows={3} value={data.cautionText}
-            onChange={(e) => set('cautionText', e.target.value)} />
-        </div>
-      </Row>
-
-      <Row label="会員限定フラグ"><OnCheck checked={data.memberOnlyFlag} onChange={(v) => set('memberOnlyFlag', v)} /></Row>
-      <Row label="先行チケット利用フラグ"><OnCheck checked={data.advTicketFlag} onChange={(v) => set('advTicketFlag', v)} /></Row>
-      <Row label="検索対象外フラグ"><OnCheck checked={data.noSearchFlag} onChange={(v) => set('noSearchFlag', v)} /></Row>
-      <Row label="自動抽選フラグ"><OnCheck checked={data.autoLotteryFlag} onChange={(v) => set('autoLotteryFlag', v)} /></Row>
-      <Row label="通知フラグ"><OnCheck checked={data.notifyFlag} onChange={(v) => set('notifyFlag', v)} /></Row>
+    <div className="frow"><div className="flabel">{label}</div>
+      <div className="fbody"><input className="inp" type={type} value={val ?? ''} onChange={(e) => onChange(e.target.value)} /></div>
     </div>
+  )
+}
+function Sel({ label, val, opts, onChange }) {
+  return (
+    <div className="frow"><div className="flabel">{label}</div>
+      <div className="fbody">
+        <select className="inp" value={val ?? ''} onChange={(e) => onChange(e.target.value)}>
+          <option value=""></option>
+          {opts.map((o) => <option key={o}>{o}</option>)}
+        </select>
+      </div>
+    </div>
+  )
+}
+function Chk({ label, on, onChange }) {
+  return (
+    <label className="chk-inline"><input type="checkbox" checked={!!on} onChange={(e) => onChange(e.target.checked)} /><span>{label}</span></label>
   )
 }
