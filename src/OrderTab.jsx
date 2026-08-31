@@ -6,8 +6,9 @@ import {
   orderHeaderGroups, makeEmptyOrderHeader,
   orderDetailGroups, makeEmptyOrderDetail,
   targetHistoryFields, makeEmptyTargetHistory,
+  makeEmptyCaseLink,
 } from './orderFields.js'
-import { lookupOrderDetailByProduct } from './dummyData.js'
+import { lookupOrderDetailByProduct, lookupCaseByNo } from './dummyData.js'
 
 export default function OrderTab() {
   const [header, setHeader] = useState(makeEmptyOrderHeader)
@@ -42,6 +43,18 @@ export default function OrderTab() {
     updateRow(i, { ...r, ...res.values })
   }
 
+  // 案件番号リンク（複数）
+  const setCaseLinks = (i, links) => updateRow(i, { ...rows[i], caseLinks: links })
+  const addCaseLink = (i) => setCaseLinks(i, [...(rows[i].caseLinks || []), makeEmptyCaseLink()])
+  const delCaseLink = (i, ci) => setCaseLinks(i, rows[i].caseLinks.filter((_, idx) => idx !== ci))
+  const setCaseNo = (i, ci, val) => setCaseLinks(i, rows[i].caseLinks.map((l, idx) => (idx === ci ? { ...l, caseNo: val } : l)))
+  const refCaseLink = (i, ci) => {
+    const link = rows[i].caseLinks[ci]
+    const res = lookupCaseByNo(link.caseNo)
+    if (!res.found) { alert(`案件番号に該当なし（${link.caseNo || '未入力'}）。ダミー：000045 / 000046 / 000047`); return }
+    setCaseLinks(i, rows[i].caseLinks.map((l, idx) => (idx === ci ? { ...l, ...res.values } : l)))
+  }
+
   // 販売目標変更履歴（明細サブテーブル）
   const addHist = (i) => updateRow(i, { ...rows[i], targetHistory: [...(rows[i].targetHistory || []), makeEmptyTargetHistory()] })
   const setHist = (i, hi, key, val) => {
@@ -52,14 +65,14 @@ export default function OrderTab() {
 
   return (
     <div className="tab-panel">
-      {/* 最上部：ヘッダー番号（1件・自動採番） */}
-      <RecordHeader badge="ヘッダー" label="発注番号" no={header.orderNo || '000123'} />
+      {/* 最上部：基本情報番号（1件・自動採番） */}
+      <RecordHeader badge="基本情報" label="発注番号" no={header.orderNo || '000123'} />
 
-      {/* ① ヘッダー（旧・分類別アコーディオンをサブ見出しで統合） */}
-      <Accordion title="ヘッダー" defaultOpen={false}>
+      {/* ① 基本情報（旧・分類別アコーディオンをサブ見出しで統合） */}
+      <Accordion title="基本情報" defaultOpen={false}>
         {orderHeaderGroups.map((g) => (
           <div key={g.title}>
-            <div className="subhead">{g.title}</div>
+            <div className="subhead lead">{g.title}</div>
             <div className="grid2">
               {g.fields.map((f) => (
                 <Field key={f.key} field={f} value={header[f.key]} onChange={setHeaderField} />
@@ -104,6 +117,26 @@ export default function OrderTab() {
             >
               {/* 枝番（自動採番） */}
               <BranchBar no={i + 1} code={code} />
+
+              {/* 案件情報（複数紐づけ可） */}
+              <div className="subhead">
+                案件情報（複数紐づけ可）
+                <button type="button" className="btn-mini" onClick={() => addCaseLink(i)}>＋ 案件番号を追加</button>
+              </div>
+              {(row.caseLinks || []).map((link, ci) => (
+                <div className="caselink" key={ci}>
+                  <input className="inp" value={link.caseNo} placeholder="案件番号 例：000045"
+                    onChange={(e) => setCaseNo(i, ci, e.target.value)} />
+                  <button type="button" className="btn-ref" onClick={() => refCaseLink(i, ci)}>参照</button>
+                  <div className="cl-types">
+                    <span className="cl-chip">大<b>{link.caseTypeL || '—'}</b></span>
+                    <span className="cl-chip">中<b>{link.caseTypeM || '—'}</b></span>
+                    <span className="cl-chip">小<b>{link.caseTypeS || '—'}</b></span>
+                    <span className="cl-chip">参考価格(税抜)<b>{link.refPriceEx || '—'}</b></span>
+                  </div>
+                  <button type="button" className="btn-del" onClick={() => delCaseLink(i, ci)} disabled={(row.caseLinks || []).length <= 1}>削除</button>
+                </div>
+              ))}
 
               {orderDetailGroups.map((g) => (
                 <div key={g.title}>

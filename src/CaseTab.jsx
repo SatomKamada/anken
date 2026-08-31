@@ -9,7 +9,7 @@ import {
   makeEmptySalesForm, salesFormRows, makeEmptySpecCommon, makeEmptySpec,
 } from './fields.js'
 
-// 案件ヘッダー番号（自動採番のダミー・数値のみ）
+// 案件ヘッダー番号（自動採番のダミー・連番のみ）
 const CASE_NO = '000045'
 
 export default function CaseTab() {
@@ -35,13 +35,16 @@ export default function CaseTab() {
 
   return (
     <div className="tab-panel">
-      {/* 最上部：ヘッダー番号（1件・自動採番） */}
-      <RecordHeader badge="ヘッダー" label="案件番号" no={CASE_NO} />
+      {/* 最上部：基本情報番号（1件・自動採番） */}
+      <RecordHeader badge="基本情報" label="案件番号" no={CASE_NO} />
 
-      {/* ヘッダー側（商品情報＝ヘッダー） */}
-      <ProductInfo value={product} onChange={setProduct} defaultOpen={false} />
+      {/* ① 基本情報（商品情報＋商品属性情報＋商品規格設定＋商品規格情報（共通）を統合） */}
+      <Accordion title="基本情報" defaultOpen={false}>
+        {/* 商品情報 */}
+        <ProductInfo value={product} onChange={setProduct} bare />
 
-      <Accordion title="商品属性情報" defaultOpen={false}>
+        {/* 商品属性情報 */}
+        <div className="subhead lead">商品属性情報</div>
         <div className="grid2">
           {productAttrFields.map((f) => (
             <div className="frow" key={f.key}>
@@ -56,9 +59,9 @@ export default function CaseTab() {
             </div>
           ))}
         </div>
-      </Accordion>
 
-      <Accordion title="商品規格設定" defaultOpen={false}>
+        {/* 商品規格設定 */}
+        <div className="subhead lead">商品規格設定</div>
         <table className="ptable">
           <thead><tr><th>販売形態</th><th>利用</th><th>上限数</th></tr></thead>
           <tbody>
@@ -71,11 +74,12 @@ export default function CaseTab() {
             ))}
           </tbody>
         </table>
+
+        {/* 商品規格情報（共通） */}
+        <SpecCommon value={specCommon} onChange={setSpecCommon} onSeedSpec={seedSpec} bare />
       </Accordion>
 
-      <SpecCommon value={specCommon} onChange={setSpecCommon} onSeedSpec={seedSpec} defaultOpen={false} />
-
-      {/* 明細側（商品規格・掲載履歴＝明細、枝番を自動採番） */}
+      {/* ② 明細（商品規格・掲載履歴＝明細、枝番を自動採番） */}
       <SpecList rows={specRows} setRows={setSpecRows} headerNo={CASE_NO} />
     </div>
   )

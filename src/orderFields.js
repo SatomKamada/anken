@@ -209,9 +209,16 @@ export function makeEmptyOrderDetail() {
     o[f.key] = f.type === 'checkbox' ? false : ''
   }
   o.branchMaxNo = '1'
+  // 案件番号（複数紐づけ可）
+  o.caseLinks = [makeEmptyCaseLink()]
   // 販売目標変更履歴（サブテーブル）
   o.targetHistory = []
   return o
+}
+
+// ---- 案件番号リンク（明細内・複数可）------------------------
+export function makeEmptyCaseLink() {
+  return { caseNo: '', caseTypeL: '', caseTypeM: '', caseTypeS: '', refPriceEx: '' }
 }
 
 // ---- 販売目標変更履歴（明細内サブテーブル）------------------

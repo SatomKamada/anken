@@ -133,6 +133,26 @@ export const specMaster = {
   },
 }
 
+// ---- 案件マスタ（発注明細の案件番号 参照用）------------------
+// key = 案件番号（数値連番）。参照で案件種別・参考価格を返す。
+export const caseMaster = {
+  '000045': { caseNo: '000045', caseTypeL: '食品',   caseTypeM: '飲料',       caseTypeS: '緑茶',     refPriceEx: '120' },
+  '000046': { caseNo: '000046', caseTypeL: '日用品', caseTypeM: 'スキンケア', caseTypeS: 'クリーム', refPriceEx: '1100' },
+  '000047': { caseNo: '000047', caseTypeL: '食品',   caseTypeM: '冷凍食品',   caseTypeS: '果実',     refPriceEx: '450' },
+}
+
+export function lookupCaseByNo(caseNo) {
+  const c = caseMaster[(caseNo || '').trim()]
+  if (!c) return { found: false, values: {} }
+  return {
+    found: true,
+    values: {
+      caseTypeL: c.caseTypeL, caseTypeM: c.caseTypeM, caseTypeS: c.caseTypeS,
+      refPriceEx: c.refPriceEx,
+    },
+  }
+}
+
 // ---- 発注明細 参照用（商品マスタ→発注明細の項目へ）----------
 export function lookupOrderDetailByProduct({ productCode, janCode }) {
   let p = null

@@ -8,7 +8,7 @@ import { specMaster } from './dummyData.js'
 
 // 商品規格情報（共通）+ 商品規格コード 参照ボタン
 // props: value, onChange(nextObj), onSeedSpec(seedSpecObj)
-export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = false }) {
+export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = false, bare = false }) {
   const v = value
   const [msg, setMsg] = useState(null)
   const set = (k, val) => onChange({ ...v, [k]: val })
@@ -25,8 +25,8 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
     setMsg({ t: 'ok', m: `商品規格マスタから連携しました（${code}）。個別明細の商品規格欄にも仮入力しました。` })
   }
 
-  return (
-    <Accordion title="商品規格情報（共通）" defaultOpen={defaultOpen}>
+  const body = (
+    <>
       {msg && <div className={'notice ' + msg.t}>{msg.m}</div>}
 
       <div className="frow">
@@ -64,8 +64,11 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
         <Chk label="自動抽選" on={v.autoLotteryFlag} onChange={(c) => set('autoLotteryFlag', c)} />
         <Chk label="通知" on={v.notifyFlag} onChange={(c) => set('notifyFlag', c)} />
       </div>
-    </Accordion>
+    </>
   )
+
+  if (bare) return (<><div className="subhead lead">商品規格情報（共通）</div>{body}</>)
+  return <Accordion title="商品規格情報（共通）" defaultOpen={defaultOpen}>{body}</Accordion>
 }
 
 function Txt({ label, val, onChange, type = 'text' }) {

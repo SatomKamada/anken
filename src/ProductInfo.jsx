@@ -8,7 +8,7 @@ import {
 import { productMaster, productMasterByJan, jicfsMaster } from './dummyData.js'
 
 // 商品情報（共通）+ 商品コード/JANコード 参照ボタン
-export default function ProductInfo({ value, onChange, defaultOpen = false }) {
+export default function ProductInfo({ value, onChange, defaultOpen = false, bare = false }) {
   const v = value
   const [msg, setMsg] = useState(null)
   const set = (k, val) => onChange({ ...v, [k]: val })
@@ -52,8 +52,8 @@ export default function ProductInfo({ value, onChange, defaultOpen = false }) {
     set(k, on ? [...arr, opt] : arr.filter((x) => x !== opt))
   }
 
-  return (
-    <Accordion title="商品情報（ヘッダー）" defaultOpen={defaultOpen}>
+  const body = (
+    <>
       {msg && <div className={'notice ' + msg.t}>{msg.m}</div>}
 
       {/* コード + 参照ボタン */}
@@ -146,8 +146,11 @@ export default function ProductInfo({ value, onChange, defaultOpen = false }) {
         <label className="chk-inline"><input type="checkbox" checked={v.functionalFood} onChange={(e) => set('functionalFood', e.target.checked)} /><span>機能性表示食品</span></label>
         <label className="chk-inline"><input type="checkbox" checked={v.specificHealthFood} onChange={(e) => set('specificHealthFood', e.target.checked)} /><span>特定保健用食品</span></label>
       </div>
-    </Accordion>
+    </>
   )
+
+  if (bare) return (<><div className="subhead lead">商品情報</div>{body}</>)
+  return <Accordion title="商品情報（ヘッダー）" defaultOpen={defaultOpen}>{body}</Accordion>
 }
 
 function Txt({ label, val, onChange, type = 'text' }) {

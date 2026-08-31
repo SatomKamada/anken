@@ -133,6 +133,18 @@ textarea.inp { resize: vertical; }
   font-weight: 700; color: var(--brand-d); border-bottom: 1px solid var(--line);
 }
 .subhead.sub2 { color: var(--ink-soft); }
+/* 基本情報内の主要セクション見出し（統合された旧アコーディオン相当） */
+.subhead.lead {
+  margin-top: 20px; padding: 6px 10px; font-size: 14px;
+  color: #fff; background: var(--brand); border: none; border-radius: 5px;
+}
+.subhead.lead:first-child { margin-top: 4px; }
+
+/* 案件番号リンク行（発注明細・複数可） */
+.caselink { display: grid; grid-template-columns: 150px auto 1fr auto; gap: 8px; align-items: center; margin: 4px 0; }
+.caselink .cl-types { display: flex; gap: 6px; flex-wrap: wrap; }
+.caselink .cl-chip { background: #eef2f5; border: 1px solid var(--line); border-radius: 4px; padding: 3px 8px; font-size: 12px; color: var(--ink-soft); }
+.caselink .cl-chip b { color: var(--ink); font-weight: 700; margin-left: 3px; }
 
 /* buttons */
 .btn-ref {
