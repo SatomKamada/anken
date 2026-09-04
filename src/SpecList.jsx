@@ -2,24 +2,21 @@ import React from 'react'
 import Accordion from './Accordion.jsx'
 import Field from './Field.jsx'
 import PostHistory from './PostHistory.jsx'
+import FinanceSection from './FinanceSection.jsx'
 import { BranchBar, branchCode } from './RecordHeader.jsx'
-import { specGroups, specTopFields, makeEmptySpec } from './fields.js'
+import { specGroups, specTopFields, makeEmptySpec, makeEmptyPostHistory } from './fields.js'
 
-const baseGroup    = specGroups.find((g) => g.title === '基本')
-const lotteryGroup = specGroups.find((g) => g.title === '抽選')
-const surveyGroup  = specGroups.find((g) => g.title === 'アンケート')
+const baseGroup = specGroups.find((g) => g.title === '基本')
 
 // 商品規格・掲載履歴（個別）明細（1:多）
 // props: rows, setRows, headerNo（ヘッダー番号：枝番採番用）
 export default function SpecList({ rows, setRows, headerNo }) {
   const updateRow = (i, next) => setRows(rows.map((r, idx) => (idx === i ? next : r)))
   const setField = (i, key, val) => updateRow(i, { ...rows[i], [key]: val })
-  const setPostHistory = (i, ph) => updateRow(i, { ...rows[i], postHistory: ph })
 
   const duplicateLast = () => {
     const src = rows[rows.length - 1]
-    const clone = src ? structuredClone(src) : makeEmptySpec()
-    setRows([...rows, clone])
+    setRows([...rows, src ? structuredClone(src) : makeEmptySpec()])
   }
   const addEmpty = () => setRows([...rows, makeEmptySpec()])
   const dupRow = (i) => {
@@ -27,6 +24,21 @@ export default function SpecList({ rows, setRows, headerNo }) {
     setRows([...rows.slice(0, i + 1), clone, ...rows.slice(i + 1)])
   }
   const delRow = (i) => setRows(rows.filter((_, idx) => idx !== i))
+
+  // 掲載履歴（複製可）
+  const setPh = (i, pi, ph) => {
+    const list = rows[i].postHistories.map((p, idx) => (idx === pi ? ph : p))
+    updateRow(i, { ...rows[i], postHistories: list })
+  }
+  const dupPh = (i, pi) => {
+    const list = rows[i].postHistories
+    const clone = structuredClone(list[pi])
+    updateRow(i, { ...rows[i], postHistories: [...list.slice(0, pi + 1), clone, ...list.slice(pi + 1)] })
+  }
+  const addPh = (i) => updateRow(i, { ...rows[i], postHistories: [...rows[i].postHistories, makeEmptyPostHistory()] })
+  const delPh = (i, pi) => updateRow(i, { ...rows[i], postHistories: rows[i].postHistories.filter((_, idx) => idx !== pi) })
+
+  const setFinance = (i, fin) => updateRow(i, { ...rows[i], finance: fin })
 
   return (
     <Accordion
@@ -49,27 +61,6 @@ export default function SpecList({ rows, setRows, headerNo }) {
             {row.specCode || '（規格コード未設定）'}{row.specProductName ? ' / ' + row.specProductName : ''}
           </>
         )
-        // 抽選・アンケート（掲載履歴のチャネル別価格の下に差し込む）
-        const afterPrices = (
-          <>
-            <div className="fgroup">
-              <div className="subhead">抽選</div>
-              <div className="grid2">
-                {lotteryGroup.fields.map((f) => (
-                  <Field key={f.key} field={f} value={row[f.key]} onChange={(k, val) => setField(i, k, val)} />
-                ))}
-              </div>
-            </div>
-            <div className="fgroup">
-              <div className="subhead">アンケート</div>
-              <div className="grid2">
-                {surveyGroup.fields.map((f) => (
-                  <Field key={f.key} field={f} value={row[f.key]} onChange={(k, val) => setField(i, k, val)} />
-                ))}
-              </div>
-            </div>
-          </>
-        )
         return (
           <Accordion
             key={i}
@@ -83,19 +74,15 @@ export default function SpecList({ rows, setRows, headerNo }) {
               </>
             }
           >
-            {/* 枝番（自動採番） */}
             <BranchBar no={i + 1} code={code} numberLabel="案件明細番号" codeLabel="案件番号" />
 
             <div className="fgroup">
-              {/* 商品規格コード（先頭） */}
               <div className="frow">
                 <div className="flabel">商品規格コード</div>
                 <div className="fbody">
                   <input className="inp" value={row.specCode} onChange={(e) => setField(i, 'specCode', e.target.value)} placeholder="共通の参照で仮入力されます" />
                 </div>
               </div>
-
-              {/* 規格区分・販売形態・販売数（縦並び） */}
               <div className="vstack">
                 {specTopFields.map((f) => (
                   <Field key={f.key} field={f} value={row[f.key]} onChange={(k, val) => setField(i, k, val)} />
@@ -113,8 +100,33 @@ export default function SpecList({ rows, setRows, headerNo }) {
               </div>
             </div>
 
-            {/* 掲載履歴（内部に抽選・アンケートをチャネル別価格の下で表示） */}
-            <PostHistory value={row.postHistory} onChange={(ph) => setPostHistory(i, ph)} afterPrices={afterPrices} />
+            {/* 掲載履歴（複製可・抽選/アンケートを内包） */}
+            <Accordion
+              level="sub"
+              defaultOpen={false}
+              title={`掲載履歴（${row.postHistories.length}件）`}
+              right={<button type="button" className="btn-plus" onClick={() => addPh(i)}>＋ 掲載履歴を追加</button>}
+            >
+              {row.postHistories.map((ph, pi) => (
+                <Accordion
+                  key={pi}
+                  level="sub"
+                  defaultOpen={false}
+                  title={`掲載履歴 #${pi + 1}${ph.postName ? ' / ' + ph.postName : ''}`}
+                  right={
+                    <>
+                      <button type="button" className="btn-mini" onClick={() => dupPh(i, pi)}>複製</button>
+                      <button type="button" className="btn-del" onClick={() => delPh(i, pi)} disabled={row.postHistories.length <= 1}>削除</button>
+                    </>
+                  }
+                >
+                  <PostHistory value={ph} onChange={(next) => setPh(i, pi, next)} />
+                </Accordion>
+              ))}
+            </Accordion>
+
+            {/* 掲載履歴の下：財務系分類（変動費〜試算） */}
+            <FinanceSection finance={row.finance} onChange={(fin) => setFinance(i, fin)} />
           </Accordion>
         )
       })}

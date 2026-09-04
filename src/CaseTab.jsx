@@ -7,12 +7,14 @@ import { RecordHeader } from './RecordHeader.jsx'
 import {
   makeEmptyProductInfo, makeEmptyProductAttr, productAttrFields,
   makeEmptySalesForm, salesFormRows, makeEmptySpecCommon, makeEmptySpec,
+  makeEmptyCaseHead, caseTypeOptions,
 } from './fields.js'
 
 // 案件ヘッダー番号（自動採番のダミー・連番のみ）
 const CASE_NO = '000045'
 
 export default function CaseTab() {
+  const [caseHead, setCaseHead] = useState(makeEmptyCaseHead)
   const [product, setProduct] = useState(makeEmptyProductInfo)
   const [attr, setAttr] = useState(makeEmptyProductAttr)
   const [salesForm, setSalesForm] = useState(makeEmptySalesForm)
@@ -38,6 +40,31 @@ export default function CaseTab() {
       {/* 最上部：基本情報番号（1件・自動採番） */}
       <RecordHeader badge="基本情報" label="案件ヘッダー番号" no={CASE_NO} />
 
+      {/* 基本情報の上（アコーディオンなし）：案件種別・各種フラグ */}
+      <div className="fgroup casehead">
+        <div className="frow">
+          <div className="flabel">案件種別</div>
+          <div className="fbody">
+            <select className="inp" value={caseHead.caseType} onChange={(e) => setCaseHead({ ...caseHead, caseType: e.target.value })}>
+              <option value="">選択してください</option>
+              {caseTypeOptions.map((o) => <option key={o}>{o}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="frow">
+          <div className="flabel">セット商品フラグ</div>
+          <div className="fbody">
+            <label className="chk-inline"><input type="checkbox" checked={caseHead.setProductFlag} onChange={(e) => setCaseHead({ ...caseHead, setProductFlag: e.target.checked })} /><span>ON</span></label>
+          </div>
+        </div>
+        <div className="frow">
+          <div className="flabel">ちょっプルバーターフラグ</div>
+          <div className="fbody">
+            <label className="chk-inline"><input type="checkbox" checked={caseHead.choppleBarterFlag} onChange={(e) => setCaseHead({ ...caseHead, choppleBarterFlag: e.target.checked })} /><span>ON</span></label>
+          </div>
+        </div>
+      </div>
+
       {/* ① 基本情報（商品情報＋商品属性情報＋商品規格設定＋商品規格情報（共通）を統合） */}
       <Accordion title="基本情報" defaultOpen={false}>
         {/* 商品情報 */}
@@ -58,6 +85,16 @@ export default function CaseTab() {
               </div>
             </div>
           ))}
+        </div>
+        {/* プロモーション説明（新規作成フラグON時のみ活性・100字程度） */}
+        <div className="frow">
+          <div className="flabel">プロモーション説明</div>
+          <div className="fbody">
+            <textarea className="inp" rows={3} maxLength={120} disabled={!attr.newFlag}
+              placeholder={attr.newFlag ? '100字程度で入力' : '新規作成フラグをONにすると入力できます'}
+              value={attr.promoDesc || ''} onChange={(e) => setAttrField('promoDesc', e.target.value)} />
+            {attr.newFlag && <div className="fnote">{(attr.promoDesc || '').length} / 120</div>}
+          </div>
         </div>
 
         {/* 商品規格設定 */}

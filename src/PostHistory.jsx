@@ -1,12 +1,14 @@
 import React from 'react'
 import Accordion from './Accordion.jsx'
+import Field from './Field.jsx'
 import {
   postAttrOptions, bestBeforeTypeOptions, priceChannels,
+  lotteryFields, surveyFields,
 } from './fields.js'
 
-// 掲載履歴（各規格に内包）
-// props: value(postHistory object), onChange(nextObject), afterPrices(チャネル別価格の下に差し込むnode)
-export default function PostHistory({ value, onChange, afterPrices }) {
+// 掲載履歴（各規格に内包・複製可）
+// props: value(postHistory object), onChange(nextObject)
+export default function PostHistory({ value, onChange }) {
   const v = value
   const set = (patch) => onChange({ ...v, ...patch })
 
@@ -19,8 +21,10 @@ export default function PostHistory({ value, onChange, afterPrices }) {
     set({ prices: { ...v.prices, [ch]: { ...v.prices[ch], ...patch } } })
   }
 
+  const setF = (k, val) => set({ [k]: val })
+
   return (
-    <Accordion title="掲載履歴" level="sub" defaultOpen={false}>
+    <div className="ph-body">
       <div className="grid2">
         <L label="掲載期間（開始）"><input className="inp" type="date" value={v.postPeriodFrom} onChange={(e) => set({ postPeriodFrom: e.target.value })} /></L>
         <L label="掲載期間（終了）"><input className="inp" type="date" value={v.postPeriodTo} onChange={(e) => set({ postPeriodTo: e.target.value })} /></L>
@@ -82,10 +86,25 @@ export default function PostHistory({ value, onChange, afterPrices }) {
       </table>
 
       {/* チャネル別価格の下に抽選・アンケートを配置 */}
-      {afterPrices}
+      <div className="fgroup">
+        <div className="subhead">抽選</div>
+        <div className="grid2">
+          {lotteryFields.map((f) => (
+            <Field key={f.key} field={f} value={v[f.key]} onChange={(k, val) => setF(k, val)} />
+          ))}
+        </div>
+      </div>
+      <div className="fgroup">
+        <div className="subhead">アンケート</div>
+        <div className="grid2">
+          {surveyFields.map((f) => (
+            <Field key={f.key} field={f} value={v[f.key]} onChange={(k, val) => setF(k, val)} />
+          ))}
+        </div>
+      </div>
 
       <L label="メモ"><textarea className="inp" rows={2} value={v.memo} onChange={(e) => set({ memo: e.target.value })} /></L>
-    </Accordion>
+    </div>
   )
 }
 

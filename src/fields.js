@@ -53,6 +53,7 @@ export const productAttrFields = [
 export function makeEmptyProductAttr() {
   const o = {}
   for (const f of productAttrFields) o[f.key] = f.type === 'checkbox' ? false : ''
+  o.promoDesc = '' // プロモーション説明（新規作成フラグON時のみ活性）
   return o
 }
 
@@ -94,24 +95,20 @@ export const specGroups = [
       },
     ],
   },
-  {
-    title: '抽選',
-    fields: [
-      { key: 'lotteryPeople', label: '抽選人数',        type: 'number' },
-      { key: 'lotteryTotal',  label: '抽選合計',        type: 'number' },
-      { key: 'winConfirmAt',  label: '当選確定日時',     type: 'datetime' },
-      { key: 'lotteryScope',  label: '抽選対象範囲区分', type: 'select', options: ['会員','非会員','会員/非会員'] },
-    ],
-  },
-  {
-    title: 'アンケート',
-    fields: [
-      { key: 'preSurvey',      label: '事前アンケート',       type: 'select', options: ['有','無'] },
-      { key: 'preSurveyCode',  label: '事前アンケートコード',   type: 'text' },
-      { key: 'postSurvey',     label: '事後アンケート',       type: 'select', options: ['有','無'] },
-      { key: 'postSurveyCode', label: '事後アンケートコード',   type: 'text' },
-    ],
-  },
+]
+
+// 抽選・アンケート（各掲載履歴に内包：チャネル別価格の下に表示）
+export const lotteryFields = [
+  { key: 'lotteryPeople', label: '抽選人数',        type: 'number' },
+  { key: 'lotteryTotal',  label: '抽選合計',        type: 'number' },
+  { key: 'winConfirmAt',  label: '当選確定日時',     type: 'datetime' },
+  { key: 'lotteryScope',  label: '抽選対象範囲区分', type: 'select', options: ['会員','非会員','会員/非会員'] },
+]
+export const surveyFields = [
+  { key: 'preSurvey',      label: '事前アンケート',       type: 'select', options: ['有','無'] },
+  { key: 'preSurveyCode',  label: '事前アンケートコード',   type: 'text' },
+  { key: 'postSurvey',     label: '事後アンケート',       type: 'select', options: ['有','無'] },
+  { key: 'postSurveyCode', label: '事後アンケートコード',   type: 'text' },
 ]
 
 // ============================================================
@@ -138,6 +135,10 @@ export function makeEmptyPostHistory() {
     bestBeforeExcluded: false, bestBeforeType: '賞味期限', bestBeforeDate: '',
     displayProvideCount: '',
     prices,
+    // 抽選（掲載履歴内・チャネル別価格の下）
+    lotteryPeople: '', lotteryTotal: '', winConfirmAt: '', lotteryScope: '',
+    // アンケート（掲載履歴内・チャネル別価格の下）
+    preSurvey: '', preSurveyCode: '', postSurvey: '', postSurveyCode: '',
     segmentOn: false, segmentType: 'セグメント', segmentValue: '',
     memo: '',
   }
@@ -187,6 +188,20 @@ export function makeEmptySpec() {
   for (const f of allSpecFields) {
     row[f.key] = f.type === 'checkbox' ? false : f.type === 'checkboxGroup' ? [] : ''
   }
-  row.postHistory = makeEmptyPostHistory() // 掲載履歴を規格ごとに保持
+  row.postHistories = [makeEmptyPostHistory()] // 掲載履歴（複製可・1:多）
+  row.finance = {}                             // 変動費〜試算（分類ごと label→値）
   return row
+}
+
+// ============================================================
+// 案件ヘッダー（基本情報の上・アコーディオンなし）
+// ============================================================
+export const caseTypeOptions = ['新規', '商品規格追加', '掲載履歴追加', '商品規格修正', '掲載履歴修正']
+
+export function makeEmptyCaseHead() {
+  return {
+    caseType: '',           // 案件種別
+    setProductFlag: false,  // セット商品フラグ
+    choppleBarterFlag: false, // ちょっプルバーターフラグ
+  }
 }

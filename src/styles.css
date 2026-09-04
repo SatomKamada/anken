@@ -168,6 +168,27 @@ textarea.inp { resize: vertical; }
 .chk-grid.vcol { flex-direction: column; align-items: flex-start; gap: 2px; }
 .chk-grid.vcol .chk-inline { padding: 3px 0; }
 
+/* 案件ヘッダー（基本情報の上・非アコーディオン） */
+.casehead { background: #fff; }
+
+/* 掲載履歴 本文 */
+.ph-body { padding-top: 2px; }
+
+/* 新収益構造_単価 マトリクス（チャネル列） */
+.umatrix { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.ucol { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; background: #fff; }
+.ucol-head { font-weight: 700; color: var(--brand-d); border-bottom: 1px solid var(--line); padding-bottom: 4px; margin-bottom: 6px; }
+.urow { display: flex; gap: 10px; margin: 4px 0; }
+.ucell { flex: 1; min-width: 0; }
+.ucell-label { color: var(--ink-soft); font-size: 11px; margin-bottom: 2px; }
+.pct-wrap { display: flex; align-items: stretch; }
+.pct-wrap .inp { border-radius: 5px 0 0 5px; }
+.pct { display: inline-flex; align-items: center; padding: 0 8px; background: #f0f2f4; border: 1px solid var(--line-strong); border-left: none; border-radius: 0 5px 5px 0; color: var(--ink-soft); }
+
+@media (max-width: 760px) {
+  .umatrix { grid-template-columns: 1fr; }
+}
+
 /* ヘルプアイコン */
 .help {
   display: inline-flex; align-items: center; justify-content: center;
