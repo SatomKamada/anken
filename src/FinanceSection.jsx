@@ -12,20 +12,22 @@ export default function FinanceSection({ finance, onChange }) {
     <>
       {financeGroups.map((g) => (
         <Accordion key={g.title} level="sub" defaultOpen={false} title={g.title}>
-          {g.sections.map((sec, si) => (
-            <div className="fgroup" key={si}>
-              {sec.title && <div className="subhead">{sec.title}</div>}
-              {sec.type === 'matrix'
-                ? <ChannelMatrix sec={sec} get={(l) => get(g.title, l)} set={(l, v) => set(g.title, l, v)} />
-                : (
-                  <div className="grid2">
-                    {sec.fields.map((f) => (
-                      <FinField key={f.label} f={f} val={get(g.title, f.label)} onChange={(v) => set(g.title, f.label, v)} />
-                    ))}
-                  </div>
-                )}
-            </div>
-          ))}
+          {g.custom === 'joudai'
+            ? <Joudai get={(l) => get(g.title, l)} set={(l, v) => set(g.title, l, v)} />
+            : g.sections.map((sec, si) => (
+              <div className="fgroup" key={si}>
+                {sec.title && <div className="subhead">{sec.title}</div>}
+                {sec.type === 'matrix'
+                  ? <ChannelMatrix sec={sec} get={(l) => get(g.title, l)} set={(l, v) => set(g.title, l, v)} />
+                  : (
+                    <div className="grid2">
+                      {sec.fields.map((f) => (
+                        <FinField key={f.label} f={f} val={get(g.title, f.label)} onChange={(v) => set(g.title, f.label, v)} />
+                      ))}
+                    </div>
+                  )}
+              </div>
+            ))}
         </Accordion>
       ))}
     </>
@@ -77,6 +79,20 @@ function FinField({ f, val, onChange }) {
     <div className="frow">
       <div className="flabel">{f.label}</div>
       <div className="fbody"><Adorned kind={f.kind} val={val} onChange={onChange} /></div>
+    </div>
+  )
+}
+
+// 上代（参考価格＝単価・上代合計＝いずれも手入力）
+function Joudai({ get, set }) {
+  return (
+    <div className="fgroup">
+      <div className="grid2">
+        <FinField f={{ label: '参考価格（税抜）', kind: 'money' }} val={get('参考価格（税抜）')} onChange={(v) => set('参考価格（税抜）', v)} />
+        <FinField f={{ label: '参考価格（税込）', kind: 'money' }} val={get('参考価格（税込）')} onChange={(v) => set('参考価格（税込）', v)} />
+        <FinField f={{ label: '上代合計（税抜）', kind: 'money' }} val={get('上代合計（税抜）')} onChange={(v) => set('上代合計（税抜）', v)} />
+        <FinField f={{ label: '上代合計（税込）', kind: 'money' }} val={get('上代合計（税込）')} onChange={(v) => set('上代合計（税込）', v)} />
+      </div>
     </div>
   )
 }
