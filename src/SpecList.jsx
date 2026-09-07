@@ -4,7 +4,7 @@ import Field from './Field.jsx'
 import PostHistory from './PostHistory.jsx'
 import FinanceSection from './FinanceSection.jsx'
 import { BranchBar, branchCode } from './RecordHeader.jsx'
-import { specGroups, specTopFields, makeEmptySpec, makeEmptyPostHistory } from './fields.js'
+import { specGroups, specTopFields, makeEmptySpec, makeEmptyPriceInfo } from './fields.js'
 
 const baseGroup = specGroups.find((g) => g.title === '基本')
 
@@ -25,20 +25,18 @@ export default function SpecList({ rows, setRows, headerNo }) {
   }
   const delRow = (i) => setRows(rows.filter((_, idx) => idx !== i))
 
-  // 掲載履歴（複製可）
-  const setPh = (i, pi, ph) => {
-    const list = rows[i].postHistories.map((p, idx) => (idx === pi ? ph : p))
-    updateRow(i, { ...rows[i], postHistories: list })
+  // 掲載履歴・価格情報（バンドル：finance ＋ post。丸ごと複製）
+  const setPi = (i, pi, next) => {
+    const list = rows[i].priceInfos.map((b, idx) => (idx === pi ? next : b))
+    updateRow(i, { ...rows[i], priceInfos: list })
   }
-  const dupPh = (i, pi) => {
-    const list = rows[i].postHistories
-    const clone = structuredClone(list[pi])
-    updateRow(i, { ...rows[i], postHistories: [...list.slice(0, pi + 1), clone, ...list.slice(pi + 1)] })
+  const addPi = (i) => updateRow(i, { ...rows[i], priceInfos: [...rows[i].priceInfos, makeEmptyPriceInfo()] })
+  const dupPi = (i, pi) => {
+    const list = rows[i].priceInfos
+    const clone = structuredClone(list[pi]) // finance＋postを丸ごと複製
+    updateRow(i, { ...rows[i], priceInfos: [...list.slice(0, pi + 1), clone, ...list.slice(pi + 1)] })
   }
-  const addPh = (i) => updateRow(i, { ...rows[i], postHistories: [...rows[i].postHistories, makeEmptyPostHistory()] })
-  const delPh = (i, pi) => updateRow(i, { ...rows[i], postHistories: rows[i].postHistories.filter((_, idx) => idx !== pi) })
-
-  const setFinance = (i, fin) => updateRow(i, { ...rows[i], finance: fin })
+  const delPi = (i, pi) => updateRow(i, { ...rows[i], priceInfos: rows[i].priceInfos.filter((_, idx) => idx !== pi) })
 
   return (
     <Accordion
@@ -100,34 +98,38 @@ export default function SpecList({ rows, setRows, headerNo }) {
               </div>
             </div>
 
-            {/* 掲載履歴（親コンテナ）：中に 上代〜試算 と 各掲載履歴 をアコーディオンで内包 */}
-            <Accordion
-              level="sub"
-              defaultOpen={false}
-              title={`掲載履歴（${row.postHistories.length}件）`}
-              right={<button type="button" className="btn-plus" onClick={() => addPh(i)}>＋ 掲載履歴を追加</button>}
-            >
-              {/* 上代・変動費〜試算（チャネル別価格の上） */}
-              <FinanceSection finance={row.finance} onChange={(fin) => setFinance(i, fin)} />
-
-              {/* 掲載履歴 明細（複製可・抽選/アンケートを内包） */}
-              {row.postHistories.map((ph, pi) => (
-                <Accordion
-                  key={pi}
-                  level="sub"
-                  defaultOpen={false}
-                  title={`掲載履歴 #${pi + 1}${ph.postName ? ' / ' + ph.postName : ''}`}
-                  right={
-                    <>
-                      <button type="button" className="btn-mini" onClick={() => dupPh(i, pi)}>複製</button>
-                      <button type="button" className="btn-del" onClick={() => delPh(i, pi)} disabled={row.postHistories.length <= 1}>削除</button>
-                    </>
-                  }
-                >
-                  <PostHistory value={ph} onChange={(next) => setPh(i, pi, next)} />
-                </Accordion>
-              ))}
-            </Accordion>
+            {/* 掲載履歴・価格情報（複製単位：上代〜試算＋掲載履歴を丸ごと複製） */}
+            <div className="subhead">
+              掲載履歴・価格情報
+              <button type="button" className="btn-plus" onClick={() => addPi(i)}>＋ 掲載履歴・価格情報を追加</button>
+            </div>
+            {row.priceInfos.map((pi, k) => (
+              <Accordion
+                key={k}
+                level="sub"
+                defaultOpen={false}
+                title={`掲載履歴・価格情報 #${k + 1}${pi.post.postName ? ' / ' + pi.post.postName : ''}`}
+                right={
+                  <>
+                    <button type="button" className="btn-mini" onClick={() => dupPi(i, k)}>複製</button>
+                    <button type="button" className="btn-del" onClick={() => delPi(i, k)} disabled={row.priceInfos.length <= 1}>削除</button>
+                  </>
+                }
+              >
+                {/* 上代〜試算。掲載履歴は「上代」の直下に差し込む（単体複製なし） */}
+                <FinanceSection
+                  finance={pi.finance}
+                  onChange={(fin) => setPi(i, k, { ...pi, finance: fin })}
+                  afterGroups={{
+                    '上代': (
+                      <Accordion level="sub" defaultOpen={false} title="掲載履歴 #1">
+                        <PostHistory value={pi.post} onChange={(next) => setPi(i, k, { ...pi, post: next })} />
+                      </Accordion>
+                    ),
+                  }}
+                />
+              </Accordion>
+            ))}
           </Accordion>
         )
       })}

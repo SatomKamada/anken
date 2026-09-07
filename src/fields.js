@@ -183,13 +183,17 @@ export const specTopFields = [
 
 export const allSpecFields = [...specTopFields, ...specGroups.flatMap((g) => g.fields)]
 
+// 掲載履歴・価格情報（複製単位）：上代〜試算(finance) ＋ 掲載履歴1件(post)
+export function makeEmptyPriceInfo() {
+  return { finance: {}, post: makeEmptyPostHistory() }
+}
+
 export function makeEmptySpec() {
   const row = { specCode: '' } // 商品規格コード（先頭）
   for (const f of allSpecFields) {
     row[f.key] = f.type === 'checkbox' ? false : f.type === 'checkboxGroup' ? [] : ''
   }
-  row.postHistories = [makeEmptyPostHistory()] // 掲載履歴（複製可・1:多）
-  row.finance = {}                             // 変動費〜試算（分類ごと label→値）
+  row.priceInfos = [makeEmptyPriceInfo()] // 掲載履歴・価格情報（複製可・1:多）
   return row
 }
 

@@ -4,31 +4,34 @@ import { financeGroups } from './caseFinanceFields.js'
 
 // 財務系分類（掲載履歴の下）
 // props: finance(object: {group:{label:val}}), onChange(nextFinance)
-export default function FinanceSection({ finance, onChange }) {
+export default function FinanceSection({ finance, onChange, afterGroups }) {
   const get = (grp, label) => (finance[grp] && finance[grp][label]) || ''
   const set = (grp, label, val) => onChange({ ...finance, [grp]: { ...(finance[grp] || {}), [label]: val } })
 
   return (
     <>
       {financeGroups.map((g) => (
-        <Accordion key={g.title} level="sub" defaultOpen={false} title={g.title}>
-          {g.custom === 'joudai'
-            ? <Joudai get={(l) => get(g.title, l)} set={(l, v) => set(g.title, l, v)} />
-            : g.sections.map((sec, si) => (
-              <div className="fgroup" key={si}>
-                {sec.title && <div className="subhead">{sec.title}</div>}
-                {sec.type === 'matrix'
-                  ? <ChannelMatrix sec={sec} get={(l) => get(g.title, l)} set={(l, v) => set(g.title, l, v)} />
-                  : (
-                    <div className="grid2">
-                      {sec.fields.map((f) => (
-                        <FinField key={f.label} f={f} val={get(g.title, f.label)} onChange={(v) => set(g.title, f.label, v)} />
-                      ))}
-                    </div>
-                  )}
-              </div>
-            ))}
-        </Accordion>
+        <React.Fragment key={g.title}>
+          <Accordion level="sub" defaultOpen={false} title={g.title}>
+            {g.custom === 'joudai'
+              ? <Joudai get={(l) => get(g.title, l)} set={(l, v) => set(g.title, l, v)} />
+              : g.sections.map((sec, si) => (
+                <div className="fgroup" key={si}>
+                  {sec.title && <div className="subhead">{sec.title}</div>}
+                  {sec.type === 'matrix'
+                    ? <ChannelMatrix sec={sec} get={(l) => get(g.title, l)} set={(l, v) => set(g.title, l, v)} />
+                    : (
+                      <div className="grid2">
+                        {sec.fields.map((f) => (
+                          <FinField key={f.label} f={f} val={get(g.title, f.label)} onChange={(v) => set(g.title, f.label, v)} />
+                        ))}
+                      </div>
+                    )}
+                </div>
+              ))}
+          </Accordion>
+          {afterGroups && afterGroups[g.title]}
+        </React.Fragment>
       ))}
     </>
   )
