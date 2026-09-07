@@ -100,16 +100,17 @@ export default function SpecList({ rows, setRows, headerNo }) {
               </div>
             </div>
 
-            {/* 掲載履歴の上：財務系分類（上代・変動費〜試算） */}
-            <FinanceSection finance={row.finance} onChange={(fin) => setFinance(i, fin)} />
-
-            {/* 掲載履歴（複製可・抽選/アンケートを内包） */}
+            {/* 掲載履歴（親コンテナ）：中に 上代〜試算 と 各掲載履歴 をアコーディオンで内包 */}
             <Accordion
               level="sub"
               defaultOpen={false}
               title={`掲載履歴（${row.postHistories.length}件）`}
               right={<button type="button" className="btn-plus" onClick={() => addPh(i)}>＋ 掲載履歴を追加</button>}
             >
+              {/* 上代・変動費〜試算（チャネル別価格の上） */}
+              <FinanceSection finance={row.finance} onChange={(fin) => setFinance(i, fin)} />
+
+              {/* 掲載履歴 明細（複製可・抽選/アンケートを内包） */}
               {row.postHistories.map((ph, pi) => (
                 <Accordion
                   key={pi}
