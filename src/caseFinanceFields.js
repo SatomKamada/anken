@@ -140,12 +140,12 @@ const shisan = {
       'バンド結束費（試算）', 'エアキャップ費用（試算）', 'ドライアイス費用（試算）', 'OPP同梱費（試算）', '調整費（試算）',
       'クレジットカード決済手数料（試算）', '物流費（試算）',
     ]),
-    grid('メタ情報', ['作成者ID', '作成日時', '更新者ID', '更新日時']),
   ],
 }
 
 // financeGroups：各分類は sections（未指定は単一グリッド or 単一マトリクス）
 export const financeGroups = [
+  { title: '上代',             custom: 'joudai' },
   { title: '変動費',           sections: [henpi] },
   { title: '仕入れ',           sections: [shiire] },
   { title: '粗利',             sections: [arariMatrix] },

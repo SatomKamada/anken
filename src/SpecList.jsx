@@ -100,6 +100,9 @@ export default function SpecList({ rows, setRows, headerNo }) {
               </div>
             </div>
 
+            {/* 掲載履歴の上：財務系分類（上代・変動費〜試算） */}
+            <FinanceSection finance={row.finance} onChange={(fin) => setFinance(i, fin)} />
+
             {/* 掲載履歴（複製可・抽選/アンケートを内包） */}
             <Accordion
               level="sub"
@@ -124,9 +127,6 @@ export default function SpecList({ rows, setRows, headerNo }) {
                 </Accordion>
               ))}
             </Accordion>
-
-            {/* 掲載履歴の下：財務系分類（変動費〜試算） */}
-            <FinanceSection finance={row.finance} onChange={(fin) => setFinance(i, fin)} />
           </Accordion>
         )
       })}
