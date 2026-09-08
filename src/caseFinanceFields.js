@@ -29,9 +29,13 @@ const sagyo = {
   fields: [
     { label: '発送サイズ', kind: 'text' },
     { label: 'アッセンブリ', kind: 'text' },
+    { label: 'ピースアッセン数', kind: 'num' },
+    { label: 'ケースアッセン数', kind: 'num' },
     { label: 'アッセンブリ数', kind: 'num' },
     { label: '資材', kind: 'text' },
     { label: 'バンド結束', kind: 'text' },
+    { label: 'エアキャップ（緩衝材）', kind: 'text' },
+    { label: '封入物印刷料（枚数入力）', kind: 'num' },
   ],
 }
 

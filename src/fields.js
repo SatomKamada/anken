@@ -124,6 +124,7 @@ export function makeEmptyPostHistory() {
   const prices = {}
   for (const ch of priceChannels) prices[ch] = { salePrice: '', unitPrice: '', offFlag: false, offRate: '', baseProfit: '' }
   return {
+    postCode: '',              // 掲載履歴コード（参照ボタン対象）
     postPeriodFrom: '', postPeriodTo: '',
     salePeriodFrom: '', salePeriodTo: '',
     targetChannel: [],

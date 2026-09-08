@@ -5,6 +5,7 @@ import PostHistory from './PostHistory.jsx'
 import FinanceSection from './FinanceSection.jsx'
 import { BranchBar, branchCode } from './RecordHeader.jsx'
 import { specGroups, specTopFields, makeEmptySpec, makeEmptyPriceInfo } from './fields.js'
+import { specMaster } from './dummyData.js'
 
 const baseGroup = specGroups.find((g) => g.title === '基本')
 
@@ -38,6 +39,15 @@ export default function SpecList({ rows, setRows, headerNo }) {
   }
   const delPi = (i, pi) => updateRow(i, { ...rows[i], priceInfos: rows[i].priceInfos.filter((_, idx) => idx !== pi) })
 
+  // 商品規格コード参照 → 商品規格マスタから明細へ入力
+  const refSpec = (i) => {
+    const code = (rows[i].specCode || '').trim()
+    if (!code) { alert('商品規格コードを入力してください'); return }
+    const m = specMaster[code]
+    if (!m) { alert(`商品規格マスタに該当なし（${code}）。ダミー：20000001 / 20000002`); return }
+    updateRow(i, { ...rows[i], ...m.seedSpec })
+  }
+
   return (
     <Accordion
       title="商品規格・掲載履歴（個別）［明細］"
@@ -56,7 +66,7 @@ export default function SpecList({ rows, setRows, headerNo }) {
         const title = (
           <>
             <span className="branch-tag">明細 #{i + 1}</span>
-            {row.specCode || '（規格コード未設定）'}{row.specProductName ? ' / ' + row.specProductName : ''}
+            {row.specCode || ''}{row.specProductName ? ' / ' + row.specProductName : ''}
           </>
         )
         return (
@@ -77,8 +87,10 @@ export default function SpecList({ rows, setRows, headerNo }) {
             <div className="fgroup">
               <div className="frow">
                 <div className="flabel">商品規格コード</div>
-                <div className="fbody">
-                  <input className="inp" value={row.specCode} onChange={(e) => setField(i, 'specCode', e.target.value)} placeholder="共通の参照で仮入力されます" />
+                <div className="fbody has-right">
+                  <input className="inp" value={row.specCode} onChange={(e) => setField(i, 'specCode', e.target.value)} placeholder="例：20000001" />
+                  <button type="button" className="btn-ref" onClick={() => refSpec(i)}>参照</button>
+                  <div className="fnote">商品規格マスタから明細へ入力（20000001 / 20000002）</div>
                 </div>
               </div>
               <div className="vstack">

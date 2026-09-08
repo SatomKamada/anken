@@ -1,16 +1,33 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Accordion from './Accordion.jsx'
 import Field from './Field.jsx'
 import {
   postAttrOptions, bestBeforeTypeOptions, priceChannels,
   lotteryFields, surveyFields,
 } from './fields.js'
+import { lookupPostByCode } from './dummyData.js'
 
 // 掲載履歴（各規格に内包・複製可）
 // props: value(postHistory object), onChange(nextObject)
 export default function PostHistory({ value, onChange }) {
   const v = value
+  const [msg, setMsg] = useState(null)
   const set = (patch) => onChange({ ...v, ...patch })
+
+  // 掲載履歴コード参照 → 掲載履歴マスタから入力
+  const refPost = () => {
+    const code = (v.postCode || '').trim()
+    if (!code) { setMsg({ t: 'warn', m: '掲載履歴コードを入力してください' }); return }
+    const res = lookupPostByCode(code)
+    if (!res.found) { setMsg({ t: 'warn', m: `掲載履歴マスタに該当なし（${code}）。ダミー：30000001 / 30000002` }); return }
+    const val = res.values
+    const nextPrices = { ...v.prices }
+    if (val.prices) {
+      for (const ch of Object.keys(val.prices)) nextPrices[ch] = { ...nextPrices[ch], ...val.prices[ch] }
+    }
+    onChange({ ...v, ...val, prices: nextPrices })
+    setMsg({ t: 'ok', m: `掲載履歴マスタから連携しました（${code} / ${val.postName || ''}）` })
+  }
 
   const toggleAttr = (opt, on) => {
     const arr = v.postAttr || []
@@ -25,6 +42,15 @@ export default function PostHistory({ value, onChange }) {
 
   return (
     <div className="ph-body">
+      {msg && <div className={'notice ' + msg.t}>{msg.m}</div>}
+      <div className="frow">
+        <div className="flabel">掲載履歴コード</div>
+        <div className="fbody has-right">
+          <input className="inp" value={v.postCode || ''} onChange={(e) => set({ postCode: e.target.value })} placeholder="例：30000001" />
+          <button type="button" className="btn-ref" onClick={refPost}>参照</button>
+          <div className="fnote">掲載履歴マスタから情報を呼び出し（30000001 / 30000002）</div>
+        </div>
+      </div>
       <div className="grid2">
         <L label="掲載期間（開始）"><input className="inp" type="date" value={v.postPeriodFrom} onChange={(e) => set({ postPeriodFrom: e.target.value })} /></L>
         <L label="掲載期間（終了）"><input className="inp" type="date" value={v.postPeriodTo} onChange={(e) => set({ postPeriodTo: e.target.value })} /></L>

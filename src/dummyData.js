@@ -168,6 +168,35 @@ export function lookupCompany(code) {
   return { found: true, values: { companyName: c.companyName } }
 }
 
+// ---- 掲載履歴マスタ（掲載履歴コード 参照用）-----------------
+// key = 掲載履歴コード（数字のみ）。参照で掲載履歴の主要項目を返す。
+export const postMaster = {
+  '30000001': {
+    postName: 'オーガニック緑茶 500ml 24本 掲載A',
+    postPeriodFrom: '2026-09-01', postPeriodTo: '2026-09-30',
+    salePeriodFrom: '2026-09-05', salePeriodTo: '2026-09-25',
+    catchCopy: 'すっきり定番の緑茶をお得に',
+    bestBeforeType: '賞味期限', bestBeforeDate: '2027-03-31',
+    displayProvideCount: '500',
+    prices: { '本店': { salePrice: '2953', baseProfit: '341' } },
+  },
+  '30000002': {
+    postName: '冷凍ミックスベリー 300g 抽選掲載',
+    postPeriodFrom: '2026-10-01', postPeriodTo: '2026-10-20',
+    salePeriodFrom: '2026-10-05', salePeriodTo: '2026-10-18',
+    catchCopy: '4種のベリーを冷凍でお届け',
+    bestBeforeType: '賞味期限', bestBeforeDate: '2027-06-30',
+    displayProvideCount: '200',
+    prices: { '本店': { salePrice: '480', baseProfit: '120' } },
+  },
+}
+
+export function lookupPostByCode(code) {
+  const p = postMaster[(code || '').trim()]
+  if (!p) return { found: false, values: {} }
+  return { found: true, values: p }
+}
+
 // ---- 発注明細 参照用（商品マスタ→発注明細の項目へ）----------
 export function lookupOrderDetailByProduct({ productCode, janCode }) {
   let p = null
