@@ -168,10 +168,13 @@ export const cautionPresetOptions    = ['なし', '要冷蔵', '割れ物注意'
 export const companyNameOptions      = ['花王株式会社', '○○商事', '△△食品', 'ユースキン製薬株式会社', 'アサヒグループ食品株式会社']
 // 受発注型（企業選択を許可するちょっプル種別）
 export const jufuchuChoppleTypes     = ['受発注（通常）', '受発注（プロパー）']
+// 業態区分（ちょっプル種別の前）
+export const businessTypeOptions     = ['ちょっプル', '抽選・先着サンプル', 'イベント']
 
 export function makeEmptySpecCommon() {
   return {
     specCode: '',                 // 商品規格コード（先頭・参照ボタン対象）
+    businessType: '',             // 業態区分（ちょっプル種別の前）
     choppleType: '',              // ちょっプル種別（基本から移動）
     salesRep: '', companyName: '', ownItemNo: '',
     tempZone: '未設定', dryIce: false,

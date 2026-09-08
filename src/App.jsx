@@ -1,10 +1,14 @@
 import React, { useState } from 'react'
 import CaseTab from './CaseTab.jsx'
+import SetProductTab from './SetProductTab.jsx'
+import GroupTab from './GroupTab.jsx'
 import OrderTab from './OrderTab.jsx'
 import WarehouseTab from './WarehouseTab.jsx'
 
 const TABS = [
   { key: 'case',  label: '案件' },
+  { key: 'set',   label: '案件（セット商品）' },
+  { key: 'group', label: 'グループ' },
   { key: 'order', label: '発注' },
   { key: 'move',  label: '倉庫移動' },
 ]
@@ -31,7 +35,11 @@ export default function App() {
       </nav>
 
       <main className="content">
-        {tab === 'case' ? <CaseTab /> : tab === 'order' ? <OrderTab /> : <WarehouseTab />}
+        {tab === 'case' ? <CaseTab />
+          : tab === 'set' ? <SetProductTab />
+          : tab === 'group' ? <GroupTab />
+          : tab === 'order' ? <OrderTab />
+          : <WarehouseTab />}
       </main>
     </div>
   )

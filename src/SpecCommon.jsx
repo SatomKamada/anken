@@ -4,13 +4,13 @@ import {
   salesRepOptions, tempZoneOptions, noticeInfoOptions,
   deliveryMethodOptions, deliveryExcludeOptions, deliveryFeeTypeOptions,
   shippingLeadOptions, cautionPresetOptions,
-  choppleTypeOptions, companyNameOptions, jufuchuChoppleTypes,
+  choppleTypeOptions, companyNameOptions, jufuchuChoppleTypes, businessTypeOptions,
 } from './fields.js'
 import { specMaster } from './dummyData.js'
 
 // 商品規格情報（共通）+ 商品規格コード 参照ボタン
-// props: value, onChange(nextObj), onSeedSpec(seedSpecObj)
-export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = false, bare = false }) {
+// props: value, onChange, onSeedSpec, defaultOpen, bare, setMode(セット商品：一部非活性)
+export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = false, bare = false, setMode = false }) {
   const v = value
   const [msg, setMsg] = useState(null)
   const set = (k, val) => onChange({ ...v, [k]: val })
@@ -41,7 +41,10 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
       </div>
 
       <div className="grid2">
-        <Sel label="ちょっプル種別" val={v.choppleType} opts={choppleTypeOptions} onChange={(x) => set('choppleType', x)} />
+        <Sel label="業態区分" val={v.businessType} opts={businessTypeOptions} onChange={(x) => set('businessType', x)}
+          disabled={setMode} note={setMode ? 'セット商品の場合は入力不要' : undefined} />
+        <Sel label="ちょっプル種別" val={v.choppleType} opts={choppleTypeOptions} onChange={(x) => set('choppleType', x)}
+          disabled={setMode} note={setMode ? 'セット商品の場合は入力不要' : undefined} />
         <Sel label="営業担当" val={v.salesRep} opts={salesRepOptions} onChange={(x) => set('salesRep', x)} />
         <div className="frow">
           <div className="flabel">企業名</div>
@@ -57,7 +60,8 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
           </div>
         </div>
         <Txt label="自社品番" val={v.ownItemNo} onChange={(x) => set('ownItemNo', x)} />
-        <Sel label="温度帯" val={v.tempZone} opts={tempZoneOptions} onChange={(x) => set('tempZone', x)} />
+        <Sel label="温度帯" val={v.tempZone} opts={tempZoneOptions} onChange={(x) => set('tempZone', x)}
+          disabled={setMode} note={setMode ? 'セット商品の場合は入力不要' : undefined} />
         <Sel label="告知情報" val={v.noticeInfo} opts={noticeInfoOptions} onChange={(x) => set('noticeInfo', x)} />
         <Sel label="配送方法" val={v.deliveryMethod} opts={deliveryMethodOptions} onChange={(x) => set('deliveryMethod', x)} />
         <Sel label="配送除外エリア" val={v.deliveryExcludeArea} opts={deliveryExcludeOptions} onChange={(x) => set('deliveryExcludeArea', x)} />
@@ -73,13 +77,14 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
 
       <div className="subhead">各種フラグ</div>
       <div className="chk-grid">
-        <Chk label="ドライアイス" on={v.dryIce} onChange={(c) => set('dryIce', c)} />
+        <Chk label="ドライアイス" on={v.dryIce} onChange={(c) => set('dryIce', c)} disabled={setMode} />
         <Chk label="会員限定" on={v.memberOnlyFlag} onChange={(c) => set('memberOnlyFlag', c)} />
         <Chk label="前売り券" on={v.advTicketFlag} onChange={(c) => set('advTicketFlag', c)} />
         <Chk label="検索非表示" on={v.noSearchFlag} onChange={(c) => set('noSearchFlag', c)} />
         <Chk label="自動抽選" on={v.autoLotteryFlag} onChange={(c) => set('autoLotteryFlag', c)} />
         <Chk label="通知" on={v.notifyFlag} onChange={(c) => set('notifyFlag', c)} />
       </div>
+      {setMode && <div className="fnote">※ ドライアイスフラグはセット商品の場合は入力不要です</div>}
     </>
   )
 
@@ -94,20 +99,21 @@ function Txt({ label, val, onChange, type = 'text' }) {
     </div>
   )
 }
-function Sel({ label, val, opts, onChange }) {
+function Sel({ label, val, opts, onChange, disabled, note }) {
   return (
     <div className="frow"><div className="flabel">{label}</div>
       <div className="fbody">
-        <select className="inp" value={val ?? ''} onChange={(e) => onChange(e.target.value)}>
+        <select className="inp" value={val ?? ''} disabled={disabled} onChange={(e) => onChange(e.target.value)}>
           <option value=""></option>
           {opts.map((o) => <option key={o}>{o}</option>)}
         </select>
+        {note && <div className="fnote">{note}</div>}
       </div>
     </div>
   )
 }
-function Chk({ label, on, onChange }) {
+function Chk({ label, on, onChange, disabled }) {
   return (
-    <label className="chk-inline"><input type="checkbox" checked={!!on} onChange={(e) => onChange(e.target.checked)} /><span>{label}</span></label>
+    <label className={'chk-inline' + (disabled ? ' dis' : '')}><input type="checkbox" disabled={disabled} checked={!!on} onChange={(e) => onChange(e.target.checked)} /><span>{label}</span></label>
   )
 }
