@@ -103,8 +103,8 @@ export const orderDetailGroups = [
       { key: 'jicfsShort',   label: 'JICFS分類名（略称）', type: 'text' },
       { key: 'itfCode',      label: 'ITFコード',        type: 'text' },
       { key: 'attrCode',     label: '商品属性情報コード', type: 'text', ref: '商品属性情報マスタ' },
-      { key: 'attrChangeFlag', label: '商品属性変更フラグ', type: 'checkbox' },
       { key: 'productName',  label: '商品名',           type: 'text' },
+      { key: 'medicineType', label: '医薬品',           type: 'select', options: ['対象外','要指導医薬品','第1類医薬品','第2類医薬品','第3類医薬品','医薬部外品','医薬品未分類'] },
       { key: 'alcoholType',  label: 'アルコール区分',   type: 'select', options: ['対象外','お酒','ノンアルコール','みりん'] },
       { key: 'categoryL',    label: '商品カテゴリー（大）', type: 'text', ref: 'カテゴリマスタ' },
       { key: 'categoryM',    label: '商品カテゴリー（中）', type: 'text', ref: 'カテゴリマスタ' },
@@ -119,10 +119,11 @@ export const orderDetailGroups = [
     title: '規格・期限',
     fields: [
       {
-        key: 'saleType', label: '販売区分', type: 'select',
+        key: 'saleType', label: '規格区分', type: 'select',
         options: ['通常','わけあり（B品）','わけあり（期限）','抽選・発送あり','抽選・発送なし','先着・発送あり','先着・発送なし','イベント・発送あり','イベント・発送なし','代品','企画1','企画2','企画3'],
       },
       { key: 'dryIce',       label: 'ドライアイス', type: 'checkbox' },
+      { key: 'tempZone',     label: '温度帯',       type: 'select', options: ['常温','冷蔵','冷凍','チルド','超冷凍','その他'] },
       { key: 'bestBeforeType', label: '期限種別',   type: 'select', options: ['使用期限','賞味期限','消費期限'] },
       { key: 'bestBeforeDate', label: '消費/賞味/使用期限', type: 'date' },
       { key: 'bestBeforeDiffFlag', label: '賞味期限差異フラグ', type: 'checkbox' },
@@ -159,6 +160,7 @@ export const orderDetailGroups = [
       { key: 'taxRate',        label: '税率',               type: 'select', options: ['8%','10%'] },
       { key: 'amountEx',       label: '発注金額（税抜）',   type: 'number', auto: true, note: '単価×発注ピース数' },
       { key: 'amountExActual', label: '発注金額（実績）（税抜）', type: 'number', auto: true },
+      { key: 'amountInActual', label: '発注金額（実績）（税込）', type: 'number', auto: true },
       { key: 'rebateUnitEx',   label: 'リベート単価（税抜）', type: 'number' },
       { key: 'adjustAmount',   label: '調整金額',           type: 'number' },
       { key: 'promoUnitEx',    label: 'プロモーション単価（税抜）', type: 'number' },
@@ -199,8 +201,8 @@ export function makeEmptyCaseLink() {
 
 // ---- 販売目標変更履歴（明細内サブテーブル）------------------
 export const targetHistoryFields = [
-  { key: 'orderNo',      label: '発注番号',        type: 'text', auto: true },
-  { key: 'branchNo',     label: '枝番号',          type: 'text', auto: true },
+  { key: 'orderNo',      label: '発注ヘッダー番号',    type: 'text', auto: true },
+  { key: 'branchNo',     label: '発注明細番号（枝番）', type: 'text', auto: true },
   { key: 'targetBefore', label: '販売目標（変更前）', type: 'text', auto: true },
   { key: 'changedBy',    label: '変更者',          type: 'text', auto: true },
   { key: 'changedAt',    label: '変更日付',        type: 'text', auto: true },

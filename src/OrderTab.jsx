@@ -117,7 +117,7 @@ export default function OrderTab() {
           const title = (
             <>
               <span className="branch-tag">明細 #{i + 1}</span>
-              {row.productName || row.janCode || row.productCode || '（未設定）'}
+              {row.productName || row.janCode || ''}
             </>
           )
           return (
