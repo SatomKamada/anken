@@ -23,20 +23,48 @@ const pair = (m) => [{ metric: m, kind: 'money' }, { metric: m + '率', kind: 'p
 const money = (m) => [{ metric: m, kind: 'money' }]
 const pct = (m) => [{ metric: m, kind: 'percent' }]
 
+// ---- 作業（グリッド・変動の上）-----------------------------
+const sagyo = {
+  type: 'grid', title: null,
+  fields: [
+    { label: '発送サイズ', kind: 'text' },
+    { label: 'アッセンブリ', kind: 'text' },
+    { label: 'アッセンブリ数', kind: 'num' },
+    { label: '資材', kind: 'text' },
+    { label: 'バンド結束', kind: 'text' },
+  ],
+}
+
 // ---- 変動費（グリッド）-------------------------------------
 const henpi = grid(null, [
+  '入荷作業費','出荷作業費',
   '伝票発行料','GMO手数料','通常配送料','地域別配送料','床代(180円)','倉庫費','管理費',
   'アッセンブリ梱包費','アッセンブリ作業費','資材費','バンド結束費','エアキャップ費用',
   'ドライアイス費用','OPP同梱費(40円)','調整費','クレジット決済手数料(3.8%)','送料梱包費（単価税抜）',
 ])
 
+// ---- お試し費用（グリッド）---------------------------------
+const otameshi = {
+  type: 'grid', title: null,
+  fields: [
+    { label: '軽減税率フラグ', kind: 'check' },
+    { label: 'お試し費用（税抜）', kind: 'money' }, { label: 'お試し費用（税込）', kind: 'money' },
+    { label: 'お試し費用（税抜）＋5%', kind: 'money' }, { label: 'お試し費用（税込）＋5%', kind: 'money' },
+    { label: 'dサンプルお試し費用（税抜）', kind: 'money' }, { label: 'dサンプルお試し費用（税込）', kind: 'money' },
+    { label: 'd払いお試し費用（税抜）', kind: 'money' }, { label: 'd払いお試し費用（税込）', kind: 'money' },
+    { label: '社販コムお試し費用（税抜）', kind: 'money' }, { label: '社販コムお試し費用（税込）', kind: 'money' },
+    { label: '会員コムお試し費用（税抜）', kind: 'money' }, { label: '会員コムお試し費用（税込）', kind: 'money' },
+    { label: 'お試し費用単価（税込）', kind: 'money' },
+  ],
+}
+
 // ---- 仕入れ（グリッド）-------------------------------------
 const shiire = {
   type: 'grid', title: null,
   fields: [
-    { label: 'ケース入数', kind: 'num' }, { label: 'ボール入数', kind: 'num' },
     { label: '仕入単価（税抜）', kind: 'money' }, { label: 'セット原価', kind: 'money' },
     { label: '仕入れ合計', kind: 'money' }, { label: '掛け率', kind: 'percent' },
+    { label: '表示提供数', kind: 'num' },
   ],
 }
 
@@ -146,6 +174,8 @@ const shisan = {
 // financeGroups：各分類は sections（未指定は単一グリッド or 単一マトリクス）
 export const financeGroups = [
   { title: '上代',             custom: 'joudai' },
+  { title: 'お試し費用',        sections: [otameshi] },
+  { title: '作業',             sections: [sagyo] },
   { title: '変動費',           sections: [henpi] },
   { title: '仕入れ',           sections: [shiire] },
   { title: '粗利',             sections: [arariMatrix] },

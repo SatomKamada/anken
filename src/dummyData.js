@@ -89,7 +89,7 @@ export const specMaster = {
     common: {
       specCode: '20000001',
       salesRep: '担当A',
-      companyCode: 'C001 / 花王株式会社',
+      companyName: '花王株式会社',
       ownItemNo: '1001',
       tempZone: '常温', dryIce: false,
       noticeInfo: '告知A',
@@ -113,7 +113,7 @@ export const specMaster = {
     common: {
       specCode: '20000002',
       salesRep: '担当B',
-      companyCode: 'C003 / △△食品',
+      companyName: '△△食品',
       ownItemNo: '2002',
       tempZone: '冷凍', dryIce: true,
       noticeInfo: '告知C',

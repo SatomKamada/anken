@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import Accordion from './Accordion.jsx'
 import {
-  salesRepOptions, companyCodeOptions, tempZoneOptions, noticeInfoOptions,
-  deliveryMethodOptions, deliveryExcludeOptions, shippingLeadOptions, cautionPresetOptions,
+  salesRepOptions, tempZoneOptions, noticeInfoOptions,
+  deliveryMethodOptions, deliveryExcludeOptions, deliveryFeeTypeOptions,
+  shippingLeadOptions, cautionPresetOptions,
+  choppleTypeOptions, companyNameOptions, jufuchuChoppleTypes,
 } from './fields.js'
 import { specMaster } from './dummyData.js'
 
@@ -39,13 +41,27 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
       </div>
 
       <div className="grid2">
+        <Sel label="ちょっプル種別" val={v.choppleType} opts={choppleTypeOptions} onChange={(x) => set('choppleType', x)} />
         <Sel label="営業担当" val={v.salesRep} opts={salesRepOptions} onChange={(x) => set('salesRep', x)} />
-        <Sel label="企業コード" val={v.companyCode} opts={companyCodeOptions} onChange={(x) => set('companyCode', x)} />
+        <div className="frow">
+          <div className="flabel">企業名</div>
+          <div className="fbody">
+            <input className="inp" list="companyNameList" value={v.companyName}
+              disabled={!jufuchuChoppleTypes.includes(v.choppleType)}
+              placeholder={jufuchuChoppleTypes.includes(v.choppleType) ? '入力で候補表示（サジェスト）' : '受発注型のみ選択可'}
+              onChange={(e) => set('companyName', e.target.value)} />
+            <datalist id="companyNameList">
+              {companyNameOptions.map((o) => <option key={o} value={o} />)}
+            </datalist>
+            <div className="fnote">ちょっプル種別が「受発注型（受発注（通常）／（プロパー））」の場合のみ企業を選択できます。</div>
+          </div>
+        </div>
         <Txt label="自社品番" val={v.ownItemNo} onChange={(x) => set('ownItemNo', x)} />
         <Sel label="温度帯" val={v.tempZone} opts={tempZoneOptions} onChange={(x) => set('tempZone', x)} />
         <Sel label="告知情報" val={v.noticeInfo} opts={noticeInfoOptions} onChange={(x) => set('noticeInfo', x)} />
         <Sel label="配送方法" val={v.deliveryMethod} opts={deliveryMethodOptions} onChange={(x) => set('deliveryMethod', x)} />
         <Sel label="配送除外エリア" val={v.deliveryExcludeArea} opts={deliveryExcludeOptions} onChange={(x) => set('deliveryExcludeArea', x)} />
+        <Sel label="配送料種別" val={v.deliveryFeeType} opts={deliveryFeeTypeOptions} onChange={(x) => set('deliveryFeeType', x)} />
         <Txt label="初回出荷日" val={v.firstShipDate} onChange={(x) => set('firstShipDate', x)} type="date" />
         <Sel label="出荷リードタイム" val={v.shippingLead} opts={shippingLeadOptions} onChange={(x) => set('shippingLead', x)} />
         <Sel label="注意事項プリセット" val={v.cautionPreset} opts={cautionPresetOptions} onChange={(x) => set('cautionPreset', x)} />

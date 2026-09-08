@@ -38,6 +38,8 @@ export function makeEmptyProductInfo() {
     taxType: '基本税率', tempZone: '未設定', dryIce: false,
     allergyMain: [], allergySub: [],
     makerPrice: '',
+    // カテゴリ情報
+    categoryCode: '', categoryL: '', categoryM: '', categoryS: '',
     bestChoice: false, functionalFood: false, specificHealthFood: false,
   }
 }
@@ -76,14 +78,12 @@ export function makeEmptySalesForm() {
 // 商品規格・掲載履歴（個別）明細（1:多）
 //   基本 ＋ 抽選 ＋ アンケート。先頭に商品規格コード。
 // ============================================================
+export const choppleTypeOptions = ['通常','仕入（通常）','仕入（プロパー）','仕入（アウトレット）','直送MD（通常）','直送MD（プロパー）','直送PF','受発注（通常）','受発注（プロパー）']
+
 export const specGroups = [
   {
     title: '基本',
     fields: [
-      {
-        key: 'choppleType', label: 'ちょっプル種別', type: 'select',
-        options: ['通常','仕入（通常）','仕入（プロパー）','仕入（アウトレット）','直送MD（通常）','直送MD（プロパー）','直送PF','受発注（通常）','受発注（プロパー）'],
-      },
       { key: 'autoOrder',      label: '自動発注フラグ',        type: 'checkbox' },
       { key: 'specProductName',label: '商品規格名',            type: 'text',   note: '現行：掲載名' },
       { key: 'applyLimit',     label: '申込み回数制限',         type: 'number' },
@@ -122,7 +122,7 @@ export const priceChannels         = ['本店', 'dショッピング店', 'd払�
 
 export function makeEmptyPostHistory() {
   const prices = {}
-  for (const ch of priceChannels) prices[ch] = { salePrice: '', offFlag: false, baseProfit: '' }
+  for (const ch of priceChannels) prices[ch] = { salePrice: '', unitPrice: '', offFlag: false, offRate: '', baseProfit: '' }
   return {
     postPeriodFrom: '', postPeriodTo: '',
     salePeriodFrom: '', salePeriodTo: '',
@@ -134,11 +134,18 @@ export function makeEmptyPostHistory() {
     postName: '', subtitle1: '', subtitle2: '', catchCopy: '',
     bestBeforeExcluded: false, bestBeforeType: '賞味期限', bestBeforeDate: '',
     displayProvideCount: '',
+    sellOutDate: '',            // 完売想定日（表示提供数の下）
     prices,
+    baseCost: '',              // 基準原価（チャネル別価格の下・単一）
+    // チャネル別価格の下：当月出荷見込み数・総売上
+    shipForecastHonten: '', shipForecastDsample: '', shipForecastDpay: '',
+    totalSalesInTax: '',
     // 抽選（掲載履歴内・チャネル別価格の下）
     lotteryPeople: '', lotteryTotal: '', winConfirmAt: '', lotteryScope: '',
     // アンケート（掲載履歴内・チャネル別価格の下）
     preSurvey: '', preSurveyCode: '', postSurvey: '', postSurveyCode: '',
+    // アンケートの下：ショッピング広告掲載・PV出し・過去実績
+    shoppingAd: '', pvNeeded: '', pastResult: '',
     segmentOn: false, segmentType: 'セグメント', segmentValue: '',
     memo: '',
   }
@@ -153,16 +160,22 @@ export const tempZoneOptions         = ['未設定', '常温', '冷蔵', '冷凍
 export const noticeInfoOptions       = ['告知A', '告知B', '告知C']
 export const deliveryMethodOptions   = ['通常', 'ゆうパケット', 'ゆうメール', 'メール便', 'クール便']
 export const deliveryExcludeOptions  = ['北海道', '東北', '中国', '四国', '九州', '沖縄', '離島']
+export const deliveryFeeTypeOptions  = ['10kg未満', '10kg以上', '60', '80', '100', '100以上']
 export const shippingLeadOptions     = ['即日', '1日', '2日', '3日', '5日', '1週間']
 export const cautionPresetOptions    = ['なし', '要冷蔵', '割れ物注意', '熨斗対応不可']
+// 企業名サジェスト候補（受発注型のみ選択可）
+export const companyNameOptions      = ['花王株式会社', '○○商事', '△△食品', 'ユースキン製薬株式会社', 'アサヒグループ食品株式会社']
+// 受発注型（企業選択を許可するちょっプル種別）
+export const jufuchuChoppleTypes     = ['受発注（通常）', '受発注（プロパー）']
 
 export function makeEmptySpecCommon() {
   return {
     specCode: '',                 // 商品規格コード（先頭・参照ボタン対象）
-    salesRep: '', companyCode: '', ownItemNo: '',
+    choppleType: '',              // ちょっプル種別（基本から移動）
+    salesRep: '', companyName: '', ownItemNo: '',
     tempZone: '未設定', dryIce: false,
     noticeInfo: '',
-    deliveryMethod: '', deliveryExcludeArea: '',
+    deliveryMethod: '', deliveryExcludeArea: '', deliveryFeeType: '',
     firstShipDate: '', shippingLead: '3日',
     cautionPreset: '', cautionText: '',
     memberOnlyFlag: false, advTicketFlag: false,
@@ -201,10 +214,14 @@ export function makeEmptySpec() {
 // 案件ヘッダー（基本情報の上・アコーディオンなし）
 // ============================================================
 export const caseTypeOptions = ['新規', '商品規格追加', '掲載履歴追加', '商品規格修正', '掲載履歴修正']
+export const approvalFlowOptions = ['通常', 'Eソリ']
+export const caseStatusOptions = ['試算中', '承認待', '承認済', '差戻し', '確定済', '再申請', 'NG']
 
 export function makeEmptyCaseHead() {
   return {
     caseType: '',           // 案件種別
+    approvalFlow: '',       // 承認フロー
+    caseStatus: '',         // 案件ステータス
     setProductFlag: false,  // セット商品フラグ
     choppleBarterFlag: false, // ちょっプルバーターフラグ
   }

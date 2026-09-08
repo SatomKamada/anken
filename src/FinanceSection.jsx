@@ -65,6 +65,9 @@ function ChannelMatrix({ sec, get, set }) {
 }
 
 function Adorned({ kind, val, onChange }) {
+  if (kind === 'check') {
+    return <label className="chk-inline"><input type="checkbox" checked={!!val} onChange={(e) => onChange(e.target.checked)} /><span>ON</span></label>
+  }
   if (kind === 'percent') {
     return <div className="pct-wrap"><input className="inp" type="number" value={val} onChange={(e) => onChange(e.target.value)} /><span className="pct">%</span></div>
   }
@@ -90,6 +93,15 @@ function FinField({ f, val, onChange }) {
 function Joudai({ get, set }) {
   return (
     <div className="fgroup">
+      <div className="frow">
+        <div className="flabel">オープン価格</div>
+        <div className="fbody">
+          <label className="chk-inline">
+            <input type="checkbox" checked={!!get('オープン価格')} onChange={(e) => set('オープン価格', e.target.checked)} />
+            <span>該当（参考価格0円 等）</span>
+          </label>
+        </div>
+      </div>
       <div className="grid2">
         <FinField f={{ label: '参考価格（税抜）', kind: 'money' }} val={get('参考価格（税抜）')} onChange={(v) => set('参考価格（税抜）', v)} />
         <FinField f={{ label: '参考価格（税込）', kind: 'money' }} val={get('参考価格（税込）')} onChange={(v) => set('参考価格（税込）', v)} />

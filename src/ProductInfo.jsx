@@ -239,6 +239,14 @@ export default function ProductInfo({ value, onChange, defaultOpen = false, bare
         </div>
       </Row>
 
+      <div className="subhead">カテゴリ情報</div>
+      <div className="grid2">
+        <Row label="カテゴリーコード"><input className="inp" value={v.categoryCode} onChange={(e) => set('categoryCode', e.target.value)} placeholder="例：C020401" /></Row>
+        <Row label="大カテゴリー"><input className="inp" value={v.categoryL} onChange={(e) => set('categoryL', e.target.value)} /></Row>
+        <Row label="中カテゴリー"><input className="inp" value={v.categoryM} onChange={(e) => set('categoryM', e.target.value)} /></Row>
+        <Row label="小カテゴリー"><input className="inp" value={v.categoryS} onChange={(e) => set('categoryS', e.target.value)} /></Row>
+      </div>
+
       <Row label="ベストチョイス">
         <label className="chk-inline"><input type="checkbox" checked={v.bestChoice} onChange={(e) => set('bestChoice', e.target.checked)} /><span>対象</span></label>
       </Row>

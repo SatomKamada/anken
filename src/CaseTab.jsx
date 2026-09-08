@@ -7,7 +7,7 @@ import { RecordHeader } from './RecordHeader.jsx'
 import {
   makeEmptyProductInfo, makeEmptyProductAttr, productAttrFields,
   makeEmptySalesForm, salesFormRows, makeEmptySpecCommon, makeEmptySpec,
-  makeEmptyCaseHead, caseTypeOptions,
+  makeEmptyCaseHead, caseTypeOptions, approvalFlowOptions, caseStatusOptions,
 } from './fields.js'
 
 // 案件ヘッダー番号（自動採番のダミー・連番のみ）
@@ -48,6 +48,24 @@ export default function CaseTab() {
             <select className="inp" value={caseHead.caseType} onChange={(e) => setCaseHead({ ...caseHead, caseType: e.target.value })}>
               <option value="">選択してください</option>
               {caseTypeOptions.map((o) => <option key={o}>{o}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="frow">
+          <div className="flabel">承認フロー</div>
+          <div className="fbody">
+            <select className="inp" value={caseHead.approvalFlow} onChange={(e) => setCaseHead({ ...caseHead, approvalFlow: e.target.value })}>
+              <option value="">選択してください</option>
+              {approvalFlowOptions.map((o) => <option key={o}>{o}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="frow">
+          <div className="flabel">案件ステータス</div>
+          <div className="fbody">
+            <select className="inp" value={caseHead.caseStatus} onChange={(e) => setCaseHead({ ...caseHead, caseStatus: e.target.value })}>
+              <option value="">選択してください</option>
+              {caseStatusOptions.map((o) => <option key={o}>{o}</option>)}
             </select>
           </div>
         </div>
