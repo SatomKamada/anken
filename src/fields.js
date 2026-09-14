@@ -27,20 +27,12 @@ export function makeEmptyProductInfo() {
   return {
     recordId: '',             // 内部ID（参照時にセット）
     productCode: '',           // 商品コード（先頭）
-    janCode: '', maker: '', companyUrl: '',
+    janCode: '', maker: '',
     productName: '', subtitle: '', catchCopy: '',
-    medicineOn: false, medicineType: '対象外', questionnaire: '',
-    alcohol: '対象外', brand: '', series: '', gender: '対象外',
-    jicfsCode: '', jicfsKanji: '', jicfsKana: '', jicfsAbbr: '', itfCode: '',
-    caseQty: '0', bowlQty: '0', netContent: '', unit: '',
-    tags: [],
-    keyword: '',
-    taxType: '基本税率', tempZone: '未設定', dryIce: false,
-    allergyMain: [], allergySub: [],
-    makerPrice: '',
+    medicineOn: false, medicineType: '対象外',
+    tempZone: '未設定', dryIce: false,
     // カテゴリ情報
     categoryCode: '', categoryL: '', categoryM: '', categoryS: '',
-    bestChoice: false, functionalFood: false, specificHealthFood: false,
   }
 }
 
@@ -176,9 +168,8 @@ export function makeEmptySpecCommon() {
     specCode: '',                 // 商品規格コード（先頭・参照ボタン対象）
     businessType: '',             // 業態区分（ちょっプル種別の前）
     choppleType: '',              // ちょっプル種別（基本から移動）
-    salesRep: '', companyName: '', ownItemNo: '',
+    salesRep: '', companyName: '',
     tempZone: '未設定', dryIce: false,
-    noticeInfo: '',
     deliveryMethod: '', deliveryExcludeArea: '', deliveryFeeType: '',
     firstShipDate: '', shippingLead: '3日',
     cautionPreset: '', cautionText: '',
@@ -226,7 +217,5 @@ export function makeEmptyCaseHead() {
     caseType: '',           // 案件種別
     approvalFlow: '',       // 承認フロー
     caseStatus: '',         // 案件ステータス
-    setProductFlag: false,  // セット商品フラグ
-    choppleBarterFlag: false, // ちょっプルバーターフラグ
   }
 }

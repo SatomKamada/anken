@@ -69,18 +69,6 @@ export default function CaseTab() {
             </select>
           </div>
         </div>
-        <div className="frow">
-          <div className="flabel">セット商品フラグ</div>
-          <div className="fbody">
-            <label className="chk-inline"><input type="checkbox" checked={caseHead.setProductFlag} onChange={(e) => setCaseHead({ ...caseHead, setProductFlag: e.target.checked })} /><span>ON</span></label>
-          </div>
-        </div>
-        <div className="frow">
-          <div className="flabel">ちょっプルバーターフラグ</div>
-          <div className="fbody">
-            <label className="chk-inline"><input type="checkbox" checked={caseHead.choppleBarterFlag} onChange={(e) => setCaseHead({ ...caseHead, choppleBarterFlag: e.target.checked })} /><span>ON</span></label>
-          </div>
-        </div>
       </div>
 
       {/* ① 基本情報（商品情報＋商品属性情報＋商品規格設定＋商品規格情報（共通）を統合） */}

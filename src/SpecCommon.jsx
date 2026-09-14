@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Accordion from './Accordion.jsx'
 import {
-  salesRepOptions, tempZoneOptions, noticeInfoOptions,
+  salesRepOptions, tempZoneOptions,
   deliveryMethodOptions, deliveryExcludeOptions, deliveryFeeTypeOptions,
   shippingLeadOptions, cautionPresetOptions,
   choppleTypeOptions, companyNameOptions, jufuchuChoppleTypes, businessTypeOptions,
@@ -59,10 +59,8 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
             <div className="fnote">ちょっプル種別が「受発注型（受発注（通常）／（プロパー））」の場合のみ企業を選択できます。</div>
           </div>
         </div>
-        <Txt label="自社品番" val={v.ownItemNo} onChange={(x) => set('ownItemNo', x)} />
         <Sel label="温度帯" val={v.tempZone} opts={tempZoneOptions} onChange={(x) => set('tempZone', x)}
           disabled={setMode} note={setMode ? 'セット商品の場合は入力不要' : undefined} />
-        <Sel label="告知情報" val={v.noticeInfo} opts={noticeInfoOptions} onChange={(x) => set('noticeInfo', x)} />
         <Sel label="配送方法" val={v.deliveryMethod} opts={deliveryMethodOptions} onChange={(x) => set('deliveryMethod', x)} />
         <Sel label="配送除外エリア" val={v.deliveryExcludeArea} opts={deliveryExcludeOptions} onChange={(x) => set('deliveryExcludeArea', x)} />
         <Sel label="配送料種別" val={v.deliveryFeeType} opts={deliveryFeeTypeOptions} onChange={(x) => set('deliveryFeeType', x)} />
