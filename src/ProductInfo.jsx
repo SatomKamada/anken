@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import Accordion from './Accordion.jsx'
 import {
-  makerOptions, medicineTypeOptions, productTempZoneOptions,
+  medicineTypeOptions, productTempZoneOptions,
 } from './fields.js'
-import { productMaster, productMasterByJan, jicfsMaster } from './dummyData.js'
+import { productMaster } from './dummyData.js'
 
 // 商品情報（共通）… 添付画像レイアウト準拠 + 商品コード/JAN 参照ボタン
 export default function ProductInfo({ value, onChange, defaultOpen = false, bare = false }) {
@@ -22,65 +22,37 @@ export default function ProductInfo({ value, onChange, defaultOpen = false, bare
   }
 
   // JAN参照 → 商品マスタ or JICFS
-  const refByJan = () => {
-    const jan = (v.janCode || '').trim()
-    if (!jan) { setMsg({ t: 'warn', m: 'JANコードを入力してください' }); return }
-    if (productMasterByJan[jan]) {
-      const p = productMaster[productMasterByJan[jan]]
-      onChange({ ...v, ...p })
-      setMsg({ t: 'ok', m: `商品マスタから連携しました（JAN:${jan} / ${p.productName}）` })
-      return
-    }
-    if (jicfsMaster[jan]) {
-      const j = jicfsMaster[jan]
-      onChange({
-        ...v, janCode: jan,
-        jicfsCode: j.jicfsCode, jicfsKanji: j.jicfsKanji, jicfsKana: j.jicfsKana, jicfsAbbr: j.jicfsAbbr,
-        itfCode: j.itfCode,
-        productName: v.productName || j.productName,
-      })
-      setMsg({ t: 'info', m: `商品マスタに無いため JICFS から分類情報のみ連携しました（JAN:${jan}）` })
-      return
-    }
-    setMsg({ t: 'warn', m: `商品マスタ・JICFSに該当なし（JAN:${jan}）。手動入力してください。` })
-  }
-
   const copyCode = () => { try { navigator.clipboard?.writeText(v.productCode || '') } catch (e) {} }
 
   const body = (
     <>
       {msg && <div className={'notice ' + msg.t}>{msg.m}</div>}
 
-      {/* 商品コード（参照ボタンの仕組みは維持）＋ ID */}
+      {/* JANコード（表示のみ・入力不可） */}
+      <div className="frow">
+        <Label text="JANコード" />
+        <div className="fbody has-right">
+          <input className="inp inp-code" value={v.janCode} readOnly placeholder="表示のみ・入力不要" title="表示のみ（入力不要）" />
+        </div>
+      </div>
+
+      {/* 商品コード（参照ボタンで各項目へ連携） */}
       <div className="frow">
         <Label text="商品コード" />
         <div className="fbody has-right">
           <input className="inp inp-code" value={v.productCode} onChange={(e) => set('productCode', e.target.value)} placeholder="例：10000001" />
           <button type="button" className="btn-icon" title="コピー" onClick={copyCode}>⧉</button>
           <button type="button" className="btn-ref" onClick={refByProductCode}>参照</button>
-          <div className="fnote">商品マスタから連携</div>
-        </div>
-      </div>
-
-      {/* JANコード（参照ボタンの仕組みは維持） */}
-      <div className="frow">
-        <Label text="JANコード" help />
-        <div className="fbody has-right">
-          <input className="inp" value={v.janCode} onChange={(e) => set('janCode', e.target.value)} placeholder="例：4908013230864" />
-          <button type="button" className="btn-ref" onClick={refByJan}>参照</button>
-          <div className="fnote">商品マスタ→無ければJICFSから連携</div>
+          <div className="fnote">商品マスタから連携（JAN・メーカー・商品名・カテゴリは表示のみ）</div>
         </div>
       </div>
 
       <Row label="メーカー">
-        <select className="inp" value={v.maker} onChange={(e) => set('maker', e.target.value)}>
-          <option value="">メーカーを選択してください</option>
-          {makerOptions.map((o) => <option key={o}>{o}</option>)}
-        </select>
+        <input className="inp" value={v.maker} readOnly placeholder="表示のみ・入力不要" title="表示のみ（入力不要）" />
       </Row>
 
-      <Row label="商品名" required help>
-        <input className="inp" value={v.productName} onChange={(e) => set('productName', e.target.value)} />
+      <Row label="商品名">
+        <input className="inp" value={v.productName} readOnly placeholder="表示のみ・入力不要" title="表示のみ（入力不要）" />
       </Row>
 
       <Row label="サブタイトル">
@@ -110,10 +82,10 @@ export default function ProductInfo({ value, onChange, defaultOpen = false, bare
 
       <div className="subhead">カテゴリ情報</div>
       <div className="grid2">
-        <Row label="カテゴリーコード"><input className="inp" value={v.categoryCode} onChange={(e) => set('categoryCode', e.target.value)} placeholder="例：C020401" /></Row>
-        <Row label="大カテゴリー"><input className="inp" value={v.categoryL} onChange={(e) => set('categoryL', e.target.value)} /></Row>
-        <Row label="中カテゴリー"><input className="inp" value={v.categoryM} onChange={(e) => set('categoryM', e.target.value)} /></Row>
-        <Row label="小カテゴリー"><input className="inp" value={v.categoryS} onChange={(e) => set('categoryS', e.target.value)} /></Row>
+        <Row label="カテゴリーコード"><input className="inp" value={v.categoryCode} readOnly placeholder="表示のみ・入力不要" title="表示のみ（入力不要）" /></Row>
+        <Row label="大カテゴリー"><input className="inp" value={v.categoryL} readOnly placeholder="表示のみ・入力不要" title="表示のみ（入力不要）" /></Row>
+        <Row label="中カテゴリー"><input className="inp" value={v.categoryM} readOnly placeholder="表示のみ・入力不要" title="表示のみ（入力不要）" /></Row>
+        <Row label="小カテゴリー"><input className="inp" value={v.categoryS} readOnly placeholder="表示のみ・入力不要" title="表示のみ（入力不要）" /></Row>
       </div>
     </>
   )

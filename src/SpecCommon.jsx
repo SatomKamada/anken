@@ -3,12 +3,11 @@ import Accordion from './Accordion.jsx'
 import {
   salesRepOptions, tempZoneOptions,
   deliveryMethodOptions, deliveryExcludeOptions, deliveryFeeTypeOptions,
-  shippingLeadOptions, cautionPresetOptions,
-  choppleTypeOptions, companyNameOptions, jufuchuChoppleTypes, businessTypeOptions,
+  choppleTypeOptions, businessTypeOptions,
 } from './fields.js'
-import { specMaster } from './dummyData.js'
+import { specMaster, lookupCompanySpec } from './dummyData.js'
 
-// 商品規格情報（共通）+ 商品規格コード 参照ボタン
+// 商品規格情報（共通）+ 商品規格コード / 企業コード 参照ボタン
 // props: value, onChange, onSeedSpec, defaultOpen, bare, setMode(セット商品：一部非活性)
 export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = false, bare = false, setMode = false }) {
   const v = value
@@ -20,11 +19,19 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
     if (!code) { setMsg({ t: 'warn', m: '商品規格コードを入力してください' }); return }
     const m = specMaster[code]
     if (!m) { setMsg({ t: 'warn', m: `商品規格マスタに該当なし（${code}）` }); return }
-    // 共通へ流し込み
     onChange({ ...v, ...m.common })
-    // 個別明細（基本）へ仮入力
     if (onSeedSpec) onSeedSpec(m.seedSpec)
     setMsg({ t: 'ok', m: `商品規格マスタから連携しました（${code}）。個別明細の商品規格欄にも仮入力しました。` })
+  }
+
+  // 企業コード参照 → 業態区分・ちょっプル種別・営業担当を自動入力
+  const refByCompanyCode = () => {
+    const code = (v.companyCode || '').trim()
+    if (!code) { setMsg({ t: 'warn', m: '企業コードを入力してください' }); return }
+    const res = lookupCompanySpec(code)
+    if (!res.found) { setMsg({ t: 'warn', m: `企業マスタに該当なし（${code}）。ダミー：001 / 002 / 003` }); return }
+    onChange({ ...v, businessType: res.values.businessType, choppleType: res.values.choppleType, salesRep: res.values.salesRep })
+    setMsg({ t: 'ok', m: `企業マスタから連携しました（${code} / ${res.values.companyName}）。業態区分・ちょっプル種別・営業担当を自動入力しました。` })
   }
 
   const body = (
@@ -34,9 +41,17 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
       <div className="frow">
         <div className="flabel">商品規格コード</div>
         <div className="fbody has-right">
-          <input className="inp" value={v.specCode} onChange={(e) => set('specCode', e.target.value)} placeholder="例：20000001" />
+          <input className="inp inp-code" value={v.specCode} onChange={(e) => set('specCode', e.target.value)} placeholder="例：20000001" />
           <button type="button" className="btn-ref" onClick={refBySpecCode}>参照</button>
-          <div className="fnote">商品規格マスタから連携</div>
+        </div>
+      </div>
+
+      <div className="frow">
+        <div className="flabel">企業コード</div>
+        <div className="fbody has-right">
+          <input className="inp inp-code" value={v.companyCode} onChange={(e) => set('companyCode', e.target.value)} placeholder="例：001" />
+          <button type="button" className="btn-ref" onClick={refByCompanyCode}>参照</button>
+          <div className="fnote">参照で 業態区分・ちょっプル種別・営業担当 を自動入力（001 / 002 / 003）</div>
         </div>
       </div>
 
@@ -46,31 +61,11 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
         <Sel label="ちょっプル種別" val={v.choppleType} opts={choppleTypeOptions} onChange={(x) => set('choppleType', x)}
           disabled={setMode} note={setMode ? 'セット商品の場合は入力不要' : undefined} />
         <Sel label="営業担当" val={v.salesRep} opts={salesRepOptions} onChange={(x) => set('salesRep', x)} />
-        <div className="frow">
-          <div className="flabel">企業名</div>
-          <div className="fbody">
-            <input className="inp" list="companyNameList" value={v.companyName}
-              disabled={!jufuchuChoppleTypes.includes(v.choppleType)}
-              placeholder={jufuchuChoppleTypes.includes(v.choppleType) ? '入力で候補表示（サジェスト）' : '受発注型のみ選択可'}
-              onChange={(e) => set('companyName', e.target.value)} />
-            <datalist id="companyNameList">
-              {companyNameOptions.map((o) => <option key={o} value={o} />)}
-            </datalist>
-            <div className="fnote">ちょっプル種別が「受発注型（受発注（通常）／（プロパー））」の場合のみ企業を選択できます。</div>
-          </div>
-        </div>
         <Sel label="温度帯" val={v.tempZone} opts={tempZoneOptions} onChange={(x) => set('tempZone', x)}
           disabled={setMode} note={setMode ? 'セット商品の場合は入力不要' : undefined} />
         <Sel label="配送方法" val={v.deliveryMethod} opts={deliveryMethodOptions} onChange={(x) => set('deliveryMethod', x)} />
         <Sel label="配送除外エリア" val={v.deliveryExcludeArea} opts={deliveryExcludeOptions} onChange={(x) => set('deliveryExcludeArea', x)} />
         <Sel label="配送料種別" val={v.deliveryFeeType} opts={deliveryFeeTypeOptions} onChange={(x) => set('deliveryFeeType', x)} />
-        <Txt label="初回出荷日" val={v.firstShipDate} onChange={(x) => set('firstShipDate', x)} type="date" />
-        <Sel label="出荷リードタイム" val={v.shippingLead} opts={shippingLeadOptions} onChange={(x) => set('shippingLead', x)} />
-        <Sel label="注意事項プリセット" val={v.cautionPreset} opts={cautionPresetOptions} onChange={(x) => set('cautionPreset', x)} />
-      </div>
-
-      <div className="frow"><div className="flabel">注意事項</div>
-        <div className="fbody"><textarea className="inp" rows={2} value={v.cautionText} onChange={(e) => set('cautionText', e.target.value)} /></div>
       </div>
 
       <div className="subhead">各種フラグ</div>

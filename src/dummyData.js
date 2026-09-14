@@ -157,15 +157,22 @@ export function lookupCaseByNo(caseNo) {
 
 // ---- 企業マスタ（発注ヘッダー 企業コード 参照用）-------------
 export const companyMaster = {
-  '001': { companyName: '花王株式会社' },
-  '002': { companyName: 'よつ葉乳業' },
-  '003': { companyName: '△△食品' },
+  '001': { companyName: '花王株式会社',   businessType: 'ちょっプル',       choppleType: '仕入（通常）', salesRep: '担当A' },
+  '002': { companyName: 'よつ葉乳業',     businessType: '抽選・先着サンプル', choppleType: '直送MD（通常）', salesRep: '担当B' },
+  '003': { companyName: '△△食品',       businessType: 'イベント',         choppleType: '受発注（通常）', salesRep: '担当C' },
 }
 
 export function lookupCompany(code) {
   const c = companyMaster[(code || '').trim()]
   if (!c) return { found: false, values: {} }
   return { found: true, values: { companyName: c.companyName } }
+}
+
+// 企業コード参照（商品規格情報 共通）→ 業態区分・ちょっプル種別・営業担当を自動入力
+export function lookupCompanySpec(code) {
+  const c = companyMaster[(code || '').trim()]
+  if (!c) return { found: false, values: {} }
+  return { found: true, values: { businessType: c.businessType, choppleType: c.choppleType, salesRep: c.salesRep, companyName: c.companyName } }
 }
 
 // ---- 掲載履歴マスタ（掲載履歴コード 参照用）-----------------

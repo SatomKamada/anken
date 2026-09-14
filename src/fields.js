@@ -76,8 +76,7 @@ export const specGroups = [
   {
     title: '基本',
     fields: [
-      { key: 'autoOrder',      label: '自動発注フラグ',        type: 'checkbox' },
-      { key: 'specProductName',label: '商品規格名',            type: 'text',   note: '現行：掲載名' },
+      { key: 'autoOrder',      label: '自動発注フラグ',        type: 'checkbox', note: '※受発注型の場合選択可能' },
       { key: 'applyLimit',     label: '申込み回数制限',         type: 'number' },
       { key: 'applyCount',     label: '申込み可能数',           type: 'number' },
       { key: 'targetChannel',  label: '対象チャネル', type: 'checkboxGroup', options: ['web','アプリ','実店舗'] },
@@ -166,13 +165,12 @@ export const businessTypeOptions     = ['ちょっプル', '抽選・先着サ�
 export function makeEmptySpecCommon() {
   return {
     specCode: '',                 // 商品規格コード（先頭・参照ボタン対象）
-    businessType: '',             // 業態区分（ちょっプル種別の前）
-    choppleType: '',              // ちょっプル種別（基本から移動）
-    salesRep: '', companyName: '',
+    companyCode: '',              // 企業コード（商品規格コードの下・参照ボタン対象）
+    businessType: '',             // 業態区分（企業コード参照で自動）
+    choppleType: '',              // ちょっプル種別（企業コード参照で自動）
+    salesRep: '',                 // 営業担当（企業コード参照で自動）
     tempZone: '未設定', dryIce: false,
     deliveryMethod: '', deliveryExcludeArea: '', deliveryFeeType: '',
-    firstShipDate: '', shippingLead: '3日',
-    cautionPreset: '', cautionText: '',
     memberOnlyFlag: false, advTicketFlag: false,
     noSearchFlag: false, autoLotteryFlag: false, notifyFlag: false,
   }
