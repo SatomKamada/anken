@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import Accordion from './Accordion.jsx'
 import {
-  salesRepOptions, tempZoneOptions,
+  tempZoneOptions,
   deliveryMethodOptions, deliveryExcludeOptions, deliveryFeeTypeOptions,
-  choppleTypeOptions, businessTypeOptions,
+
 } from './fields.js'
 import { specMaster, lookupCompanySpec } from './dummyData.js'
 
@@ -56,11 +56,9 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
       </div>
 
       <div className="grid2">
-        <Sel label="業態区分" val={v.businessType} opts={businessTypeOptions} onChange={(x) => set('businessType', x)}
-          disabled={setMode} note={setMode ? 'セット商品の場合は入力不要' : undefined} />
-        <Sel label="ちょっプル種別" val={v.choppleType} opts={choppleTypeOptions} onChange={(x) => set('choppleType', x)}
-          disabled={setMode} note={setMode ? 'セット商品の場合は入力不要' : undefined} />
-        <Sel label="営業担当" val={v.salesRep} opts={salesRepOptions} onChange={(x) => set('salesRep', x)} />
+        <Disp label="業態区分" val={v.businessType} />
+        <Disp label="ちょっプル種別" val={v.choppleType} />
+        <Disp label="営業担当" val={v.salesRep} />
         <Sel label="温度帯" val={v.tempZone} opts={tempZoneOptions} onChange={(x) => set('tempZone', x)}
           disabled={setMode} note={setMode ? 'セット商品の場合は入力不要' : undefined} />
         <Sel label="配送方法" val={v.deliveryMethod} opts={deliveryMethodOptions} onChange={(x) => set('deliveryMethod', x)} />
@@ -85,6 +83,13 @@ export default function SpecCommon({ value, onChange, onSeedSpec, defaultOpen = 
   return <Accordion title="商品規格情報（共通）" defaultOpen={defaultOpen}>{body}</Accordion>
 }
 
+function Disp({ label, val }) {
+  return (
+    <div className="frow"><div className="flabel">{label}</div>
+      <div className="fbody"><input className="inp" value={val ?? ''} readOnly placeholder="表示のみ・入力不要（企業コード参照で自動）" title="表示のみ（入力不要）" /></div>
+    </div>
+  )
+}
 function Txt({ label, val, onChange, type = 'text' }) {
   return (
     <div className="frow"><div className="flabel">{label}</div>

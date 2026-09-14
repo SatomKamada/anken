@@ -175,6 +175,11 @@ export function lookupCompanySpec(code) {
   return { found: true, values: { businessType: c.businessType, choppleType: c.choppleType, salesRep: c.salesRep, companyName: c.companyName } }
 }
 
+// ---- カテゴリマスタ（カテゴリ参照用・ダミー）------------------
+export function lookupCategory(key) {
+  return { categoryCode: 'C020401', categoryL: 'お菓子', categoryM: 'キャンディ・ガム・タブレット', categoryS: '飴・ソフトキャンディー' }
+}
+
 // ---- 掲載履歴マスタ（掲載履歴コード 参照用）-----------------
 // key = 掲載履歴コード（数字のみ）。参照で掲載履歴の主要項目を返す。
 export const postMaster = {

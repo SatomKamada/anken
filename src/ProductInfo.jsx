@@ -3,7 +3,7 @@ import Accordion from './Accordion.jsx'
 import {
   medicineTypeOptions, productTempZoneOptions,
 } from './fields.js'
-import { productMaster } from './dummyData.js'
+import { productMaster, productMasterByJan, jicfsMaster, lookupCategory } from './dummyData.js'
 
 // 商品情報（共通）… 添付画像レイアウト準拠 + 商品コード/JAN 参照ボタン
 export default function ProductInfo({ value, onChange, defaultOpen = false, bare = false }) {
@@ -22,17 +22,45 @@ export default function ProductInfo({ value, onChange, defaultOpen = false, bare
   }
 
   // JAN参照 → 商品マスタ or JICFS
+  // JAN参照 → 商品マスタ or JICFS
+  const refByJan = () => {
+    const jan = (v.janCode || '').trim()
+    if (!jan) { setMsg({ t: 'warn', m: 'JANコードを入力してください' }); return }
+    if (productMasterByJan[jan]) {
+      const p = productMaster[productMasterByJan[jan]]
+      onChange({ ...v, ...p })
+      setMsg({ t: 'ok', m: `商品マスタから連携しました（JAN:${jan} / ${p.productName}）` })
+      return
+    }
+    if (jicfsMaster[jan]) {
+      const j = jicfsMaster[jan]
+      onChange({ ...v, janCode: jan, productName: v.productName || j.productName })
+      setMsg({ t: 'info', m: `商品マスタに無いため JICFS を参照しました（JAN:${jan}）` })
+      return
+    }
+    setMsg({ t: 'warn', m: `商品マスタ・JICFSに該当なし（JAN:${jan}）` })
+  }
+
+  // カテゴリ参照 → カテゴリマスタから入力
+  const refCategory = () => {
+    const res = lookupCategory(v.categoryCode || v.janCode || v.productCode)
+    onChange({ ...v, ...res })
+    setMsg({ t: 'ok', m: `カテゴリマスタから連携しました（${res.categoryCode} / ${res.categoryL}＞${res.categoryM}＞${res.categoryS}）` })
+  }
+
   const copyCode = () => { try { navigator.clipboard?.writeText(v.productCode || '') } catch (e) {} }
 
   const body = (
     <>
       {msg && <div className={'notice ' + msg.t}>{msg.m}</div>}
 
-      {/* JANコード（表示のみ・入力不可） */}
+      {/* JANコード（入力＋参照） */}
       <div className="frow">
         <Label text="JANコード" />
         <div className="fbody has-right">
-          <input className="inp inp-code" value={v.janCode} readOnly placeholder="表示のみ・入力不要" title="表示のみ（入力不要）" />
+          <input className="inp inp-code" value={v.janCode} onChange={(e) => set('janCode', e.target.value)} placeholder="例：4908013230864" />
+          <button type="button" className="btn-ref" onClick={refByJan}>参照</button>
+          <div className="fnote">商品マスタ→無ければJICFSから連携</div>
         </div>
       </div>
 
@@ -80,12 +108,15 @@ export default function ProductInfo({ value, onChange, defaultOpen = false, bare
         <label className="chk-inline"><input type="checkbox" checked={v.dryIce} onChange={(e) => set('dryIce', e.target.checked)} /><span>ON</span></label>
       </Row>
 
-      <div className="subhead">カテゴリ情報</div>
+      <div className="subhead">
+        カテゴリ情報
+        <button type="button" className="btn-ref" onClick={refCategory}>参照</button>
+      </div>
       <div className="grid2">
-        <Row label="カテゴリーコード"><input className="inp" value={v.categoryCode} readOnly placeholder="表示のみ・入力不要" title="表示のみ（入力不要）" /></Row>
-        <Row label="大カテゴリー"><input className="inp" value={v.categoryL} readOnly placeholder="表示のみ・入力不要" title="表示のみ（入力不要）" /></Row>
-        <Row label="中カテゴリー"><input className="inp" value={v.categoryM} readOnly placeholder="表示のみ・入力不要" title="表示のみ（入力不要）" /></Row>
-        <Row label="小カテゴリー"><input className="inp" value={v.categoryS} readOnly placeholder="表示のみ・入力不要" title="表示のみ（入力不要）" /></Row>
+        <Row label="カテゴリーコード"><input className="inp" value={v.categoryCode} readOnly placeholder="参照ボタンで入力（表示のみ）" title="参照で入力・表示のみ" /></Row>
+        <Row label="大カテゴリー"><input className="inp" value={v.categoryL} readOnly placeholder="参照ボタンで入力（表示のみ）" title="参照で入力・表示のみ" /></Row>
+        <Row label="中カテゴリー"><input className="inp" value={v.categoryM} readOnly placeholder="参照ボタンで入力（表示のみ）" title="参照で入力・表示のみ" /></Row>
+        <Row label="小カテゴリー"><input className="inp" value={v.categoryS} readOnly placeholder="参照ボタンで入力（表示のみ）" title="参照で入力・表示のみ" /></Row>
       </div>
     </>
   )
