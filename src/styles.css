@@ -349,3 +349,13 @@ textarea.inp { resize: vertical; }
 /* 一覧へ戻るバー */
 .detail-back { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
 .detail-back .detail-rec { color: var(--ink-soft); font-size: 12px; }
+
+/* 明細テーブル（詳細画面・表形式） */
+.ktable.meisai td, .ktable.meisai th { font-size: 11px; }
+.ktable.meisai .cell-inp { min-width: 110px; border: 1px solid transparent; background: transparent; padding: 3px 5px; font-size: 11px; font-family: inherit; border-radius: 3px; }
+.ktable.meisai .cell-inp:hover { border-color: var(--line); }
+.ktable.meisai .cell-inp:focus { outline: none; border-color: var(--brand); background: #fff; }
+.ktable.meisai .cell-inp.ro { background: #f0f2f4; color: var(--ink-soft); }
+.ktable.meisai .cell-ref { display: flex; gap: 3px; align-items: center; }
+.btn-ref.sm { padding: 2px 7px; font-size: 11px; }
+.ktable.meisai .td-ico { font-size: 11px; color: var(--ink-soft); }

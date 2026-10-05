@@ -95,6 +95,8 @@ export const orderDetailGroups = [
     title: '商品情報',
     fields: [
       { key: 'branchMaxNo',  label: '発注番号（枝番）Max No', type: 'text', auto: true },
+      { key: 'attrCode',     label: '商品属性情報コード', type: 'text', ref: '商品属性情報マスタ' },
+      { key: 'caseNo',       label: '案件番号',         type: 'text', reflink: 'case', ref: '案件管理.id' },
       { key: 'janCode',      label: 'JANコード',       type: 'text', reflink: 'jan', ref: 'JAN基本情報.JAN / 商品マスタ.JAN' },
       { key: 'caseJanCode',  label: 'ケースJANコード',  type: 'text' },
       { key: 'jicfsCode',    label: 'JICFS分類コード',  type: 'text' },
@@ -102,7 +104,6 @@ export const orderDetailGroups = [
       { key: 'jicfsKana',    label: 'JICFS分類名（カナ）', type: 'text' },
       { key: 'jicfsShort',   label: 'JICFS分類名（略称）', type: 'text' },
       { key: 'itfCode',      label: 'ITFコード',        type: 'text' },
-      { key: 'attrCode',     label: '商品属性情報コード', type: 'text', ref: '商品属性情報マスタ' },
       { key: 'productId',    label: '商品ID',           type: 'text', ref: '商品マスタ.id' },
       { key: 'productName',  label: '商品名',           type: 'text' },
       { key: 'medicineType', label: '医薬品',           type: 'select', options: ['対象外','要指導医薬品','第1類医薬品','第2類医薬品','第3類医薬品','医薬部外品','医薬品未分類'] },
@@ -123,8 +124,6 @@ export const orderDetailGroups = [
         key: 'saleType', label: '規格区分', type: 'select',
         options: ['通常','わけあり（B品）','わけあり（期限）','抽選・発送あり','抽選・発送なし','先着・発送あり','先着・発送なし','イベント・発送あり','イベント・発送なし','代品','企画1','企画2','企画3'],
       },
-      { key: 'dryIce',       label: 'ドライアイス', type: 'checkbox' },
-      { key: 'tempZone',     label: '温度帯',       type: 'select', options: ['常温','冷蔵','冷凍','チルド','超冷凍','その他'] },
       { key: 'bestBeforeType', label: '期限種別',   type: 'select', options: ['使用期限','賞味期限','消費期限'] },
       { key: 'bestBeforeDate', label: '消費/賞味/使用期限', type: 'date' },
       { key: 'bestBeforeDiffFlag', label: '賞味期限差異フラグ', type: 'checkbox' },
@@ -188,8 +187,6 @@ export function makeEmptyOrderDetail() {
     o[f.key] = f.type === 'checkbox' ? false : ''
   }
   o.branchMaxNo = '1'
-  // 案件番号（複数紐づけ可）
-  o.caseLinks = [makeEmptyCaseLink()]
   // 販売目標変更履歴（サブテーブル）
   o.targetHistory = []
   return o

@@ -141,9 +141,34 @@ export const specMaster = {
 // ---- 案件マスタ（発注明細の案件番号 参照用）------------------
 // key = 案件番号（数値連番）。参照で案件種別・参考価格を返す。
 export const caseMaster = {
-  '000045': { caseNo: '000045', caseTypeL: '在庫',   caseTypeM: '試算あり',   caseTypeS: 'メーカー滞留品', refPriceEx: '120' },
-  '000046': { caseNo: '000046', caseTypeL: '受発注', caseTypeM: '試算なし',   caseTypeS: 'NBプロパー',     refPriceEx: '1100' },
-  '000047': { caseNo: '000047', caseTypeL: '通常',   caseTypeM: '倉庫間移動', caseTypeS: 'TC',            refPriceEx: '450' },
+  '000045': { caseNo: '000045', caseTypeL: '在庫',   caseTypeM: '試算あり',   caseTypeS: 'メーカー滞留品', refPriceEx: '120',
+    productName: 'オーガニック緑茶 500ml', makerName: '伊藤園', medicineType: '対象外', alcoholType: '対象外',
+    orderCaseCount: '24', orderBallCount: '0', categoryL: '飲料', categoryM: '茶飲料', categoryS: '緑茶' },
+  '000046': { caseNo: '000046', caseTypeL: '受発注', caseTypeM: '試算なし',   caseTypeS: 'NBプロパー',     refPriceEx: '1100',
+    productName: 'しっとり保湿クリーム 50g', makerName: '小林製薬', medicineType: '医薬部外品', alcoholType: '対象外',
+    orderCaseCount: '12', orderBallCount: '2', categoryL: '日用品', categoryM: 'スキンケア', categoryS: 'クリーム' },
+  '000047': { caseNo: '000047', caseTypeL: '通常',   caseTypeM: '倉庫間移動', caseTypeS: 'TC',            refPriceEx: '450',
+    productName: '冷凍ミックスベリー 300g', makerName: '明治', medicineType: '対象外', alcoholType: '対象外',
+    orderCaseCount: '20', orderBallCount: '0', categoryL: '冷凍食品', categoryM: '冷凍果実', categoryS: 'ミックスベリー' },
+}
+
+// 案件番号参照（発注明細）→ 案件に紐づく商品情報を自動入力
+export function lookupCaseProduct(caseNo) {
+  const c = caseMaster[(caseNo || '').trim()]
+  if (!c) return { found: false, values: {} }
+  return { found: true, values: {
+    productName: c.productName, makerName: c.makerName, medicineType: c.medicineType, alcoholType: c.alcoholType,
+    orderCaseCount: c.orderCaseCount, orderBallCount: c.orderBallCount,
+    categoryL: c.categoryL, categoryM: c.categoryM, categoryS: c.categoryS,
+    refPriceEx: c.refPriceEx,
+  } }
+}
+
+// 企業名→企業コード（一覧でクライアント名入力時に自動）
+export const companyByName = {
+  '花王株式会社': '001', 'よつ葉乳業': '002', '△△食品': '003',
+  '路興商事株式会社': '6281', 'コンフェックス株式会社': '2576', '株式会社八天堂': '6318',
+  'DKSHジャパン株式会社': '4749', '小林製薬株式会社': '34', 'ラブリー・ペット商会': '3726', '株式会社ライフブリッジ': '5833',
 }
 
 export function lookupCaseByNo(caseNo) {

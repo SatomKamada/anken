@@ -10,16 +10,25 @@ const VIEW_OPTIONS = [
 ]
 const OUTPUT_OPTIONS = ['出力する書類', '発注書（通常）']
 
-// 列定義（locked=鍵／req=必須／type=編集UI）
+// 企業名→企業コード（クライアント名入力時に企業コード自動）
+const COMPANY_BY_NAME = {
+  '花王株式会社': '001', 'よつ葉乳業': '002', '△△食品': '003',
+  '路興商事株式会社': '6281', 'コンフェックス株式会社': '2576', '株式会社八天堂': '6318',
+  'DKSHジャパン株式会社': '4749', '小林製薬株式会社': '34', 'ラブリー・ペット商会': '3726', '株式会社ライフブリッジ': '5833',
+  '株式会社クレイツ': '5679', '株式会社ミライスビー': '5583', 'サンコー株式会社': '5380', '株式会社QUADS': '4892',
+}
+const COMPANY_NAMES = Object.keys(COMPANY_BY_NAME)
+
+// 列定義（詳細の名称に合わせる／locked=鍵／req=必須／type=編集UI）
 const COLS = [
   { key: 'recordNo', label: 'レコード番号', locked: true },
-  { key: 'orderNo', label: '発注番号', locked: true },
+  { key: 'orderNo', label: '発注ヘッダー番号', locked: true },
   { key: 'promo', label: 'プロモーションコード' },
   { key: 'status', label: '発注ステータス', req: true, type: 'select', options: ['入力中', '登録済', '申請中', '承認済', '発注済', '一部入荷', '全部入荷', '差戻', 'NG'] },
   { key: 'assignee', label: '担当者', locked: true },
   { key: 'createdAt', label: '作成日時', locked: true },
-  { key: 'companyId', label: 'Company ID', locked: true, req: true },
-  { key: 'client', label: 'クライアント名', locked: true, req: true },
+  { key: 'client', label: '企業名', type: 'companyName', req: true },
+  { key: 'companyId', label: '企業コード', locked: true, req: true },
   { key: 'caseTypeL', label: '案件種別（大）', type: 'select', options: ['在庫', '受発注', '通常', 'その他'] },
   { key: 'caseTypeM', label: '案件種別（中）', type: 'select', options: ['試算あり', '試算なし', '倉庫間移動', 'その他'] },
   { key: 'caseTypeS', label: '案件種別（小）', type: 'select', options: ['メーカー滞留品', 'NBプロパー', 'TC', 'AAS', 'キャンペーン・抽選', '代品・過受注', '代品'] },
@@ -29,9 +38,9 @@ const COLS = [
   { key: 'payDue', label: '支払期日', type: 'date' },
   { key: 'totalCase', label: 'ケース数合計', locked: true },
   { key: 'totalPiece', label: 'ピース数合計', locked: true },
-  { key: 'amountIn', label: '発注金額合計（税込）', locked: true },
-  { key: 'tax8', label: '消費税（8%）', locked: true },
-  { key: 'tax10', label: '消費税（10%）', locked: true },
+  { key: 'amountIn', label: '発注金額合計（税込み）', locked: true },
+  { key: 'tax8', label: '消費税（8%）' },
+  { key: 'tax10', label: '消費税（10%）' },
   { key: 'amountEx', label: '発注金額合計（税抜）', locked: true },
 ]
 
@@ -49,8 +58,9 @@ const SAMPLE = [
   R('48923', '00048923', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '5833', '株式会社ライフブリッジ', '受発注', '試算あり', 'TC', '一斉発注', '2026-11-30', '0', '4', '¥3,036', '¥0', '¥276', '¥2,760'),
 ]
 
-const ITEM_COLS = ['発注番号（枝番）', 'メーカー名', '商品名', '温度帯', '分類', '倉庫', '配送区分', '賞味期限', '納品日', '販売目標', 'JANコード', 'ケース入数', 'ボール入数', 'ケース数', 'ピース数', '参考価格（税抜）', '単価（税抜）', '税率', '発注金額（税抜）', '商品ID', '商品カテゴリー（大）', '商品カテゴリー（中）', '商品カテゴリー（小）']
-const ITEM_SAMPLE = [['1', 'DKSHジャパ…', 'フェル…', '常温', '', '佐川（花見川）', '通常', '2026-11-13', '2026-10-09', '2026-10-14', '', '12', '0', '50', '600', '¥0.00', '¥600.00', '8', '¥360,000.00', '', '', '', '']]
+// 発注商品テーブル（詳細の名称に合わせる／温度帯・配送区分は削除／商品属性情報コード・案件番号を枝番の隣に追加）
+const ITEM_COLS = ['発注明細番号（枝番）', '商品属性情報コード', '案件番号', 'メーカー名', '商品名', '倉庫', '消費/賞味/使用期限', '納品日', '販売目標', 'JANコード', 'メーカーID', 'ITFコード', '発注ケース入数', '発注ボール入数', '発注ケース数', '発注総ピース数', '参考価格（税抜）', '単価（税抜）', '税率', '発注金額（税抜）', '商品ID', '商品カテゴリー（大）', '商品カテゴリー（中）', '商品カテゴリー（小）']
+const ITEM_SAMPLE = [['1', '', '000045', 'DKSHジャパ…', 'フェル…', '佐川（花見川）', '2026-11-13', '2026-10-09', '2026-10-14', '', '', '', '12', '0', '50', '600', '¥0.00', '¥600.00', '8', '¥360,000.00', '', '', '', '']]
 const RELATED = ['発注商品テーブル', '案件テーブル', '販売目標変更履歴テーブル']
 
 const IcoChart = () => (<svg viewBox="0 0 24 24" width="16" height="16"><polyline points="3,16 9,10 13,14 21,6" fill="none" stroke="currentColor" strokeWidth="2" /></svg>)
@@ -117,14 +127,21 @@ export default function OrderList({ onOpen }) {
                   <td key={c.key} className={c.locked ? 'locked-cell' : 'edit-cell'}>
                     {c.locked
                       ? <span>{row[c.key]}</span>
-                      : c.type === 'select'
+                      : c.type === 'companyName'
                         ? (
-                          <select className="cell-inp" value={row[c.key] || ''} onChange={(e) => setCell(ri, c.key, e.target.value)}>
-                            <option value=""></option>
-                            {c.options.map((o) => <option key={o}>{o}</option>)}
-                          </select>
+                          <>
+                            <input className="cell-inp" list="companyNameList" value={row[c.key] || ''}
+                              onChange={(e) => setRows(rows.map((r, i) => i === ri ? { ...r, client: e.target.value, companyId: COMPANY_BY_NAME[e.target.value] || r.companyId } : r))} />
+                          </>
                         )
-                        : <input className="cell-inp" type={c.type === 'date' ? 'date' : 'text'} value={row[c.key] || ''} onChange={(e) => setCell(ri, c.key, e.target.value)} />}
+                        : c.type === 'select'
+                          ? (
+                            <select className="cell-inp" value={row[c.key] || ''} onChange={(e) => setCell(ri, c.key, e.target.value)}>
+                              <option value=""></option>
+                              {c.options.map((o) => <option key={o}>{o}</option>)}
+                            </select>
+                          )
+                          : <input className="cell-inp" type={c.type === 'date' ? 'date' : 'text'} value={row[c.key] || ''} onChange={(e) => setCell(ri, c.key, e.target.value)} />}
                   </td>
                 ))}
               </tr>
@@ -153,7 +170,11 @@ export default function OrderList({ onOpen }) {
         {rel === 2 && <div className="empty small">販売目標変更履歴テーブル（サンプル省略）</div>}
       </div>
 
-      <div className="fnote" style={{ marginTop: 8 }}>※ 行頭のアイコンを押すと詳細画面に遷移します。鍵（🔒）以外のセルは編集できます。</div>
+      <datalist id="companyNameList">
+        {COMPANY_NAMES.map((o) => <option key={o} value={o} />)}
+      </datalist>
+
+      <div className="fnote" style={{ marginTop: 8 }}>※ 行頭のアイコンを押すと詳細画面に遷移します。鍵（🔒）以外のセルは編集できます。企業名を入れると企業コードが自動入力されます。</div>
     </div>
   )
 }
