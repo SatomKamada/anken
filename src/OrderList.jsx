@@ -56,6 +56,7 @@ const ITEM_COLS = [
   { key: 'stockLinkFlag', label: '在庫自動紐づけフラグ', type: 'select', options: ['ON', 'OFF'] },
   { key: 'attrCode', label: '商品属性情報コード', req: true },
   { key: 'warehouse', label: '倉庫', type: 'select', options: ['佐川（花見川）', '日通倉庫', '自社倉庫'] },
+  { key: 'bestBeforeType', label: '期限種別', type: 'select', options: ['賞味期限', '消費期限', '製造日', 'なし'] },
   { key: 'bestBeforeDate', label: '消費/賞味/使用期限', type: 'date' },
   { key: 'deliveryDate', label: '納品日', type: 'date' },
   { key: 'salesTarget', label: '販売目標' },
@@ -69,6 +70,8 @@ const ITEM_COLS = [
   { key: 'taxRate', label: '税率', type: 'select', options: ['8%', '10%'] },
   { key: 'amountEx', label: '発注金額（税抜）', type: 'number' },
 ]
+
+const IS_NEW_ITEM = (k) => ['caseNo', 'saleType', 'stockLinkFlag', 'attrCode', 'bestBeforeType'].includes(k);
 
 const mkItem = (branchNo, over = {}) => ({ ...makeEmptyOrderDetail(), branchNo, ...over })
 const H = (recordNo, orderNo, promo, status, assignee, createdAt, companyId, client, caseL, caseM, caseS, cat, items) =>
@@ -199,12 +202,12 @@ export default function OrderList({ onOpen }) {
         {rel === 0 && (
           <div className="ktable-scroll">
             <table className="ktable">
-              <thead><tr>{ITEM_COLS.map((c) => <th key={c.key}>{c.label}{c.req && <span className="req-star">＊</span>}</th>)}</tr></thead>
+              <thead><tr>{ITEM_COLS.map((c) => <th key={c.key} style={IS_NEW_ITEM(c.key) ? { backgroundColor: '#fff4e5' } : {}}>{c.label}{c.req && <span className="req-star">＊</span>}</th>)}</tr></thead>
               <tbody>
                 {items.map((row, ii) => (
                   <tr key={ii}>
                     {ITEM_COLS.map((c) => (
-                      <td key={c.key} className="edit-cell">
+                      <td key={c.key} className="edit-cell" style={IS_NEW_ITEM(c.key) ? { backgroundColor: '#fff4e5' } : {}}>
                         {c.caseRef
                           ? <input className="cell-inp" value={row.caseNo || ''} placeholder="コード入力→Enter" onChange={(e) => setItemCell(ii, 'caseNo', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); confirmCaseNo(ii) } }} />
                           : c.type === 'select'

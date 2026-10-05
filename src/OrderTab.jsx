@@ -3,7 +3,7 @@ import Accordion from './Accordion.jsx'
 import KGroup from './KGroup.jsx'
 import OrderList from './OrderList.jsx'
 import Field from './Field.jsx'
-import { RecordHeader, branchCode } from './RecordHeader.jsx'
+import { branchCode } from './RecordHeader.jsx'
 import {
   orderHeaderGroups, makeEmptyOrderHeader,
   orderDetailGroups, makeEmptyOrderDetail,
@@ -19,17 +19,22 @@ const COMPANY_BY_NAME = {
 const COMPANY_NAMES = Object.keys(COMPANY_BY_NAME)
 
 // 明細の全項目（表の列）。発注番号（枝番）Max No は枝番で表現するため除外。
-const RAW_DETAIL_COLS = orderDetailGroups.flatMap((g) => g.fields).filter((f) => f.key !== 'branchMaxNo')
+const RAW_DETAIL_COLS = orderDetailGroups.flatMap((g) => g.fields).filter((f) => !['branchMaxNo', 'saleType', 'stockLinkFlag', 'bestBeforeType'].includes(f.key))
 const DETAIL_COLS = []
 for (const f of RAW_DETAIL_COLS) {
   if (f.key === 'attrCode') {
     DETAIL_COLS.push({ key: 'saleType', label: '規格区分', type: 'select', options: ['通常','わけあり（B品）','わけあり（期限）','抽選・発送あり','抽選・発送なし','先着・発送あり','先着・発送なし','イベント・発送あり','イベント・発送なし','代品','初試し','企画1','企画2','企画3'] })
     DETAIL_COLS.push({ key: 'stockLinkFlag', label: '在庫自動紐づけフラグ', type: 'select', options: ['ON', 'OFF'] })
     DETAIL_COLS.push({ ...f, required: true })
+  } else if (f.key === 'bestBeforeDate') {
+    DETAIL_COLS.push({ key: 'bestBeforeType', label: '期限種別', type: 'select', options: ['賞味期限', '消費期限', '製造日', 'なし'] })
+    DETAIL_COLS.push(f)
   } else {
     DETAIL_COLS.push(f)
   }
 }
+
+const IS_NEW_ITEM = (k) => ['caseNo', 'saleType', 'stockLinkFlag', 'attrCode', 'bestBeforeType'].includes(k);
 
 const HEADER_NO = '000123'
 
@@ -117,10 +122,8 @@ export default function OrderTab() {
     <div className="tab-panel">
       <div className="detail-back">
         <button type="button" className="btn-mini" onClick={() => setView('list')}>← 一覧に戻る</button>
-        {selected && <span className="detail-rec">レコード {selected.recordNo} ／ {selected.client}</span>}
+        {selected && <span className="detail-rec">発注ヘッダー番号 {selected.orderNo || selected.recordNo} ／ {selected.client}</span>}
       </div>
-      {/* 最上部：ヘッダー番号（1件・自動採番） */}
-      <RecordHeader badge="発注ヘッダー情報" label="発注ヘッダー番号" no={selected?.orderNo || header.orderNo || HEADER_NO} />
 
       {/* ① 基本情報（分類はサブ見出しで統合／最上位分類はラベル非表示） */}
       <Accordion title="発注ヘッダー情報" defaultOpen={false}>
@@ -181,7 +184,7 @@ export default function OrderTab() {
                   <th className="th-ico"></th>
                   <th>発注明細番号（枝番）</th>
                   {DETAIL_COLS.map((f) => (
-                    <th key={f.key}>{f.auto && <span className="lock">🔒</span>}{f.label}{(f.required || f.key === 'attrCode') && <span className="req-star">＊</span>}</th>
+                    <th key={f.key} style={IS_NEW_ITEM(f.key) ? { backgroundColor: '#fff4e5' } : {}}>{f.auto && <span className="lock">🔒</span>}{f.label}{(f.required || f.key === 'attrCode') && <span className="req-star">＊</span>}</th>
                   ))}
                 </tr>
               </thead>
@@ -191,7 +194,7 @@ export default function OrderTab() {
                     <td className="td-ico">#{i + 1}</td>
                     <td className="edit-cell tc"><input className="cell-inp" style={{ minWidth: 70 }} value={row.branchNo ?? ''} onChange={(e) => setRowField(i, 'branchNo', e.target.value)} /></td>
                     {DETAIL_COLS.map((f) => (
-                      <td key={f.key} className={f.auto ? 'locked-cell' : 'edit-cell'}>{cell(f, row, i)}</td>
+                      <td key={f.key} className={f.auto ? 'locked-cell' : 'edit-cell'} style={IS_NEW_ITEM(f.key) ? { backgroundColor: '#fff4e5' } : {}}>{cell(f, row, i)}</td>
                     ))}
                   </tr>
                 ))}
