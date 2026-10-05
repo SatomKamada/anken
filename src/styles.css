@@ -364,3 +364,10 @@ textarea.inp { resize: vertical; }
 .kact-btn.primary { background: var(--brand); color: #fff; border-color: var(--brand-d); font-weight: 700; }
 .kact-btn.primary:hover { background: var(--brand-d); }
 .kactionbar.sub { border-bottom: none; padding: 4px 0; margin-bottom: 4px; }
+
+/* 一覧の行選択・削除ボタン */
+.ktable tr.row-sel > td { background: #e8f1fb !important; }
+.ktable tbody tr { cursor: pointer; }
+.kact-btn.danger { background: #fff; color: var(--req); border-color: #e0b4b0; font-weight: 700; }
+.kact-btn.danger:hover { background: #fdeceb; }
+.krel-note { color: var(--ink-soft); font-size: 12px; margin-left: 10px; }

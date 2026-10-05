@@ -29,17 +29,17 @@ export default function OrderTab() {
   const nextBranch = () => String(rows.length + 1).padStart(3, '0')
   // 追加：空行を追加
   const addEmpty = () => setRows([...rows, { ...makeEmptyOrderDetail(), branchNo: nextBranch() }])
-  // 複製：一番上の行を複製して追加
+  // 複製：一番上の行を複製し、一番上に追加
   const duplicateTop = () => {
     const src = rows[0]
     const clone = src ? structuredClone(src) : makeEmptyOrderDetail()
     clone.branchNo = nextBranch()
-    setRows([...rows, clone])
+    setRows([clone, ...rows])
   }
   const dupRow = (i) => {
     const clone = structuredClone(rows[i])
     clone.branchNo = nextBranch()
-    setRows([...rows.slice(0, i + 1), clone, ...rows.slice(i + 1)])
+    setRows([clone, ...rows])
   }
   const delRow = (i) => setRows(rows.filter((_, idx) => idx !== i))
 
@@ -75,14 +75,12 @@ export default function OrderTab() {
   const cell = (f, row, i) => {
     if (f.auto) return <input className="cell-inp ro" readOnly value={row[f.key] ?? ''} title="自動" />
     if (f.type === 'checkbox') return <input type="checkbox" checked={!!row[f.key]} onChange={(e) => setRowField(i, f.key, e.target.checked)} />
-    // 案件番号：入力したら自動入力（＋参照ボタンでも可）
+    // 案件番号：コード入力→Enterで確定・自動入力（参照ボタン不要）
     if (f.key === 'caseNo') {
       return (
-        <div className="cell-ref">
-          <input className="cell-inp" value={row.caseNo ?? ''} placeholder="例：000045"
-            onChange={(e) => onCaseNoChange(i, e.target.value)} />
-          <button type="button" className="btn-ref sm" onClick={() => refDetail(i, 'case')}>参照</button>
-        </div>
+        <input className="cell-inp" value={row.caseNo ?? ''} placeholder="コード入力→Enter"
+          onChange={(e) => setRowField(i, 'caseNo', e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); const res = lookupCaseProduct(rows[i].caseNo); if (res.found) updateRow(i, { ...rows[i], ...res.values }) } }} />
       )
     }
     let inp
@@ -101,10 +99,16 @@ export default function OrderTab() {
   }
 
   // 発注タブを開くと最初は一覧（検索結果の表）を表示
+  const openDetail = (rec) => {
+    setSelected(rec)
+    const items = (rec.items && rec.items.length) ? rec.items.map((x) => structuredClone(x)) : [{ ...makeEmptyOrderDetail(), branchNo: '001' }]
+    setRows(items)
+    setView('detail')
+  }
   if (view === 'list') {
     return (
       <div className="tab-panel">
-        <OrderList onOpen={(rec) => { setSelected(rec); setView('detail') }} />
+        <OrderList onOpen={openDetail} />
       </div>
     )
   }

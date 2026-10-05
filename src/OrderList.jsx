@@ -1,17 +1,13 @@
 import React, { useState } from 'react'
+import { makeEmptyOrderDetail } from './orderFields.js'
 import { lookupCaseProduct } from './dummyData.js'
 
-// 発注管理：一覧（検索結果の表）— kintone風。行頭アイコンで詳細へ。
-// props: onOpen(record)
+// 発注管理：一覧（検索結果の表）— kintone風。
+// props: onOpen(record) … record は { ...header, items:[明細...] }
 
-const VIEW_OPTIONS = [
-  '請求書消込', '営業', 'オペ', 'ロジ', '発注情報出力', '入荷実績',
-  '営業アシスタント', '開発確認用', '仕入実績管理用', '販売目標出力',
-  'JICFS作業用', '仕入型発注情報抽出用', '（すべて）',
-]
+const VIEW_OPTIONS = ['請求書消込', '営業', 'オペ', 'ロジ', '発注情報出力', '入荷実績', '営業アシスタント', '開発確認用', '仕入実績管理用', '販売目標出力', 'JICFS作業用', '仕入型発注情報抽出用', '（すべて）']
 const OUTPUT_OPTIONS = ['出力する書類', '発注書（通常）']
 
-// 企業名→企業コード（クライアント名入力時に企業コード自動）
 const COMPANY_BY_NAME = {
   '花王株式会社': '001', 'よつ葉乳業': '002', '△△食品': '003',
   '路興商事株式会社': '6281', 'コンフェックス株式会社': '2576', '株式会社八天堂': '6318',
@@ -20,7 +16,6 @@ const COMPANY_BY_NAME = {
 }
 const COMPANY_NAMES = Object.keys(COMPANY_BY_NAME)
 
-// ヘッダー一覧 列定義
 const COLS = [
   { key: 'recordNo', label: 'レコード番号', locked: true },
   { key: 'orderNo', label: '発注ヘッダー番号', locked: true },
@@ -45,29 +40,15 @@ const COLS = [
   { key: 'amountEx', label: '発注金額合計（税抜）', locked: true },
 ]
 
-const H = (recordNo, orderNo, promo, status, assignee, createdAt, companyId, client, caseL, caseM, caseS, cat) =>
-  ({ recordNo, orderNo, promo, status, assignee, createdAt, companyId, client, caseTypeL: caseL, caseTypeM: caseM, caseTypeS: caseS, orderCat: cat, prodType: 'その他', payTerms: '末締め翌月末払い', payDue: '2026-11-30', totalCase: '0', totalPiece: '0', amountIn: '¥0', tax8: '¥0', tax10: '¥0', amountEx: '¥0' })
-
-const HEADER_SAMPLE = [
-  H('48930', '00048930', '', '入力中', '伊波 篤', '2026-10-05 12:45', '6281', '路興商事株式会社', '在庫', '試算あり', 'メーカー滞留品', ''),
-  H('48929', '00048929', '', '入力中', '伊波 篤', '2026-10-05 12:38', '2576', 'コンフェックス株式会社', '在庫', '試算あり', 'メーカー滞留品', ''),
-  H('48928', '00048928', '', '発注済', '伊波 篤', '2026-10-05 12:32', '6318', '株式会社八天堂', '受発注', '試算あり', 'TC', '一斉発注'),
-  H('48927', '00048927', '', '入力中', '小宮 佳介', '2026-10-05 11:36', '4749', 'DKSHジャパン株式会社', '在庫', '試算あり', 'メーカー滞留品', ''),
-  H('48926', '00048926', 'Y393', '入力中', '石津 衛一', '2026-10-05 10:57', '34', '小林製薬株式会社', '通常', '', 'メーカー滞留品', ''),
-  H('48925', '00048925', 'Y393', '発注済', '石津 衛一', '2026-10-05 10:55', '34', '小林製薬株式会社', '通常', '', 'メーカー滞留品', ''),
-  H('48924', '00048924', '', '発注済', '谷口 祐磨', '2026-10-05 9:26', '3726', 'ラブリー・ペット商会', '受発注', '試算あり', 'TC', '一斉発注'),
-  H('48923', '00048923', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '5833', '株式会社ライフブリッジ', '受発注', '試算あり', 'TC', '一斉発注'),
-]
-
-// 発注商品テーブル（関連シート）列定義
+// 発注商品テーブル（表示列・キーは orderFields の明細に一致）
 const ITEM_COLS = [
   { key: 'branchNo', label: '発注明細番号（枝番）' },
   { key: 'attrCode', label: '商品属性情報コード' },
-  { key: 'caseNo', label: '案件番号', ref: 'case' },
+  { key: 'caseNo', label: '案件番号', caseRef: true },
   { key: 'makerName', label: 'メーカー名' },
   { key: 'productName', label: '商品名' },
   { key: 'warehouse', label: '倉庫', type: 'select', options: ['佐川（花見川）', '日通倉庫', '自社倉庫'] },
-  { key: 'bestBefore', label: '消費/賞味/使用期限', type: 'date' },
+  { key: 'bestBeforeDate', label: '消費/賞味/使用期限', type: 'date' },
   { key: 'deliveryDate', label: '納品日', type: 'date' },
   { key: 'salesTarget', label: '販売目標' },
   { key: 'janCode', label: 'JANコード' },
@@ -86,8 +67,24 @@ const ITEM_COLS = [
   { key: 'categoryM', label: '商品カテゴリー（中）' },
   { key: 'categoryS', label: '商品カテゴリー（小）' },
 ]
-const makeItem = (branchNo) => { const o = {}; ITEM_COLS.forEach((c) => (o[c.key] = '')); o.branchNo = branchNo; return o }
-const ITEM_SAMPLE = [{ ...makeItem('1'), caseNo: '000045', makerName: 'DKSHジャパン…', productName: 'フェル…', warehouse: '佐川（花見川）', bestBefore: '2026-11-13', deliveryDate: '2026-10-09', salesTarget: '2026-10-14', orderCaseCount: '12', orderBallCount: '0', orderCaseQty: '50', totalPieceQty: '600', unitPriceEx: '600', taxRate: '8%', amountEx: '360000' }]
+
+const mkItem = (branchNo, over = {}) => ({ ...makeEmptyOrderDetail(), branchNo, ...over })
+const H = (recordNo, orderNo, promo, status, assignee, createdAt, companyId, client, caseL, caseM, caseS, cat, items) =>
+  ({ recordNo, orderNo, promo, status, assignee, createdAt, companyId, client, caseTypeL: caseL, caseTypeM: caseM, caseTypeS: caseS, orderCat: cat, prodType: 'その他', payTerms: '末締め翌月末払い', payDue: '2026-11-30', totalCase: '0', totalPiece: '0', amountIn: '¥0', tax8: '¥0', tax10: '¥0', amountEx: '¥0', items })
+
+const INIT = [
+  H('48930', '00048930', '', '入力中', '伊波 篤', '2026-10-05 12:45', '6281', '路興商事株式会社', '在庫', '試算あり', 'メーカー滞留品', '', [mkItem('1', { caseNo: '000047', makerName: '明治', productName: '冷凍ミックスベリー 300g', warehouse: '自社倉庫', orderCaseCount: '20', categoryL: '冷凍食品', categoryM: '冷凍果実', categoryS: 'ミックスベリー' })]),
+  H('48929', '00048929', '', '入力中', '伊波 篤', '2026-10-05 12:38', '2576', 'コンフェックス株式会社', '在庫', '試算あり', 'メーカー滞留品', '', [mkItem('1')]),
+  H('48928', '00048928', '', '発注済', '伊波 篤', '2026-10-05 12:32', '6318', '株式会社八天堂', '受発注', '試算あり', 'TC', '一斉発注', [mkItem('1')]),
+  H('48927', '00048927', '', '入力中', '小宮 佳介', '2026-10-05 11:36', '4749', 'DKSHジャパン株式会社', '在庫', '試算あり', 'メーカー滞留品', '', [
+    mkItem('1', { caseNo: '000045', makerName: '伊藤園', productName: 'オーガニック緑茶 500ml', warehouse: '佐川（花見川）', deliveryDate: '2026-10-09', orderCaseCount: '24', orderCaseQty: '50', totalPieceQty: '600', unitPriceEx: '600', taxRate: '8%', amountEx: '360000', categoryL: '飲料', categoryM: '茶飲料', categoryS: '緑茶' }),
+    mkItem('2', { caseNo: '000046', makerName: '小林製薬', productName: 'しっとり保湿クリーム 50g', warehouse: '佐川（花見川）', orderCaseCount: '12', orderBallCount: '2', categoryL: '日用品', categoryM: 'スキンケア', categoryS: 'クリーム' }),
+  ]),
+  H('48926', '00048926', 'Y393', '入力中', '石津 衛一', '2026-10-05 10:57', '34', '小林製薬株式会社', '通常', '', 'メーカー滞留品', '', [mkItem('1')]),
+  H('48925', '00048925', 'Y393', '発注済', '石津 衛一', '2026-10-05 10:55', '34', '小林製薬株式会社', '通常', '', 'メーカー滞留品', '', [mkItem('1')]),
+  H('48924', '00048924', '', '発注済', '谷口 祐磨', '2026-10-05 9:26', '3726', 'ラブリー・ペット商会', '受発注', '試算あり', 'TC', '一斉発注', [mkItem('1')]),
+  H('48923', '00048923', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '5833', '株式会社ライフブリッジ', '受発注', '試算あり', 'TC', '一斉発注', [mkItem('1')]),
+]
 
 const RELATED = ['発注商品テーブル', '案件テーブル', '販売目標変更履歴テーブル']
 
@@ -97,93 +94,65 @@ const IcoBars = () => (<svg viewBox="0 0 24 24" width="16" height="16"><rect x="
 const IcoDetail = () => (<svg viewBox="0 0 24 24" width="15" height="15" style={{ verticalAlign: 'middle' }}><rect x="5" y="3" width="14" height="18" rx="2" fill="none" stroke="currentColor" strokeWidth="1.6" /><line x1="8" y1="8" x2="16" y2="8" stroke="currentColor" strokeWidth="1.4" /><line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" strokeWidth="1.4" /><line x1="8" y1="16" x2="13" y2="16" stroke="currentColor" strokeWidth="1.4" /></svg>)
 
 export default function OrderList({ onOpen }) {
-  const [rows, setRows] = useState(HEADER_SAMPLE)
-  const [items, setItems] = useState(ITEM_SAMPLE)
+  const [rows, setRows] = useState(INIT)
+  const [sel, setSel] = useState(0)                 // 選択中のヘッダー行
   const [viewSel, setViewSel] = useState('入荷実績')
   const [outputSel, setOutputSel] = useState('発注書（通常）')
   const [rel, setRel] = useState(0)
 
-  // --- ヘッダー一覧 操作 ---
   const setCell = (ri, key, val) => setRows(rows.map((r, i) => (i === ri ? { ...r, [key]: val } : r)))
   const nextRecord = () => String(Math.max(0, ...rows.map((r) => Number(r.recordNo) || 0)) + 1)
-  const addHeader = () => {
-    const n = nextRecord()
-    setRows([...rows, H(n, String(n).padStart(8, '0'), '', '入力中', '', '', '', '', '', '', '', '')])
-  }
-  const dupHeaderTop = () => {
-    const src = rows[0]
-    if (!src) { addHeader(); return }
-    const n = nextRecord()
-    setRows([...rows, { ...structuredClone(src), recordNo: n, orderNo: String(n).padStart(8, '0') }])
-  }
 
-  // --- 発注商品テーブル 操作 ---
-  const setItemCell = (ri, key, val) => setItems(items.map((r, i) => (i === ri ? { ...r, [key]: val } : r)))
-  const onItemCaseNo = (ri, val) => {
-    const res = lookupCaseProduct(val)
-    setItems(items.map((r, i) => (i === ri ? { ...r, caseNo: val, ...(res.found ? res.values : {}) } : r)))
-  }
-  const nextBranch = () => String(items.length + 1)
-  const addItem = () => setItems([...items, makeItem(nextBranch())])
-  const dupItemTop = () => {
-    const src = items[0]
-    const clone = src ? structuredClone(src) : makeItem(nextBranch())
-    clone.branchNo = nextBranch()
-    setItems([...items, clone])
-  }
-  const delItem = (ri) => setItems(items.filter((_, i) => i !== ri))
+  // 追加：空レコード／複製：選択行を複製して一番上／削除：選択行
+  const addHeader = () => { const n = nextRecord(); setRows([H(n, String(n).padStart(8, '0'), '', '入力中', '', '', '', '', '', '', '', '', [mkItem('1')]), ...rows]); setSel(0) }
+  const dupHeader = () => { const src = rows[sel]; if (!src) return; const n = nextRecord(); setRows([{ ...structuredClone(src), recordNo: n, orderNo: String(n).padStart(8, '0') }, ...rows]); setSel(0) }
+  const delHeader = () => { if (rows.length === 0) return; const next = rows.filter((_, i) => i !== sel); setRows(next); setSel(Math.max(0, Math.min(sel, next.length - 1))) }
 
-  const ACTIONS = ['全画面表示', '元に戻す', 'やり直し', '再読み込み', '保存', '削除', '検索', 'フィルタ', 'エクスポート']
+  // 発注商品テーブル（選択レコードの明細）編集
+  const items = rows[sel]?.items || []
+  const setItem = (updater) => setRows(rows.map((r, i) => (i === sel ? { ...r, items: updater(r.items) } : r)))
+  const setItemCell = (ii, key, val) => setItem((list) => list.map((r, i) => (i === ii ? { ...r, [key]: val } : r)))
+  const confirmCaseNo = (ii) => setItem((list) => list.map((r, i) => {
+    if (i !== ii) return r
+    const res = lookupCaseProduct(r.caseNo)
+    return res.found ? { ...r, ...res.values } : r
+  }))
+
+  const ACTIONS = ['全画面表示', '元に戻す', 'やり直し', '再読み込み', '保存', '検索', 'フィルタ', 'エクスポート']
 
   return (
     <div className="klist-wrap">
-      {/* 上部アプリバー */}
       <div className="kappbar">
-        <select className="kview-select" value={viewSel} onChange={(e) => setViewSel(e.target.value)}>
-          {VIEW_OPTIONS.map((o) => <option key={o}>{o}</option>)}
-        </select>
+        <select className="kview-select" value={viewSel} onChange={(e) => setViewSel(e.target.value)}>{VIEW_OPTIONS.map((o) => <option key={o}>{o}</option>)}</select>
         <button type="button" className="kicon-btn chart" title="グラフ"><IcoChart /><span className="kcaret">▾</span></button>
         <button type="button" className="kicon-btn" title="絞り込み"><IcoFilter /></button>
         <button type="button" className="kicon-btn" title="分析"><IcoBars /></button>
-        <select className="koutput-select" value={outputSel} onChange={(e) => setOutputSel(e.target.value)}>
-          {OUTPUT_OPTIONS.map((o) => <option key={o}>{o}</option>)}
-        </select>
+        <select className="koutput-select" value={outputSel} onChange={(e) => setOutputSel(e.target.value)}>{OUTPUT_OPTIONS.map((o) => <option key={o}>{o}</option>)}</select>
         <button type="button" className="kbtn-out">出力</button>
         <span className="kcount">1 - {rows.length}（{rows.length}件中）</span>
       </div>
 
-      {/* アクションバー：追加＝空行、複製＝一番上の行を複製 */}
+      {/* 共通アクションバー（ヘッダー行・発注商品行の双方で使用） */}
       <div className="kactionbar">
         <button type="button" className="kact-btn primary" onClick={addHeader}>＋追加</button>
-        <button type="button" className="kact-btn primary" onClick={dupHeaderTop}>複製</button>
+        <button type="button" className="kact-btn primary" onClick={dupHeader}>複製</button>
+        <button type="button" className="kact-btn danger" onClick={delHeader}>削除</button>
         {ACTIONS.map((a) => <button key={a} type="button" className="kact-btn">{a}</button>)}
       </div>
 
-      {/* ヘッダー一覧（鍵以外は編集可） */}
+      {/* ヘッダー一覧（行クリックで選択→下の発注商品テーブルが切替） */}
       <div className="ktable-scroll">
         <table className="ktable">
-          <thead>
-            <tr>
-              <th className="th-ico"></th>
-              {COLS.map((c) => (
-                <th key={c.key}>{c.locked && <span className="lock">🔒</span>}{c.label}{c.req && <span className="req-star">＊</span>}</th>
-              ))}
-            </tr>
-          </thead>
+          <thead><tr><th className="th-ico"></th>{COLS.map((c) => <th key={c.key}>{c.locked && <span className="lock">🔒</span>}{c.label}{c.req && <span className="req-star">＊</span>}</th>)}</tr></thead>
           <tbody>
             {rows.map((row, ri) => (
-              <tr key={ri}>
-                <td className="td-ico">
-                  <button type="button" className="detail-ico" title="レコードの詳細を表示する"
-                    onClick={() => onOpen({ recordNo: row.recordNo, orderNo: row.orderNo, client: row.client })}><IcoDetail /></button>
-                </td>
+              <tr key={ri} className={ri === sel ? 'row-sel' : ''} onClick={() => setSel(ri)}>
+                <td className="td-ico"><button type="button" className="detail-ico" title="レコードの詳細を表示する" onClick={(e) => { e.stopPropagation(); onOpen({ ...row }) }}><IcoDetail /></button></td>
                 {COLS.map((c) => (
                   <td key={c.key} className={c.locked ? 'locked-cell' : 'edit-cell'}>
-                    {c.locked
-                      ? <span>{row[c.key]}</span>
+                    {c.locked ? <span>{row[c.key]}</span>
                       : c.type === 'companyName'
-                        ? <input className="cell-inp" list="companyNameList" value={row[c.key] || ''}
-                            onChange={(e) => setRows(rows.map((r, i) => i === ri ? { ...r, client: e.target.value, companyId: COMPANY_BY_NAME[e.target.value] || r.companyId } : r))} />
+                        ? <input className="cell-inp" list="companyNameList" value={row[c.key] || ''} onChange={(e) => setRows(rows.map((r, i) => i === ri ? { ...r, client: e.target.value, companyId: COMPANY_BY_NAME[e.target.value] || r.companyId } : r))} />
                         : c.type === 'select'
                           ? <select className="cell-inp" value={row[c.key] || ''} onChange={(e) => setCell(ri, c.key, e.target.value)}><option value=""></option>{c.options.map((o) => <option key={o}>{o}</option>)}</select>
                           : <input className="cell-inp" type={c.type === 'date' ? 'date' : 'text'} value={row[c.key] || ''} onChange={(e) => setCell(ri, c.key, e.target.value)} />}
@@ -199,41 +168,30 @@ export default function OrderList({ onOpen }) {
       <div className="krelated">
         <div className="krel-tabs">
           <span className="krel-label">関連シート</span>
-          {RELATED.map((t, i) => (
-            <button key={t} type="button" className={'krel-tab' + (rel === i ? ' active' : '')} onClick={() => setRel(i)}>{t}</button>
-          ))}
+          {RELATED.map((t, i) => <button key={t} type="button" className={'krel-tab' + (rel === i ? ' active' : '')} onClick={() => setRel(i)}>{t}</button>)}
+          {rel === 0 && <span className="krel-note">（選択中：レコード {rows[sel]?.recordNo}）</span>}
         </div>
         {rel === 0 && (
-          <>
-            <div className="kactionbar sub">
-              <button type="button" className="kact-btn primary" onClick={addItem}>＋追加</button>
-              <button type="button" className="kact-btn primary" onClick={dupItemTop}>複製</button>
-            </div>
-            <div className="ktable-scroll">
-              <table className="ktable">
-                <thead><tr>{ITEM_COLS.map((c) => <th key={c.key}>{c.label}</th>)}<th>操作</th></tr></thead>
-                <tbody>
-                  {items.map((row, ri) => (
-                    <tr key={ri}>
-                      {ITEM_COLS.map((c) => (
-                        <td key={c.key} className="edit-cell">
-                          {c.ref === 'case'
-                            ? <div className="cell-ref">
-                                <input className="cell-inp" value={row.caseNo || ''} placeholder="例：000045" onChange={(e) => onItemCaseNo(ri, e.target.value)} />
-                                <button type="button" className="btn-ref sm" onClick={() => onItemCaseNo(ri, row.caseNo)}>参照</button>
-                              </div>
-                            : c.type === 'select'
-                              ? <select className="cell-inp" value={row[c.key] || ''} onChange={(e) => setItemCell(ri, c.key, e.target.value)}><option value=""></option>{c.options.map((o) => <option key={o}>{o}</option>)}</select>
-                              : <input className="cell-inp" type={c.type === 'date' ? 'date' : c.type === 'number' ? 'number' : 'text'} value={row[c.key] || ''} onChange={(e) => setItemCell(ri, c.key, e.target.value)} />}
-                        </td>
-                      ))}
-                      <td className="tc"><button type="button" className="btn-del" onClick={() => delItem(ri)}>削除</button></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
+          <div className="ktable-scroll">
+            <table className="ktable">
+              <thead><tr>{ITEM_COLS.map((c) => <th key={c.key}>{c.label}</th>)}</tr></thead>
+              <tbody>
+                {items.map((row, ii) => (
+                  <tr key={ii}>
+                    {ITEM_COLS.map((c) => (
+                      <td key={c.key} className="edit-cell">
+                        {c.caseRef
+                          ? <input className="cell-inp" value={row.caseNo || ''} placeholder="コード入力→Enter" onChange={(e) => setItemCell(ii, 'caseNo', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); confirmCaseNo(ii) } }} />
+                          : c.type === 'select'
+                            ? <select className="cell-inp" value={row[c.key] || ''} onChange={(e) => setItemCell(ii, c.key, e.target.value)}><option value=""></option>{c.options.map((o) => <option key={o}>{o}</option>)}</select>
+                            : <input className="cell-inp" type={c.type === 'date' ? 'date' : c.type === 'number' ? 'number' : 'text'} value={row[c.key] || ''} onChange={(e) => setItemCell(ii, c.key, e.target.value)} />}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
         {rel === 1 && <div className="empty small">案件テーブル（サンプル省略）</div>}
         {rel === 2 && <div className="empty small">販売目標変更履歴テーブル（サンプル省略）</div>}
@@ -241,7 +199,7 @@ export default function OrderList({ onOpen }) {
 
       <datalist id="companyNameList">{COMPANY_NAMES.map((o) => <option key={o} value={o} />)}</datalist>
 
-      <div className="fnote" style={{ marginTop: 8 }}>※「＋追加」で空行、「複製」で一番上の行を複製します。鍵（🔒）以外は編集可。企業名を入れると企業コードが自動入力。発注商品テーブルは案件番号を入れると商品名・メーカー名・医薬品・アルコール区分・発注ケース/ボール入数・商品カテゴリが自動入力されます。</div>
+      <div className="fnote" style={{ marginTop: 8 }}>※ 行をクリックすると選択され、下の発注商品テーブルが切り替わります。行頭アイコンで詳細へ（詳細の明細＝このレコードの発注商品テーブル）。案件番号はコードを入力しEnterで確定・自動入力。＋追加/複製/削除は上部ボタンを使用（複製は一番上に追加）。</div>
     </div>
   )
 }
