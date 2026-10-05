@@ -19,20 +19,26 @@ export default function OrderTab() {
   const [view, setView] = useState('list')   // list（検索一覧）/ detail（詳細入力）
   const [selected, setSelected] = useState(null)
   const [header, setHeader] = useState(makeEmptyOrderHeader)
-  const [rows, setRows] = useState(() => [makeEmptyOrderDetail()])
+  const [rows, setRows] = useState(() => [{ ...makeEmptyOrderDetail(), branchNo: '001' }])
   const [hmsg, setHmsg] = useState(null)
   const setHeaderField = (k, val) => setHeader({ ...header, [k]: val })
 
   const updateRow = (i, next) => setRows(rows.map((r, idx) => (idx === i ? next : r)))
   const setRowField = (i, key, val) => updateRow(i, { ...rows[i], [key]: val })
 
-  const duplicateLast = () => {
-    const src = rows[rows.length - 1]
-    setRows([...rows, src ? structuredClone(src) : makeEmptyOrderDetail()])
+  const nextBranch = () => String(rows.length + 1).padStart(3, '0')
+  // 追加：空行を追加
+  const addEmpty = () => setRows([...rows, { ...makeEmptyOrderDetail(), branchNo: nextBranch() }])
+  // 複製：一番上の行を複製して追加
+  const duplicateTop = () => {
+    const src = rows[0]
+    const clone = src ? structuredClone(src) : makeEmptyOrderDetail()
+    clone.branchNo = nextBranch()
+    setRows([...rows, clone])
   }
-  const addEmpty = () => setRows([...rows, makeEmptyOrderDetail()])
   const dupRow = (i) => {
     const clone = structuredClone(rows[i])
+    clone.branchNo = nextBranch()
     setRows([...rows.slice(0, i + 1), clone, ...rows.slice(i + 1)])
   }
   const delRow = (i) => setRows(rows.filter((_, idx) => idx !== i))
@@ -59,10 +65,26 @@ export default function OrderTab() {
     updateRow(i, { ...r, ...res.values })
   }
 
+  // 案件番号入力時：紐づく商品情報を自動入力
+  const onCaseNoChange = (i, val) => {
+    const res = lookupCaseProduct(val)
+    updateRow(i, { ...rows[i], caseNo: val, ...(res.found ? res.values : {}) })
+  }
+
   // 明細セル描画（鍵以外は編集可・参照ボタン付き）
   const cell = (f, row, i) => {
     if (f.auto) return <input className="cell-inp ro" readOnly value={row[f.key] ?? ''} title="自動" />
     if (f.type === 'checkbox') return <input type="checkbox" checked={!!row[f.key]} onChange={(e) => setRowField(i, f.key, e.target.checked)} />
+    // 案件番号：入力したら自動入力（＋参照ボタンでも可）
+    if (f.key === 'caseNo') {
+      return (
+        <div className="cell-ref">
+          <input className="cell-inp" value={row.caseNo ?? ''} placeholder="例：000045"
+            onChange={(e) => onCaseNoChange(i, e.target.value)} />
+          <button type="button" className="btn-ref sm" onClick={() => refDetail(i, 'case')}>参照</button>
+        </div>
+      )
+    }
     let inp
     if (f.type === 'select') {
       inp = (
@@ -121,8 +143,8 @@ export default function OrderTab() {
         defaultOpen={true}
         right={
           <>
-            <button type="button" className="btn-plus" title="直前の行を複製して追加" onClick={duplicateLast}>＋ 複製追加</button>
-            <button type="button" className="btn-mini" onClick={addEmpty}>空行追加</button>
+            <button type="button" className="btn-plus" title="空行を追加" onClick={addEmpty}>＋ 追加</button>
+            <button type="button" className="btn-mini" title="一番上の行を複製して追加" onClick={duplicateTop}>複製</button>
           </>
         }
       >
@@ -145,8 +167,8 @@ export default function OrderTab() {
                 {rows.map((row, i) => (
                   <tr key={i}>
                     <td className="td-ico">#{i + 1}</td>
-                    <td className="locked-cell tc">{String(i + 1).padStart(3, '0')}</td>
-                    <td className="locked-cell">{branchCode(header.orderNo || HEADER_NO, i)}</td>
+                    <td className="edit-cell tc"><input className="cell-inp" style={{ minWidth: 70 }} value={row.branchNo ?? ''} onChange={(e) => setRowField(i, 'branchNo', e.target.value)} /></td>
+                    <td className="locked-cell">{(header.orderNo || HEADER_NO)}{row.branchNo || String(i + 1).padStart(3, '0')}</td>
                     {DETAIL_COLS.map((f) => (
                       <td key={f.key} className={f.auto ? 'locked-cell' : 'edit-cell'}>{cell(f, row, i)}</td>
                     ))}
@@ -160,7 +182,7 @@ export default function OrderTab() {
             </table>
           </div>
         )}
-        <div className="fnote" style={{ marginTop: 6 }}>※ 案件番号を入れて「参照」すると、商品名・メーカー名・医薬品・アルコール区分・発注ケース/ボール入数・商品カテゴリが自動入力されます。</div>
+        <div className="fnote" style={{ marginTop: 6 }}>※「＋追加」で空行、「複製」で一番上の行を複製して追加します。案件番号を入力すると、商品名・メーカー名・医薬品・アルコール区分・発注ケース/ボール入数・商品カテゴリが自動入力されます（参照ボタンでも可）。</div>
       </Accordion>
     </div>
   )

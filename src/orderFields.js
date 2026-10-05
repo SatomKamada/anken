@@ -187,6 +187,7 @@ export function makeEmptyOrderDetail() {
     o[f.key] = f.type === 'checkbox' ? false : ''
   }
   o.branchMaxNo = '1'
+  o.branchNo = ''            // 発注明細番号（枝番）：入力可・追加/複製で自動採番
   // 販売目標変更履歴（サブテーブル）
   o.targetHistory = []
   return o
