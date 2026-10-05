@@ -5,7 +5,6 @@ import OrderList from './OrderList.jsx'
 import Field from './Field.jsx'
 import { branchCode } from './RecordHeader.jsx'
 import {
-  orderHeaderGroups, makeEmptyOrderHeader,
   orderDetailGroups, makeEmptyOrderDetail,
 } from './orderFields.js'
 import { lookupOrderDetailByProduct, lookupCaseProduct, lookupCompany } from './dummyData.js'
@@ -17,6 +16,29 @@ const COMPANY_BY_NAME = {
   '株式会社クレイツ': '5679', '株式会社ミライスビー': '5583', 'サンコー株式会社': '5380', '株式会社QUADS': '4892',
 }
 const COMPANY_NAMES = Object.keys(COMPANY_BY_NAME)
+
+// 検索画面で見えている発注ヘッダーレコードの項目を詳細画面にも定義
+const HEADER_COLS = [
+  { key: 'status', label: '発注ステータス', required: true, type: 'select', options: ['入力中', '登録済', '申請中', '承認済', '発注済', '一部入荷', '全部入荷', '差戻', 'NG'] },
+  { key: 'caseTypeL', label: '案件種別（大）', type: 'select', options: ['在庫', '受発注', '通常', 'その他'] },
+  { key: 'caseTypeM', label: '案件種別（中）', type: 'select', options: ['試算あり', '試算なし', '倉庫間移動', 'その他'] },
+  { key: 'caseTypeS', label: '案件種別（小）', type: 'select', options: ['メーカー滞留品', 'NBプロパー', 'TC', 'AAS', 'キャンペーン・抽選', '代品・過受注', '代品'] },
+  { key: 'companyId', label: '企業コード', auto: true, required: true },
+  { key: 'client', label: '企業名', type: 'companyName', required: true },
+  { key: 'orderCat', label: '受発注発注区分', type: 'select', options: ['-', '個別発注', '一斉発注'] },
+  { key: 'prodType', label: '商品種別', type: 'select', options: ['その他', '食品', '日用品', '医薬品'] },
+  { key: 'promo', label: 'プロモーションコード' },
+  { key: 'payTerms', label: '支払条件', type: 'select', options: ['末締め翌月末払い', '15日締め払い', '末締め翌月15日払い', '日付指定'] },
+  { key: 'payDue', label: '支払期日', type: 'date' },
+  { key: 'totalCase', label: 'ケース数合計', auto: true },
+  { key: 'totalPiece', label: 'ピース数合計', auto: true },
+  { key: 'amountIn', label: '発注金額合計（税込み）', auto: true },
+  { key: 'tax8', label: '消費税（8%）' },
+  { key: 'tax10', label: '消費税（10%）' },
+  { key: 'amountEx', label: '発注金額合計（税抜）', auto: true },
+  { key: 'assignee', label: '担当者', auto: true },
+  { key: 'createdAt', label: '作成日時', auto: true },
+]
 
 // 明細の全項目（表の列）。発注番号（枝番）Max No は枝番で表現するため除外。
 const RAW_DETAIL_COLS = orderDetailGroups.flatMap((g) => g.fields).filter((f) => !['branchMaxNo', 'saleType', 'stockLinkFlag', 'bestBeforeType'].includes(f.key))
@@ -39,7 +61,7 @@ const IS_NEW_ITEM = (k) => ['caseNo', 'saleType', 'stockLinkFlag', 'attrCode', '
 export default function OrderTab() {
   const [view, setView] = useState('list')   // list（検索一覧）/ detail（詳細入力）
   const [selected, setSelected] = useState(null)
-  const [header, setHeader] = useState(makeEmptyOrderHeader)
+  const [header, setHeader] = useState({})
   const [rows, setRows] = useState(() => [{ ...makeEmptyOrderDetail(), branchNo: '001' }])
 
   // 選択レコードが切り替わった時にヘッダー情報を同期
@@ -131,42 +153,33 @@ export default function OrderTab() {
         {selected && <span className="detail-rec">発注ヘッダー番号 {selected.orderNo || selected.recordNo} ／ {selected.client}</span>}
       </div>
 
-      {/* ① 基本情報（分類はサブ見出しで統合／最上位分類はラベル非表示） */}
+      {/* ① 基本情報（検索画面で見えているヘッダー項目を表示） */}
       <Accordion title="発注ヘッダー情報" defaultOpen={false}>
-        {orderHeaderGroups.map((g, gi) => (
-          <KGroup key={g.title || `g${gi}`} title={g.title || '基本情報'} defaultOpen={true}>
-            <div className="grid2">
-              {g.fields.map((f) => {
-                if (f.key === 'orderNo') return null; // ヘッダー番号は不要
-                
-                if (f.key === 'companyId') {
-                  const modF = { ...f, auto: true }; // 企業コードは手動入力不可
-                  return <Field key={f.key} field={modF} value={header[f.key]} onChange={setHeaderField} />
-                }
-                if (f.key === 'client' || f.key === 'companyName') {
-                  // 企業名サジェストと連動
-                  return (
-                    <div className="frow" key={f.key}>
-                      <div className="flabel">{f.label}{f.required && <span className="req">必須</span>}</div>
-                      <div className="fbody">
-                        <input className="inp" list="orderTabCompanyList" value={header[f.key] || ''} 
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setHeader({ ...header, [f.key]: val, companyId: COMPANY_BY_NAME[val] || header.companyId });
-                          }} 
-                        />
-                      </div>
-                    </div>
-                  )
-                }
-
+        <KGroup title="基本情報" defaultOpen={true}>
+          <div className="grid2">
+            {HEADER_COLS.map((f) => {
+              if (f.key === 'client' || f.key === 'companyName') {
+                // 企業名サジェストと連動
                 return (
-                  <Field key={f.key} field={f} value={header[f.key]} onChange={setHeaderField} />
+                  <div className="frow" key={f.key}>
+                    <div className="flabel">{f.label}{f.required && <span className="req">必須</span>}</div>
+                    <div className="fbody">
+                      <input className="inp" list="orderTabCompanyList" value={header[f.key] || ''} 
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setHeader({ ...header, [f.key]: val, companyId: COMPANY_BY_NAME[val] || header.companyId });
+                        }} 
+                      />
+                    </div>
+                  </div>
                 )
-              })}
-            </div>
-          </KGroup>
-        ))}
+              }
+              return (
+                <Field key={f.key} field={f} value={header[f.key]} onChange={setHeaderField} />
+              )
+            })}
+          </div>
+        </KGroup>
         <datalist id="orderTabCompanyList">{COMPANY_NAMES.map(o => <option key={o} value={o} />)}</datalist>
       </Accordion>
 

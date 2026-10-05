@@ -90,8 +90,11 @@ const itemFromCase = (branchNo, caseNo, extra = {}) => {
   })
 }
 
-// サンプルデータを5件に削減
+// サンプルデータを5件に削減、案件番号が入っていない発注明細を追加
 const INIT = [
+  H('48931', '00048931', '', '入力中', '伊波 篤', '2026-10-06 10:00', '6281', '路興商事株式会社', '在庫', '試算あり', 'メーカー滞留品', '個別発注', [
+    mkItem('1', { caseNo: '', orderCaseQty: '10', totalPieceQty: '120', unitPriceEx: '500', amountEx: '5000', productName: '手動入力商品サンプル' })
+  ]),
   H('48930', '00048930', 'PR-2605-01', '入力中', '伊波 篤', '2026-10-05 12:45', '6281', '路興商事株式会社', '在庫', '試算あり', 'メーカー滞留品', '個別発注', [
     itemFromCase('1', '000048', { orderCaseQty: '2', totalPieceQty: '40', unitPriceEx: '700', amountEx: '28000' }),
     itemFromCase('2', '000049', { orderCaseQty: '3', totalPieceQty: '72', unitPriceEx: '230', amountEx: '16560' }),
@@ -103,7 +106,6 @@ const INIT = [
     itemFromCase('2', '000046', { orderCaseQty: '10', totalPieceQty: '120', unitPriceEx: '1100', amountEx: '132000' }),
     itemFromCase('3', '000047', { orderCaseQty: '8', totalPieceQty: '160', unitPriceEx: '450', amountEx: '72000' }),
   ]),
-  H('48926', '00048926', 'Y393', '入力中', '石津 衛一', '2026-10-05 10:57', '34', '小林製薬株式会社', '通常', '試算あり', 'メーカー滞留品', '個別発注', [itemFromCase('1', '000046', { orderCaseQty: '7', totalPieceQty: '84', unitPriceEx: '1100', amountEx: '92400' })])
 ]
 
 const RELATED = ['発注商品テーブル', '案件テーブル', '販売目標変更履歴テーブル']
