@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Accordion from './Accordion.jsx'
 import KGroup from './KGroup.jsx'
 import OrderList from './OrderList.jsx'
@@ -36,13 +36,19 @@ for (const f of RAW_DETAIL_COLS) {
 
 const IS_NEW_ITEM = (k) => ['caseNo', 'saleType', 'stockLinkFlag', 'attrCode', 'bestBeforeType'].includes(k);
 
-const HEADER_NO = '000123'
-
 export default function OrderTab() {
   const [view, setView] = useState('list')   // list（検索一覧）/ detail（詳細入力）
   const [selected, setSelected] = useState(null)
   const [header, setHeader] = useState(makeEmptyOrderHeader)
   const [rows, setRows] = useState(() => [{ ...makeEmptyOrderDetail(), branchNo: '001' }])
+
+  // 選択レコードが切り替わった時にヘッダー情報を同期
+  useEffect(() => {
+    if (selected) {
+      setHeader((prev) => ({ ...prev, ...selected }))
+    }
+  }, [selected])
+
   const setHeaderField = (k, val) => setHeader({ ...header, [k]: val })
 
   const updateRow = (i, next) => setRows(rows.map((r, idx) => (idx === i ? next : r)))

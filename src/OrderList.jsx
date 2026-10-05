@@ -90,6 +90,7 @@ const itemFromCase = (branchNo, caseNo, extra = {}) => {
   })
 }
 
+// サンプルデータを5件に削減
 const INIT = [
   H('48930', '00048930', 'PR-2605-01', '入力中', '伊波 篤', '2026-10-05 12:45', '6281', '路興商事株式会社', '在庫', '試算あり', 'メーカー滞留品', '個別発注', [
     itemFromCase('1', '000048', { orderCaseQty: '2', totalPieceQty: '40', unitPriceEx: '700', amountEx: '28000' }),
@@ -102,16 +103,7 @@ const INIT = [
     itemFromCase('2', '000046', { orderCaseQty: '10', totalPieceQty: '120', unitPriceEx: '1100', amountEx: '132000' }),
     itemFromCase('3', '000047', { orderCaseQty: '8', totalPieceQty: '160', unitPriceEx: '450', amountEx: '72000' }),
   ]),
-  H('48926', '00048926', 'Y393', '入力中', '石津 衛一', '2026-10-05 10:57', '34', '小林製薬株式会社', '通常', '試算あり', 'メーカー滞留品', '個別発注', [itemFromCase('1', '000046', { orderCaseQty: '7', totalPieceQty: '84', unitPriceEx: '1100', amountEx: '92400' })]),
-  H('48925', '00048925', 'Y393', '発注済', '石津 衛一', '2026-10-05 10:55', '34', '小林製薬株式会社', '通常', '試算あり', 'メーカー滞留品', '一斉発注', [itemFromCase('1', '000046', { orderCaseQty: '13', totalPieceQty: '156', unitPriceEx: '1100', amountEx: '171600' })]),
-  H('48924', '00048924', '', '発注済', '谷口 祐磨', '2026-10-05 9:26', '3726', 'ラブリー・ペット商会', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000048', { orderCaseQty: '2', totalPieceQty: '40', unitPriceEx: '800', amountEx: '32000' })]),
-  H('48923', '00048923', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '5833', '株式会社ライフブリッジ', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000049', { orderCaseQty: '1', totalPieceQty: '24', unitPriceEx: '230', amountEx: '5520' })]),
-  H('48922', '00048922', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '5679', '株式会社クレイツ', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000045', { orderCaseQty: '1', totalPieceQty: '24', unitPriceEx: '150', amountEx: '3600' })]),
-  H('48921', '00048921', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '5583', '株式会社ミライスビー', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000047', { orderCaseQty: '25', totalPieceQty: '500', unitPriceEx: '450', amountEx: '225000' })]),
-  H('48920', '00048920', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '5380', 'サンコー株式会社', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000048', { orderCaseQty: '22', totalPieceQty: '440', unitPriceEx: '800', amountEx: '352000' })]),
-  H('48919', '00048919', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '4892', '株式会社QUADS', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000049', { orderCaseQty: '62', totalPieceQty: '1488', unitPriceEx: '230', amountEx: '342240' })]),
-  H('48918', '00048918', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '4455', '株式会社エスエスケイ', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000045', { orderCaseQty: '55', totalPieceQty: '1320', unitPriceEx: '150', amountEx: '198000' })]),
-  H('48917', '00048917', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '4368', '株式会社ツカモトコーポ', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000046', { orderCaseQty: '3', totalPieceQty: '36', unitPriceEx: '1100', amountEx: '39600' })]),
+  H('48926', '00048926', 'Y393', '入力中', '石津 衛一', '2026-10-05 10:57', '34', '小林製薬株式会社', '通常', '試算あり', 'メーカー滞留品', '個別発注', [itemFromCase('1', '000046', { orderCaseQty: '7', totalPieceQty: '84', unitPriceEx: '1100', amountEx: '92400' })])
 ]
 
 const RELATED = ['発注商品テーブル', '案件テーブル', '販売目標変更履歴テーブル']
