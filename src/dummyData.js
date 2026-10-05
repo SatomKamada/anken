@@ -143,13 +143,24 @@ export const specMaster = {
 export const caseMaster = {
   '000045': { caseNo: '000045', caseTypeL: '在庫',   caseTypeM: '試算あり',   caseTypeS: 'メーカー滞留品', refPriceEx: '120',
     productName: 'オーガニック緑茶 500ml', makerName: '伊藤園', medicineType: '対象外', alcoholType: '対象外',
+    janCode: '4901234567894', productId: '1', makerId: '001',
     orderCaseCount: '24', orderBallCount: '0', categoryL: '飲料', categoryM: '茶飲料', categoryS: '緑茶' },
   '000046': { caseNo: '000046', caseTypeL: '受発注', caseTypeM: '試算なし',   caseTypeS: 'NBプロパー',     refPriceEx: '1100',
     productName: 'しっとり保湿クリーム 50g', makerName: '小林製薬', medicineType: '医薬部外品', alcoholType: '対象外',
+    janCode: '4902345678905', productId: '2', makerId: '002',
     orderCaseCount: '12', orderBallCount: '2', categoryL: '日用品', categoryM: 'スキンケア', categoryS: 'クリーム' },
   '000047': { caseNo: '000047', caseTypeL: '通常',   caseTypeM: '倉庫間移動', caseTypeS: 'TC',            refPriceEx: '450',
     productName: '冷凍ミックスベリー 300g', makerName: '明治', medicineType: '対象外', alcoholType: '対象外',
+    janCode: '4903456789016', productId: '3', makerId: '003',
     orderCaseCount: '20', orderBallCount: '0', categoryL: '冷凍食品', categoryM: '冷凍果実', categoryS: 'ミックスベリー' },
+  '000048': { caseNo: '000048', caseTypeL: '在庫',   caseTypeM: '試算あり',   caseTypeS: 'NBプロパー',     refPriceEx: '800',
+    productName: '特製糖蜜漬けりんご 80g', makerName: '路興食品', medicineType: '対象外', alcoholType: '対象外',
+    janCode: '6973982640271', productId: '4', makerId: '004',
+    orderCaseCount: '20', orderBallCount: '0', categoryL: '菓子', categoryM: '果実加工品', categoryS: '糖蜜漬け' },
+  '000049': { caseNo: '000049', caseTypeL: '受発注', caseTypeM: '試算なし',   caseTypeS: 'TC',            refPriceEx: '230',
+    productName: 'クリーム仕立てカフェオレ 500ml', makerName: 'よつ葉乳業', medicineType: '対象外', alcoholType: '対象外',
+    janCode: '4908013230864', productId: '5', makerId: '005',
+    orderCaseCount: '24', orderBallCount: '0', categoryL: '飲料', categoryM: 'コーヒー飲料', categoryS: 'カフェオレ' },
 }
 
 // 案件番号参照（発注明細）→ 案件に紐づく商品情報を自動入力
@@ -158,6 +169,7 @@ export function lookupCaseProduct(caseNo) {
   if (!c) return { found: false, values: {} }
   return { found: true, values: {
     productName: c.productName, makerName: c.makerName, medicineType: c.medicineType, alcoholType: c.alcoholType,
+    janCode: c.janCode, productId: c.productId, makerId: c.makerId,
     orderCaseCount: c.orderCaseCount, orderBallCount: c.orderBallCount,
     categoryL: c.categoryL, categoryM: c.categoryM, categoryS: c.categoryS,
     refPriceEx: c.refPriceEx,

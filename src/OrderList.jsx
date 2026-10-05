@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { makeEmptyOrderDetail } from './orderFields.js'
-import { lookupCaseProduct } from './dummyData.js'
+import { lookupCaseProduct, caseMaster } from './dummyData.js'
 
 // 発注管理：一覧（検索結果の表）— kintone風。
 // props: onOpen(record) … record は { ...header, items:[明細...] }
@@ -28,8 +28,6 @@ const COLS = [
   { key: 'orderCat', label: '受発注発注区分', type: 'select', options: ['-', '個別発注', '一斉発注'] },
   { key: 'prodType', label: '商品種別', type: 'select', options: ['その他', '食品', '日用品', '医薬品'] },
   { key: 'promo', label: 'プロモーションコード' },
-  { key: 'assignee', label: '担当者', locked: true },
-  { key: 'createdAt', label: '作成日時', locked: true },
   { key: 'payTerms', label: '支払条件', type: 'select', options: ['末締め翌月末払い', '15日締め払い', '末締め翌月15日払い', '日付指定'] },
   { key: 'payDue', label: '支払期日', type: 'date' },
   { key: 'totalCase', label: 'ケース数合計', locked: true },
@@ -38,6 +36,8 @@ const COLS = [
   { key: 'tax8', label: '消費税（8%）' },
   { key: 'tax10', label: '消費税（10%）' },
   { key: 'amountEx', label: '発注金額合計（税抜）', locked: true },
+  { key: 'assignee', label: '担当者', locked: true },
+  { key: 'createdAt', label: '作成日時', locked: true },
 ]
 
 // 発注商品テーブル（表示列・キーは orderFields の明細に一致）
@@ -72,18 +72,41 @@ const mkItem = (branchNo, over = {}) => ({ ...makeEmptyOrderDetail(), branchNo, 
 const H = (recordNo, orderNo, promo, status, assignee, createdAt, companyId, client, caseL, caseM, caseS, cat, items) =>
   ({ recordNo, orderNo, promo, status, assignee, createdAt, companyId, client, caseTypeL: caseL, caseTypeM: caseM, caseTypeS: caseS, orderCat: cat, prodType: 'その他', payTerms: '末締め翌月末払い', payDue: '2026-11-30', totalCase: '0', totalPiece: '0', amountIn: '¥0', tax8: '¥0', tax10: '¥0', amountEx: '¥0', items })
 
+// 案件番号から明細を生成（ダミー充実用）
+const itemFromCase = (branchNo, caseNo, extra = {}) => {
+  const c = caseMaster[caseNo] || {}
+  return mkItem(branchNo, {
+    caseNo, janCode: c.janCode || '', productId: c.productId || '', productName: c.productName || '', makerId: c.makerId || '', makerName: c.makerName || '',
+    categoryL: c.categoryL || '', categoryM: c.categoryM || '', categoryS: c.categoryS || '',
+    medicineType: c.medicineType || '', alcoholType: c.alcoholType || '',
+    orderCaseCount: c.orderCaseCount || '', orderBallCount: c.orderBallCount || '', refPriceEx: c.refPriceEx || '',
+    warehouse: '佐川（花見川）', bestBeforeDate: '2027-05-08', deliveryDate: '2026-10-08', salesTarget: '2027-01-06',
+    taxRate: '8%', ...extra,
+  })
+}
+
 const INIT = [
-  H('48930', '00048930', '', '入力中', '伊波 篤', '2026-10-05 12:45', '6281', '路興商事株式会社', '在庫', '試算あり', 'メーカー滞留品', '', [mkItem('1', { caseNo: '000047', makerName: '明治', productName: '冷凍ミックスベリー 300g', warehouse: '自社倉庫', orderCaseCount: '20', categoryL: '冷凍食品', categoryM: '冷凍果実', categoryS: 'ミックスベリー' })]),
-  H('48929', '00048929', '', '入力中', '伊波 篤', '2026-10-05 12:38', '2576', 'コンフェックス株式会社', '在庫', '試算あり', 'メーカー滞留品', '', [mkItem('1')]),
-  H('48928', '00048928', '', '発注済', '伊波 篤', '2026-10-05 12:32', '6318', '株式会社八天堂', '受発注', '試算あり', 'TC', '一斉発注', [mkItem('1')]),
-  H('48927', '00048927', '', '入力中', '小宮 佳介', '2026-10-05 11:36', '4749', 'DKSHジャパン株式会社', '在庫', '試算あり', 'メーカー滞留品', '', [
-    mkItem('1', { caseNo: '000045', makerName: '伊藤園', productName: 'オーガニック緑茶 500ml', warehouse: '佐川（花見川）', deliveryDate: '2026-10-09', orderCaseCount: '24', orderCaseQty: '50', totalPieceQty: '600', unitPriceEx: '600', taxRate: '8%', amountEx: '360000', categoryL: '飲料', categoryM: '茶飲料', categoryS: '緑茶' }),
-    mkItem('2', { caseNo: '000046', makerName: '小林製薬', productName: 'しっとり保湿クリーム 50g', warehouse: '佐川（花見川）', orderCaseCount: '12', orderBallCount: '2', categoryL: '日用品', categoryM: 'スキンケア', categoryS: 'クリーム' }),
+  H('48930', '00048930', 'PR-2605-01', '入力中', '伊波 篤', '2026-10-05 12:45', '6281', '路興商事株式会社', '在庫', '試算あり', 'メーカー滞留品', '個別発注', [
+    itemFromCase('1', '000048', { orderCaseQty: '2', totalPieceQty: '40', unitPriceEx: '700', amountEx: '28000' }),
+    itemFromCase('2', '000049', { orderCaseQty: '3', totalPieceQty: '72', unitPriceEx: '230', amountEx: '16560' }),
   ]),
-  H('48926', '00048926', 'Y393', '入力中', '石津 衛一', '2026-10-05 10:57', '34', '小林製薬株式会社', '通常', '', 'メーカー滞留品', '', [mkItem('1')]),
-  H('48925', '00048925', 'Y393', '発注済', '石津 衛一', '2026-10-05 10:55', '34', '小林製薬株式会社', '通常', '', 'メーカー滞留品', '', [mkItem('1')]),
-  H('48924', '00048924', '', '発注済', '谷口 祐磨', '2026-10-05 9:26', '3726', 'ラブリー・ペット商会', '受発注', '試算あり', 'TC', '一斉発注', [mkItem('1')]),
-  H('48923', '00048923', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '5833', '株式会社ライフブリッジ', '受発注', '試算あり', 'TC', '一斉発注', [mkItem('1')]),
+  H('48929', '00048929', '', '入力中', '伊波 篤', '2026-10-05 12:38', '2576', 'コンフェックス株式会社', '在庫', '試算あり', 'メーカー滞留品', '個別発注', [itemFromCase('1', '000045', { orderCaseQty: '1', totalPieceQty: '24', unitPriceEx: '150', amountEx: '3600' })]),
+  H('48928', '00048928', '', '発注済', '伊波 篤', '2026-10-05 12:32', '6318', '株式会社八天堂', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000047', { orderCaseQty: '5', totalPieceQty: '100', unitPriceEx: '450', amountEx: '45000' })]),
+  H('48927', '00048927', 'Y501', '入力中', '小宮 佳介', '2026-10-05 11:36', '4749', 'DKSHジャパン株式会社', '在庫', '試算あり', 'メーカー滞留品', '一斉発注', [
+    itemFromCase('1', '000045', { orderCaseQty: '50', totalPieceQty: '600', unitPriceEx: '600', amountEx: '360000' }),
+    itemFromCase('2', '000046', { orderCaseQty: '10', totalPieceQty: '120', unitPriceEx: '1100', amountEx: '132000' }),
+    itemFromCase('3', '000047', { orderCaseQty: '8', totalPieceQty: '160', unitPriceEx: '450', amountEx: '72000' }),
+  ]),
+  H('48926', '00048926', 'Y393', '入力中', '石津 衛一', '2026-10-05 10:57', '34', '小林製薬株式会社', '通常', '試算あり', 'メーカー滞留品', '個別発注', [itemFromCase('1', '000046', { orderCaseQty: '7', totalPieceQty: '84', unitPriceEx: '1100', amountEx: '92400' })]),
+  H('48925', '00048925', 'Y393', '発注済', '石津 衛一', '2026-10-05 10:55', '34', '小林製薬株式会社', '通常', '試算あり', 'メーカー滞留品', '一斉発注', [itemFromCase('1', '000046', { orderCaseQty: '13', totalPieceQty: '156', unitPriceEx: '1100', amountEx: '171600' })]),
+  H('48924', '00048924', '', '発注済', '谷口 祐磨', '2026-10-05 9:26', '3726', 'ラブリー・ペット商会', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000048', { orderCaseQty: '2', totalPieceQty: '40', unitPriceEx: '800', amountEx: '32000' })]),
+  H('48923', '00048923', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '5833', '株式会社ライフブリッジ', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000049', { orderCaseQty: '1', totalPieceQty: '24', unitPriceEx: '230', amountEx: '5520' })]),
+  H('48922', '00048922', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '5679', '株式会社クレイツ', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000045', { orderCaseQty: '1', totalPieceQty: '24', unitPriceEx: '150', amountEx: '3600' })]),
+  H('48921', '00048921', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '5583', '株式会社ミライスビー', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000047', { orderCaseQty: '25', totalPieceQty: '500', unitPriceEx: '450', amountEx: '225000' })]),
+  H('48920', '00048920', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '5380', 'サンコー株式会社', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000048', { orderCaseQty: '22', totalPieceQty: '440', unitPriceEx: '800', amountEx: '352000' })]),
+  H('48919', '00048919', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '4892', '株式会社QUADS', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000049', { orderCaseQty: '62', totalPieceQty: '1488', unitPriceEx: '230', amountEx: '342240' })]),
+  H('48918', '00048918', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '4455', '株式会社エスエスケイ', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000045', { orderCaseQty: '55', totalPieceQty: '1320', unitPriceEx: '150', amountEx: '198000' })]),
+  H('48917', '00048917', '', '発注済', '藤原 功旨', '2026-10-05 9:25', '4368', '株式会社ツカモトコーポ', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000046', { orderCaseQty: '3', totalPieceQty: '36', unitPriceEx: '1100', amountEx: '39600' })]),
 ]
 
 const RELATED = ['発注商品テーブル', '案件テーブル', '販売目標変更履歴テーブル']

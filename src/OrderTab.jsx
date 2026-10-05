@@ -120,10 +120,10 @@ export default function OrderTab() {
         {selected && <span className="detail-rec">レコード {selected.recordNo} ／ {selected.client}</span>}
       </div>
       {/* 最上部：ヘッダー番号（1件・自動採番） */}
-      <RecordHeader badge="基本情報" label="発注ヘッダー番号" no={selected?.orderNo || header.orderNo || HEADER_NO} />
+      <RecordHeader badge="発注ヘッダー情報" label="発注ヘッダー番号" no={selected?.orderNo || header.orderNo || HEADER_NO} />
 
       {/* ① 基本情報（分類はサブ見出しで統合／最上位分類はラベル非表示） */}
-      <Accordion title="基本情報" defaultOpen={false}>
+      <Accordion title="発注ヘッダー情報" defaultOpen={false}>
         {hmsg && <div className={'notice ' + hmsg.t}>{hmsg.m}</div>}
         {orderHeaderGroups.map((g, gi) => (
           <KGroup key={g.title || `g${gi}`} title={g.title || '基本情報'} defaultOpen={true}>
@@ -143,7 +143,7 @@ export default function OrderTab() {
 
       {/* ② 明細（表形式・1:多／枝番を自動採番） */}
       <Accordion
-        title="明細（発注商品）"
+        title="発注明細"
         defaultOpen={true}
         right={
           <>
