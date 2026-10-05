@@ -359,3 +359,8 @@ textarea.inp { resize: vertical; }
 .ktable.meisai .cell-ref { display: flex; gap: 3px; align-items: center; }
 .btn-ref.sm { padding: 2px 7px; font-size: 11px; }
 .ktable.meisai .td-ico { font-size: 11px; color: var(--ink-soft); }
+
+/* アクションバーの実動作ボタン */
+.kact-btn.primary { background: var(--brand); color: #fff; border-color: var(--brand-d); font-weight: 700; }
+.kact-btn.primary:hover { background: var(--brand-d); }
+.kactionbar.sub { border-bottom: none; padding: 4px 0; margin-bottom: 4px; }
