@@ -94,7 +94,10 @@ export default function OrderTab() {
     } else {
       inp = <input className="cell-inp" type={f.type === 'date' ? 'date' : f.type === 'number' ? 'number' : 'text'} value={row[f.key] ?? ''} onChange={(e) => setRowField(i, f.key, e.target.value)} />
     }
-    if (f.reflink) return <div className="cell-ref">{inp}<button type="button" className="btn-ref sm" onClick={() => refDetail(i, f.reflink)}>参照</button></div>
+    if (f.reflink) {
+      if (f.reflink === 'jan' || f.key === 'janCode') return inp;
+      return <div className="cell-ref">{inp}<button type="button" className="btn-ref sm" onClick={() => refDetail(i, f.reflink)}>参照</button></div>
+    }
     return inp
   }
 
@@ -162,9 +165,8 @@ export default function OrderTab() {
                   <th>発注明細番号（枝番）</th>
                   <th>発注番号</th>
                   {DETAIL_COLS.map((f) => (
-                    <th key={f.key}>{f.auto && <span className="lock">🔒</span>}{f.label}{f.required && <span className="req-star">＊</span>}</th>
+                    <th key={f.key}>{f.auto && <span className="lock">🔒</span>}{f.label}{(f.required || f.key === 'attrCode') && <span className="req-star">＊</span>}</th>
                   ))}
-                  <th>操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -176,10 +178,6 @@ export default function OrderTab() {
                     {DETAIL_COLS.map((f) => (
                       <td key={f.key} className={f.auto ? 'locked-cell' : 'edit-cell'}>{cell(f, row, i)}</td>
                     ))}
-                    <td className="tc">
-                      <button type="button" className="btn-mini" onClick={() => dupRow(i)}>複製</button>
-                      <button type="button" className="btn-del" onClick={() => delRow(i)}>削除</button>
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -191,5 +189,3 @@ export default function OrderTab() {
     </div>
   )
 }
-
-

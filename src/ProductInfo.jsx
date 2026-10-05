@@ -5,7 +5,7 @@ import {
 } from './fields.js'
 import { productMaster, productMasterByJan, jicfsMaster } from './dummyData.js'
 
-// 商品情報（共通）… 添付画像レイアウト準拠 + 商品コード/JAN 参照ボタン
+// 商品情報（共通）… 添付画像レイアウト準拠 + 商品コード 参照ボタン
 export default function ProductInfo({ value, onChange, defaultOpen = false, bare = false }) {
   const v = value
   const [msg, setMsg] = useState(null)
@@ -21,38 +21,17 @@ export default function ProductInfo({ value, onChange, defaultOpen = false, bare
     setMsg({ t: 'ok', m: `商品マスタから連携しました（${code} / ${p.productName}）` })
   }
 
-  // JAN参照 → 商品マスタ or JICFS
-  // JAN参照 → 商品マスタ or JICFS
-  const refByJan = () => {
-    const jan = (v.janCode || '').trim()
-    if (!jan) { setMsg({ t: 'warn', m: 'JANコードを入力してください' }); return }
-    if (productMasterByJan[jan]) {
-      const p = productMaster[productMasterByJan[jan]]
-      onChange({ ...v, ...p })
-      setMsg({ t: 'ok', m: `商品マスタから連携しました（JAN:${jan} / ${p.productName}）` })
-      return
-    }
-    if (jicfsMaster[jan]) {
-      const j = jicfsMaster[jan]
-      onChange({ ...v, janCode: jan, productName: v.productName || j.productName })
-      setMsg({ t: 'info', m: `商品マスタに無いため JICFS を参照しました（JAN:${jan}）` })
-      return
-    }
-    setMsg({ t: 'warn', m: `商品マスタ・JICFSに該当なし（JAN:${jan}）` })
-  }
-
   const copyCode = () => { try { navigator.clipboard?.writeText(v.productCode || '') } catch (e) {} }
 
   const body = (
     <>
       {msg && <div className={'notice ' + msg.t}>{msg.m}</div>}
 
-      {/* JANコード（入力＋参照） */}
+      {/* JANコード（入力のみ） */}
       <div className="frow">
         <Label text="JANコード" />
         <div className="fbody has-right">
           <input className="inp inp-code" value={v.janCode} onChange={(e) => set('janCode', e.target.value)} placeholder="例：4908013230864" />
-          <button type="button" className="btn-ref" onClick={refByJan}>参照</button>
           <div className="fnote">商品マスタ→無ければJICFSから連携</div>
         </div>
       </div>
