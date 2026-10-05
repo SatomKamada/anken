@@ -310,17 +310,37 @@ textarea.inp { resize: vertical; }
 .kgroup .inp { background: #fff; }
 
 /* 発注 一覧（検索結果の表・kintone風） */
-.ktoolbar { display: flex; align-items: center; gap: 12px; padding: 8px 10px; background: #eef2f5; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 8px; }
-.ktoolbar .kview { background: var(--brand); color: #fff; font-weight: 700; padding: 4px 16px; border-radius: 4px; }
-.ktoolbar .kview-sel { color: var(--ink-soft); }
-.ktoolbar .kbtn-out { background: #f0a020; color: #fff; border: none; border-radius: 4px; padding: 4px 16px; font-weight: 700; cursor: pointer; }
-.ktoolbar .kcount { margin-left: auto; color: var(--ink-soft); font-size: 12px; }
+/* アプリバー（ビュー選択／グラフ／絞り込み／分析／出力） */
+.kappbar { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.kview-select { background: var(--brand); color: #fff; font-weight: 700; border: 1px solid var(--brand-d); border-radius: 4px; padding: 6px 10px; min-width: 150px; }
+.kview-select option { color: var(--ink); background: #fff; }
+.kicon-btn { display: inline-flex; align-items: center; gap: 2px; background: #eef2f5; border: 1px solid var(--line-strong); border-radius: 4px; padding: 5px 8px; cursor: pointer; color: var(--ink-soft); }
+.kicon-btn:hover { background: #e4e9ee; }
+.kicon-btn.chart { background: var(--brand); color: #fff; border-color: var(--brand-d); }
+.kicon-btn .kcaret { font-size: 9px; }
+.koutput-select { border: 1px solid var(--line-strong); border-radius: 4px; padding: 6px 10px; min-width: 150px; background: #fff; }
+.kbtn-out { background: #f0a020; color: #fff; border: none; border-radius: 4px; padding: 6px 18px; font-weight: 700; cursor: pointer; }
+.kcount { margin-left: auto; color: var(--ink-soft); font-size: 12px; }
+/* アクションバー */
+.kactionbar { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; padding: 6px 4px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+.kact-btn { appearance: none; background: transparent; border: 1px solid transparent; border-radius: 4px; padding: 4px 8px; font-size: 12px; color: var(--ink-soft); cursor: pointer; }
+.kact-btn:hover { background: #eef2f5; border-color: var(--line); }
+/* テーブル */
 .ktable-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; }
 .ktable { border-collapse: collapse; white-space: nowrap; font-size: 12px; min-width: 100%; }
 .ktable th { background: #eef2f5; color: var(--ink-soft); font-weight: 600; border: 1px solid var(--line); padding: 5px 8px; position: sticky; top: 0; }
-.ktable td { border: 1px solid var(--line); padding: 4px 8px; }
-.ktable td.rec { text-align: center; }
-.ktable .rec-link { background: none; border: none; color: var(--brand); font-weight: 700; cursor: pointer; text-decoration: underline; font-size: 12px; }
+.ktable th .lock { margin-right: 3px; }
+.ktable th .req-star { color: var(--req); margin-left: 2px; }
+.ktable td { border: 1px solid var(--line); padding: 2px 4px; }
+.ktable th.th-ico, .ktable td.td-ico { width: 28px; text-align: center; padding: 2px; background: #f7f9fb; }
+.ktable .locked-cell { background: #f0f2f4; color: var(--ink-soft); padding: 4px 8px; }
+.ktable .edit-cell { background: #fff; }
+.ktable .cell-inp { width: 100%; min-width: 90px; border: 1px solid transparent; background: transparent; padding: 3px 5px; font-size: 12px; font-family: inherit; border-radius: 3px; }
+.ktable .cell-inp:hover { border-color: var(--line); }
+.ktable .cell-inp:focus { outline: none; border-color: var(--brand); background: #fff; }
+.detail-ico { display: inline-flex; background: none; border: none; cursor: pointer; color: var(--brand); padding: 2px; }
+.detail-ico:hover { color: var(--brand-d); }
+/* 関連シート */
 .krelated { margin-top: 12px; }
 .krel-tabs { display: flex; align-items: center; gap: 2px; border-bottom: 2px solid var(--brand); margin-bottom: 6px; }
 .krel-label { color: var(--ink-soft); font-size: 12px; margin-right: 8px; }
