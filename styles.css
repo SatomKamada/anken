@@ -295,14 +295,37 @@ textarea.inp { resize: vertical; }
 .callout b { color: #8a3b00; }
 .callout .callout-sub { color: var(--ink-soft); font-size: 12px; margin-top: 2px; }
 
-/* kintone風グループ（▽＋グループ名の枠・折りたたみ） */
-.kgroup { border: 1px solid var(--line-strong); border-radius: 4px; background: #fff; margin: 10px 0; }
+/* kintone風グループ（▽＋グループ名／薄いグレーの枠で項目全体を覆う） */
+.kgroup { border: 1px solid #e2e7ec; border-radius: 6px; background: #f4f6f8; margin: 12px 0; }
 .kgroup-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .kgroup-toggle {
   flex: 1; display: flex; align-items: center; gap: 8px;
   appearance: none; background: transparent; border: none; cursor: pointer;
-  padding: 8px 12px; text-align: left; font-weight: 700; color: var(--ink); font-size: 13px;
+  padding: 10px 14px 6px; text-align: left; font-weight: 700; color: var(--ink); font-size: 13px;
 }
-.kgroup-caret { color: var(--brand); font-size: 12px; width: 14px; }
+.kgroup-caret { color: var(--ink-soft); font-size: 12px; width: 14px; }
 .kgroup-right { display: flex; gap: 6px; align-items: center; padding-right: 8px; }
-.kgroup-body { padding: 4px 14px 12px; }
+.kgroup-body { padding: 2px 16px 14px; }
+/* グレー枠内の入力は白地で見やすく */
+.kgroup .inp { background: #fff; }
+
+/* 発注 一覧（検索結果の表・kintone風） */
+.ktoolbar { display: flex; align-items: center; gap: 12px; padding: 8px 10px; background: #eef2f5; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 8px; }
+.ktoolbar .kview { background: var(--brand); color: #fff; font-weight: 700; padding: 4px 16px; border-radius: 4px; }
+.ktoolbar .kview-sel { color: var(--ink-soft); }
+.ktoolbar .kbtn-out { background: #f0a020; color: #fff; border: none; border-radius: 4px; padding: 4px 16px; font-weight: 700; cursor: pointer; }
+.ktoolbar .kcount { margin-left: auto; color: var(--ink-soft); font-size: 12px; }
+.ktable-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; }
+.ktable { border-collapse: collapse; white-space: nowrap; font-size: 12px; min-width: 100%; }
+.ktable th { background: #eef2f5; color: var(--ink-soft); font-weight: 600; border: 1px solid var(--line); padding: 5px 8px; position: sticky; top: 0; }
+.ktable td { border: 1px solid var(--line); padding: 4px 8px; }
+.ktable td.rec { text-align: center; }
+.ktable .rec-link { background: none; border: none; color: var(--brand); font-weight: 700; cursor: pointer; text-decoration: underline; font-size: 12px; }
+.krelated { margin-top: 12px; }
+.krel-tabs { display: flex; align-items: center; gap: 2px; border-bottom: 2px solid var(--brand); margin-bottom: 6px; }
+.krel-label { color: var(--ink-soft); font-size: 12px; margin-right: 8px; }
+.krel-tab { appearance: none; border: 1px solid var(--line); border-bottom: none; background: #eef2f5; color: var(--ink-soft); padding: 5px 14px; cursor: pointer; border-radius: 4px 4px 0 0; font-size: 12px; }
+.krel-tab.active { background: var(--brand); color: #fff; font-weight: 700; }
+/* 一覧へ戻るバー */
+.detail-back { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.detail-back .detail-rec { color: var(--ink-soft); font-size: 12px; }

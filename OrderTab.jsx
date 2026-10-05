@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import Accordion from './Accordion.jsx'
 import KGroup from './KGroup.jsx'
+import OrderList from './OrderList.jsx'
 import Field from './Field.jsx'
 import { RecordHeader, BranchBar, branchCode } from './RecordHeader.jsx'
 import {
@@ -15,6 +16,8 @@ import { lookupOrderDetailByProduct, lookupCaseByNo, lookupCompany } from './dum
 const HEADER_NO = '000123'
 
 export default function OrderTab() {
+  const [view, setView] = useState('list')   // list（検索一覧）/ detail（詳細入力）
+  const [selected, setSelected] = useState(null)
   const [header, setHeader] = useState(makeEmptyOrderHeader)
   const [rows, setRows] = useState(() => [makeEmptyOrderDetail()])
   const [hmsg, setHmsg] = useState(null)
@@ -76,10 +79,23 @@ export default function OrderTab() {
   }
   const delHist = (i, hi) => updateRow(i, { ...rows[i], targetHistory: rows[i].targetHistory.filter((_, idx) => idx !== hi) })
 
+  // 発注タブを開くと最初は一覧（検索結果の表）を表示
+  if (view === 'list') {
+    return (
+      <div className="tab-panel">
+        <OrderList onOpen={(rec) => { setSelected(rec); setView('detail') }} />
+      </div>
+    )
+  }
+
   return (
     <div className="tab-panel">
+      <div className="detail-back">
+        <button type="button" className="btn-mini" onClick={() => setView('list')}>← 一覧に戻る</button>
+        {selected && <span className="detail-rec">レコード {selected.recordNo} ／ {selected.client}</span>}
+      </div>
       {/* 最上部：ヘッダー番号（1件・自動採番） */}
-      <RecordHeader badge="基本情報" label="発注ヘッダー番号" no={header.orderNo || HEADER_NO} />
+      <RecordHeader badge="基本情報" label="発注ヘッダー番号" no={selected?.orderNo || header.orderNo || HEADER_NO} />
 
       {/* ① 基本情報（分類はサブ見出しで統合／最上位分類はラベル非表示） */}
       <Accordion title="基本情報" defaultOpen={false}>
