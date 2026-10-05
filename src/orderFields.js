@@ -103,6 +103,7 @@ export const orderDetailGroups = [
       { key: 'jicfsShort',   label: 'JICFS分類名（略称）', type: 'text' },
       { key: 'itfCode',      label: 'ITFコード',        type: 'text' },
       { key: 'attrCode',     label: '商品属性情報コード', type: 'text', ref: '商品属性情報マスタ' },
+      { key: 'productId',    label: '商品ID',           type: 'text', ref: '商品マスタ.id' },
       { key: 'productName',  label: '商品名',           type: 'text' },
       { key: 'medicineType', label: '医薬品',           type: 'select', options: ['対象外','要指導医薬品','第1類医薬品','第2類医薬品','第3類医薬品','医薬部外品','医薬品未分類'] },
       { key: 'alcoholType',  label: 'アルコール区分',   type: 'select', options: ['対象外','お酒','ノンアルコール','みりん'] },
@@ -111,8 +112,8 @@ export const orderDetailGroups = [
       { key: 'categoryS',    label: '商品カテゴリー（小）', type: 'text', ref: 'カテゴリマスタ' },
       { key: 'autoStockLink', label: '在庫自動紐づけフラグ', type: 'checkbox' },
       // メーカー情報（商品マスタから自動参照）を商品情報の一番下に配置
+      { key: 'makerId',      label: 'メーカーID',           type: 'text', ref: 'メーカーマスタ.id' },
       { key: 'makerName',    label: 'メーカー名',           type: 'text', auto: true, ref: '商品マスタ→メーカーマスタ.メーカー名' },
-      { key: 'makerAddFlag', label: 'メーカーマスタ追加フラグ', type: 'checkbox' },
     ],
   },
   {

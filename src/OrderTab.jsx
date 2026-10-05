@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import Accordion from './Accordion.jsx'
+import KGroup from './KGroup.jsx'
 import Field from './Field.jsx'
 import { RecordHeader, BranchBar, branchCode } from './RecordHeader.jsx'
 import {
@@ -84,8 +85,7 @@ export default function OrderTab() {
       <Accordion title="基本情報" defaultOpen={false}>
         {hmsg && <div className={'notice ' + hmsg.t}>{hmsg.m}</div>}
         {orderHeaderGroups.map((g, gi) => (
-          <div className="fgroup" key={g.title || `g${gi}`}>
-            {g.title && <div className="subhead lead">{g.title}</div>}
+          <KGroup key={g.title || `g${gi}`} title={g.title || '基本情報'} defaultOpen={true}>
             <div className="grid2">
               {g.fields.map((f) => {
                 const right = f.reflink === 'company'
@@ -96,7 +96,7 @@ export default function OrderTab() {
                 )
               })}
             </div>
-          </div>
+          </KGroup>
         ))}
       </Accordion>
 
@@ -162,8 +162,7 @@ export default function OrderTab() {
               ))}
 
               {orderDetailGroups.map((g) => (
-                <div className="fgroup" key={g.title}>
-                  <div className="subhead">{g.title}</div>
+                <KGroup key={g.title} title={g.title} defaultOpen={true}>
                   <div className="grid2">
                     {g.fields.filter((f) => f.key !== 'branchMaxNo').map((f) => {
                       const right = f.reflink
@@ -175,7 +174,7 @@ export default function OrderTab() {
                       )
                     })}
                   </div>
-                </div>
+                </KGroup>
               ))}
 
               {/* 販売目標変更履歴 */}
