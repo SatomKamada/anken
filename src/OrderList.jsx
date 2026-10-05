@@ -26,7 +26,6 @@ const COLS = [
   { key: 'companyId', label: '企業コード', locked: true, req: true },
   { key: 'client', label: '企業名', type: 'companyName', req: true },
   { key: 'orderCat', label: '受発注発注区分', type: 'select', options: ['-', '個別発注', '一斉発注'] },
-  { key: 'stockLinkFlag', label: '在庫自動紐づけフラグ', type: 'select', options: ['ON', 'OFF'] },
   { key: 'prodType', label: '商品種別', type: 'select', options: ['その他', '食品', '日用品', '医薬品'] },
   { key: 'promo', label: 'プロモーションコード' },
   { key: 'payTerms', label: '支払条件', type: 'select', options: ['末締め翌月末払い', '15日締め払い', '末締め翌月15日払い', '日付指定'] },
@@ -53,6 +52,8 @@ const ITEM_COLS = [
   { key: 'categoryS', label: '商品カテゴリー（小）' },
   { key: 'makerId', label: 'メーカーID' },
   { key: 'makerName', label: 'メーカー名' },
+  { key: 'saleType', label: '規格区分', type: 'select', options: ['通常','わけあり（B品）','わけあり（期限）','抽選・発送あり','抽選・発送なし','先着・発送あり','先着・発送なし','イベント・発送あり','イベント・発送なし','代品','初試し','企画1','企画2','企画3'] },
+  { key: 'stockLinkFlag', label: '在庫自動紐づけフラグ', type: 'select', options: ['ON', 'OFF'] },
   { key: 'attrCode', label: '商品属性情報コード', req: true },
   { key: 'warehouse', label: '倉庫', type: 'select', options: ['佐川（花見川）', '日通倉庫', '自社倉庫'] },
   { key: 'bestBeforeDate', label: '消費/賞味/使用期限', type: 'date' },
@@ -71,7 +72,7 @@ const ITEM_COLS = [
 
 const mkItem = (branchNo, over = {}) => ({ ...makeEmptyOrderDetail(), branchNo, ...over })
 const H = (recordNo, orderNo, promo, status, assignee, createdAt, companyId, client, caseL, caseM, caseS, cat, items) =>
-  ({ recordNo, orderNo, promo, status, assignee, createdAt, companyId, client, caseTypeL: caseL, caseTypeM: caseM, caseTypeS: caseS, orderCat: cat, stockLinkFlag: '', prodType: 'その他', payTerms: '末締め翌月末払い', payDue: '2026-11-30', totalCase: '0', totalPiece: '0', amountIn: '¥0', tax8: '¥0', tax10: '¥0', amountEx: '¥0', items })
+  ({ recordNo, orderNo, promo, status, assignee, createdAt, companyId, client, caseTypeL: caseL, caseTypeM: caseM, caseTypeS: caseS, orderCat: cat, prodType: 'その他', payTerms: '末締め翌月末払い', payDue: '2026-11-30', totalCase: '0', totalPiece: '0', amountIn: '¥0', tax8: '¥0', tax10: '¥0', amountEx: '¥0', items })
 
 // 案件番号から明細を生成（ダミー充実用）
 const itemFromCase = (branchNo, caseNo, extra = {}) => {

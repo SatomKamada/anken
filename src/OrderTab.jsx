@@ -10,8 +10,26 @@ import {
 } from './orderFields.js'
 import { lookupOrderDetailByProduct, lookupCaseProduct, lookupCompany } from './dummyData.js'
 
+const COMPANY_BY_NAME = {
+  '花王株式会社': '001', 'よつ葉乳業': '002', '△△食品': '003',
+  '路興商事株式会社': '6281', 'コンフェックス株式会社': '2576', '株式会社八天堂': '6318',
+  'DKSHジャパン株式会社': '4749', '小林製薬株式会社': '34', 'ラブリー・ペット商会': '3726', '株式会社ライフブリッジ': '5833',
+  '株式会社クレイツ': '5679', '株式会社ミライスビー': '5583', 'サンコー株式会社': '5380', '株式会社QUADS': '4892',
+}
+const COMPANY_NAMES = Object.keys(COMPANY_BY_NAME)
+
 // 明細の全項目（表の列）。発注番号（枝番）Max No は枝番で表現するため除外。
-const DETAIL_COLS = orderDetailGroups.flatMap((g) => g.fields).filter((f) => f.key !== 'branchMaxNo')
+const RAW_DETAIL_COLS = orderDetailGroups.flatMap((g) => g.fields).filter((f) => f.key !== 'branchMaxNo')
+const DETAIL_COLS = []
+for (const f of RAW_DETAIL_COLS) {
+  if (f.key === 'attrCode') {
+    DETAIL_COLS.push({ key: 'saleType', label: '規格区分', type: 'select', options: ['通常','わけあり（B品）','わけあり（期限）','抽選・発送あり','抽選・発送なし','先着・発送あり','先着・発送なし','イベント・発送あり','イベント・発送なし','代品','初試し','企画1','企画2','企画3'] })
+    DETAIL_COLS.push({ key: 'stockLinkFlag', label: '在庫自動紐づけフラグ', type: 'select', options: ['ON', 'OFF'] })
+    DETAIL_COLS.push({ ...f, required: true })
+  } else {
+    DETAIL_COLS.push(f)
+  }
+}
 
 const HEADER_NO = '000123'
 
@@ -20,7 +38,6 @@ export default function OrderTab() {
   const [selected, setSelected] = useState(null)
   const [header, setHeader] = useState(makeEmptyOrderHeader)
   const [rows, setRows] = useState(() => [{ ...makeEmptyOrderDetail(), branchNo: '001' }])
-  const [hmsg, setHmsg] = useState(null)
   const setHeaderField = (k, val) => setHeader({ ...header, [k]: val })
 
   const updateRow = (i, next) => setRows(rows.map((r, idx) => (idx === i ? next : r)))
@@ -36,20 +53,6 @@ export default function OrderTab() {
     clone.branchNo = nextBranch()
     setRows([clone, ...rows])
   }
-  const dupRow = (i) => {
-    const clone = structuredClone(rows[i])
-    clone.branchNo = nextBranch()
-    setRows([clone, ...rows])
-  }
-  const delRow = (i) => setRows(rows.filter((_, idx) => idx !== i))
-
-  // 企業コード参照（ヘッダー）
-  const refCompany = () => {
-    const res = lookupCompany(header.companyId)
-    if (!res.found) { setHmsg({ t: 'warn', m: `企業コードに該当なし（${header.companyId || '未入力'}）。ダミー：001 / 002 / 003` }); return }
-    setHeader({ ...header, ...res.values })
-    setHmsg({ t: 'ok', m: `企業マスタから連携しました（${header.companyId} / ${res.values.companyName}）` })
-  }
 
   // 明細の参照ボタン（JAN→商品マスタ / 案件番号→案件に紐づく商品情報）
   const refDetail = (i, mode) => {
@@ -63,12 +66,6 @@ export default function OrderTab() {
     const res = lookupOrderDetailByProduct({ productCode: mode === 'product' ? r.productCode : '', janCode: mode === 'jan' ? r.janCode : '' })
     if (!res.found) { alert('JANコードに該当なし。手動入力してください。'); return }
     updateRow(i, { ...r, ...res.values })
-  }
-
-  // 案件番号入力時：紐づく商品情報を自動入力
-  const onCaseNoChange = (i, val) => {
-    const res = lookupCaseProduct(val)
-    updateRow(i, { ...rows[i], caseNo: val, ...(res.found ? res.values : {}) })
   }
 
   // 明細セル描画（鍵以外は編集可・参照ボタン付き）
@@ -127,21 +124,41 @@ export default function OrderTab() {
 
       {/* ① 基本情報（分類はサブ見出しで統合／最上位分類はラベル非表示） */}
       <Accordion title="発注ヘッダー情報" defaultOpen={false}>
-        {hmsg && <div className={'notice ' + hmsg.t}>{hmsg.m}</div>}
         {orderHeaderGroups.map((g, gi) => (
           <KGroup key={g.title || `g${gi}`} title={g.title || '基本情報'} defaultOpen={true}>
             <div className="grid2">
               {g.fields.map((f) => {
-                const right = f.reflink === 'company'
-                  ? <button type="button" className="btn-ref" onClick={refCompany}>参照</button>
-                  : null
+                if (f.key === 'orderNo') return null; // ヘッダー番号は不要
+                
+                if (f.key === 'companyId') {
+                  const modF = { ...f, auto: true }; // 企業コードは手動入力不可
+                  return <Field key={f.key} field={modF} value={header[f.key]} onChange={setHeaderField} />
+                }
+                if (f.key === 'client' || f.key === 'companyName') {
+                  // 企業名サジェストと連動
+                  return (
+                    <div className="frow" key={f.key}>
+                      <div className="flabel">{f.label}{f.required && <span className="req">必須</span>}</div>
+                      <div className="fbody">
+                        <input className="inp" list="orderTabCompanyList" value={header[f.key] || ''} 
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setHeader({ ...header, [f.key]: val, companyId: COMPANY_BY_NAME[val] || header.companyId });
+                          }} 
+                        />
+                      </div>
+                    </div>
+                  )
+                }
+
                 return (
-                  <Field key={f.key} field={f} value={header[f.key]} right={right} onChange={setHeaderField} />
+                  <Field key={f.key} field={f} value={header[f.key]} onChange={setHeaderField} />
                 )
               })}
             </div>
           </KGroup>
         ))}
+        <datalist id="orderTabCompanyList">{COMPANY_NAMES.map(o => <option key={o} value={o} />)}</datalist>
       </Accordion>
 
       {/* ② 明細（表形式・1:多／枝番を自動採番） */}
@@ -163,7 +180,6 @@ export default function OrderTab() {
                 <tr>
                   <th className="th-ico"></th>
                   <th>発注明細番号（枝番）</th>
-                  <th>発注番号</th>
                   {DETAIL_COLS.map((f) => (
                     <th key={f.key}>{f.auto && <span className="lock">🔒</span>}{f.label}{(f.required || f.key === 'attrCode') && <span className="req-star">＊</span>}</th>
                   ))}
@@ -174,7 +190,6 @@ export default function OrderTab() {
                   <tr key={i}>
                     <td className="td-ico">#{i + 1}</td>
                     <td className="edit-cell tc"><input className="cell-inp" style={{ minWidth: 70 }} value={row.branchNo ?? ''} onChange={(e) => setRowField(i, 'branchNo', e.target.value)} /></td>
-                    <td className="locked-cell">{(header.orderNo || HEADER_NO)}{row.branchNo || String(i + 1).padStart(3, '0')}</td>
                     {DETAIL_COLS.map((f) => (
                       <td key={f.key} className={f.auto ? 'locked-cell' : 'edit-cell'}>{cell(f, row, i)}</td>
                     ))}
