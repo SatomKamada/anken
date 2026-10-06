@@ -2,7 +2,3 @@
 .cl-list td { white-space: nowrap; }
 .cl-list td.cl-num { text-align: right; font-variant-numeric: tabular-nums; }
 .cl-list tbody tr { cursor: default; }
-.cl-status { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; background: #eef2f5; color: var(--ink-soft); }
-.cl-st-承認待, .cl-st-再申請 { background: var(--warn-bg); color: var(--warn-ink); }
-.cl-st-承認済, .cl-st-確定済 { background: #e3f4ea; color: #1e7b45; }
-.cl-st-差戻し, .cl-st-NG { background: #fdeceb; color: var(--req); }

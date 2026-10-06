@@ -9,7 +9,7 @@ import { caseTypeOptions, caseStatusOptions } from './fields.js'
 export const CASE_LIST_COLS = [
   { key: 'recordNo',      label: 'レコード番号' },
   { key: 'caseNo',        label: '案件No' },
-  { key: 'caseStatus',    label: '案件ステータス', type: 'status' },
+  { key: 'caseStatus',    label: '案件ステータス' },
   { key: 'caseType',      label: '案件種別' },
   { key: 'janCode',       label: 'JAN' },
   { key: 'specId',        label: '商品規格ID' },
@@ -25,6 +25,18 @@ export const CASE_LIST_COLS = [
   { key: 'createdBy',     label: '作成者' },
 ]
 
+// ログインユーザー（ダミー）：新規作成時の作成者・営業担当
+export const CURRENT_USER = '営業担当A'
+
+// 企業名サジェスト → 企業コード（発注タブと同じ対応表）
+export const COMPANY_BY_NAME = {
+  '花王株式会社': '001', 'よつ葉乳業': '002', '△△食品': '003',
+  'ユースキン製薬株式会社': '4108', 'アサヒグループ食品株式会社': '1290',
+  '路興商事株式会社': '6281', 'コンフェックス株式会社': '2576', '株式会社八天堂': '6318',
+  'DKSHジャパン株式会社': '4749', '小林製薬株式会社': '34', 'ラブリー・ペット商会': '3726', '株式会社ライフブリッジ': '5833',
+}
+export const COMPANY_NAMES = Object.keys(COMPANY_BY_NAME)
+
 // 一覧の絞り込み（案件ステータス）
 export const CASE_LIST_VIEWS = ['（すべて）', ...caseStatusOptions]
 
@@ -36,7 +48,7 @@ export const fmtCell = (c, v) => {
 }
 
 // 新規レコード
-export const makeEmptyCaseListRow = (recordNo, at, user = '営業担当A') => ({
+export const makeEmptyCaseListRow = (recordNo, at, user = CURRENT_USER) => ({
   recordNo, caseNo: '', caseStatus: '試算中', caseType: '', janCode: '', specId: '',
   companyName: '', caseName: '', provideCount: '', postStart: '', recruitStart: '',
   joudaiTotalIn: '', trialCostIn: '', createdAt: at, updatedAt: at, createdBy: user,

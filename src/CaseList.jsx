@@ -51,9 +51,7 @@ export default function CaseList({ records, onOpen, onAdd, onDuplicate, onDelete
                 </td>
                 {CASE_LIST_COLS.map((c) => (
                   <td key={c.key} className={c.type === 'money' || c.type === 'number' ? 'cl-num' : ''}>
-                    {c.type === 'status' && r[c.key]
-                      ? <span className={'cl-status cl-st-' + r[c.key]}>{r[c.key]}</span>
-                      : fmtCell(c, r[c.key])}
+                    {fmtCell(c, r[c.key])}
                   </td>
                 ))}
               </tr>

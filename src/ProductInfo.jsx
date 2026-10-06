@@ -3,25 +3,12 @@ import Accordion from './Accordion.jsx'
 import {
   medicineTypeOptions, productTempZoneOptions,
 } from './fields.js'
-import { productMaster, productMasterByJan, jicfsMaster } from './dummyData.js'
 
-// 商品情報（共通）… 添付画像レイアウト準拠 + 商品コード 参照ボタン
+// 商品情報（共通）… 添付画像レイアウト準拠（商品コード・サブタイトル・キャッチコピーは削除）
 export default function ProductInfo({ value, onChange, defaultOpen = false, bare = false }) {
   const v = value
   const [msg, setMsg] = useState(null)
   const set = (k, val) => onChange({ ...v, [k]: val })
-
-  // 商品コード参照 → 商品マスタ
-  const refByProductCode = () => {
-    const code = (v.productCode || '').trim()
-    if (!code) { setMsg({ t: 'warn', m: '商品コードを入力してください' }); return }
-    const p = productMaster[code]
-    if (!p) { setMsg({ t: 'warn', m: `商品マスタに該当なし（${code}）。手動入力してください。` }); return }
-    onChange({ ...v, ...p })
-    setMsg({ t: 'ok', m: `商品マスタから連携しました（${code} / ${p.productName}）` })
-  }
-
-  const copyCode = () => { try { navigator.clipboard?.writeText(v.productCode || '') } catch (e) {} }
 
   const body = (
     <>
@@ -33,17 +20,6 @@ export default function ProductInfo({ value, onChange, defaultOpen = false, bare
         <div className="fbody has-right">
           <input className="inp inp-code" value={v.janCode} onChange={(e) => set('janCode', e.target.value)} placeholder="例：4908013230864" />
           <div className="fnote">商品マスタ→無ければJICFSから連携</div>
-        </div>
-      </div>
-
-      {/* 商品コード（参照ボタンで各項目へ連携） */}
-      <div className="frow">
-        <Label text="商品コード" />
-        <div className="fbody has-right">
-          <input className="inp inp-code" value={v.productCode} onChange={(e) => set('productCode', e.target.value)} placeholder="例：10000001" />
-          <button type="button" className="btn-icon" title="コピー" onClick={copyCode}>⧉</button>
-          <button type="button" className="btn-ref" onClick={refByProductCode}>参照</button>
-          <div className="fnote">商品マスタから連携（JAN・メーカー・商品名・カテゴリは表示のみ）</div>
         </div>
       </div>
 
@@ -60,14 +36,6 @@ export default function ProductInfo({ value, onChange, defaultOpen = false, bare
 
       <Row label="商品名">
         <input className="inp" value={v.productName} readOnly placeholder="表示のみ・入力不要" title="表示のみ（入力不要）" />
-      </Row>
-
-      <Row label="サブタイトル">
-        <input className="inp" value={v.subtitle} onChange={(e) => set('subtitle', e.target.value)} />
-      </Row>
-
-      <Row label="キャッチコピー">
-        <textarea className="inp" rows={3} value={v.catchCopy} onChange={(e) => set('catchCopy', e.target.value)} />
       </Row>
 
       {/* 医薬品：ON + 区分ラジオ（未ONはグレー） */}

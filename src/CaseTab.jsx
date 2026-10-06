@@ -1,20 +1,21 @@
 import React, { useState } from 'react'
 import Accordion from './Accordion.jsx'
+import KGroup from './KGroup.jsx'
+import Field from './Field.jsx'
 import ProductInfo from './ProductInfo.jsx'
-import SpecCommon from './SpecCommon.jsx'
-import SpecList from './SpecList.jsx'
-import { RecordHeader } from './RecordHeader.jsx'
+import CaseSpecInfo from './CaseSpecInfo.jsx'
+import CasePostList from './CasePostList.jsx'
 import CaseList from './CaseList.jsx'
-import { CASE_LIST_INIT, makeEmptyCaseListRow } from './caseListFields.js'
-import './caseList.css'
 import {
   makeEmptyProductInfo, makeEmptyProductAttr, productAttrFields,
-  makeEmptySalesForm, salesFormRows, makeEmptySpecCommon, makeEmptySpec,
+  makeEmptySpecCommon, makeEmptySpec, makeEmptyPriceInfo,
   makeEmptyCaseHead, caseTypeOptions, approvalFlowOptions, caseStatusOptions,
 } from './fields.js'
-
-// 案件ヘッダー番号（自動採番のダミー・連番のみ）
-const CASE_NO = '000045'
+import {
+  CASE_LIST_INIT, makeEmptyCaseListRow, CURRENT_USER, COMPANY_BY_NAME, COMPANY_NAMES,
+} from './caseListFields.js'
+import { lookupCompanySpec } from './dummyData.js'
+import './caseList.css'
 
 const nowStr = () => {
   const d = new Date(), z = (n) => String(n).padStart(2, '0')
@@ -34,7 +35,7 @@ export default function CaseTab() {
   }
   const duplicate = (i) => {
     const at = nowStr()
-    setRecords([{ ...records[i], recordNo: nextNo(), caseNo: '', createdAt: at, updatedAt: at, createdBy: '営業担当A' }, ...records])
+    setRecords([{ ...records[i], recordNo: nextNo(), caseNo: '', createdAt: at, updatedAt: at, createdBy: CURRENT_USER }, ...records])
   }
   const remove = (i) => setRecords(records.filter((_, idx) => idx !== i))
 
@@ -46,137 +47,111 @@ export default function CaseTab() {
       </div>
     )
   }
+  // key でレコードごとに詳細の入力状態をリセット
+  return <CaseDetail key={cur?.recordNo} rec={cur} onBack={() => setView('list')} />
+}
+
+// ------------------------------------------------------------
+// 詳細：発注タブと同じ構成
+//   ← 一覧に戻る ＋ 案件ヘッダー番号 ／ 企業名
+//   ① 案件ヘッダー情報（案件種別〜営業担当 → 基本情報 → 商品規格情報）
+//   ② 案件明細（掲載履歴・価格情報）
+// ------------------------------------------------------------
+const HEAD_FIELDS = [
+  { key: 'caseType',     label: '案件種別',       type: 'select', options: caseTypeOptions },
+  { key: 'approvalFlow', label: '承認フロー',     type: 'select', options: approvalFlowOptions },
+  { key: 'caseStatus',   label: '案件ステータス', type: 'select', options: caseStatusOptions },
+]
+
+// 商品規格情報（案件に1つ）の初期値：旧共通 ＋ 旧明細の規格項目
+const makeCaseSpec = (specCode = '') => {
+  const { priceInfos, ...spec } = makeEmptySpec()
+  return { ...makeEmptySpecCommon(), ...spec, specCode }
+}
+
+function CaseDetail({ rec, onBack }) {
+  const headerNo = rec?.caseNo ? rec.caseNo.slice(0, 6) : ''
+
+  const [caseHead, setCaseHead] = useState(() => ({
+    ...makeEmptyCaseHead(),
+    caseType: rec?.caseType || '',
+    caseStatus: rec?.caseStatus || '',
+    companyName: rec?.companyName || '',
+    companyCode: COMPANY_BY_NAME[rec?.companyName] || '',
+    salesRep: rec?.createdBy || CURRENT_USER, // 営業担当＝ログインユーザー（作成者）
+  }))
+  const [product, setProduct] = useState(() => ({ ...makeEmptyProductInfo(), janCode: rec?.janCode || '' }))
+  const [attr, setAttr] = useState(makeEmptyProductAttr)
+  const [spec, setSpec] = useState(() => {
+    const s = makeCaseSpec(rec?.specId || '')
+    const res = lookupCompanySpec(COMPANY_BY_NAME[rec?.companyName] || '')
+    return res?.found ? { ...s, businessType: res.values.businessType, choppleType: res.values.choppleType } : s
+  })
+  const [postRows, setPostRows] = useState(() => [makeEmptyPriceInfo()])
+
+  const setHead = (k, val) => setCaseHead({ ...caseHead, [k]: val })
+  const setAttrField = (k, val) => setAttr({ ...attr, [k]: val })
+
+  // 企業名サジェスト → 企業コード自動。企業マスタにあれば業態区分・ちょっプル種別も自動
+  const setCompanyName = (val) => {
+    const code = COMPANY_BY_NAME[val] || ''
+    setCaseHead({ ...caseHead, companyName: val, companyCode: code })
+    const res = code ? lookupCompanySpec(code) : null
+    setSpec((s) => ({
+      ...s,
+      businessType: res?.found ? res.values.businessType : '',
+      choppleType: res?.found ? res.values.choppleType : '',
+    }))
+  }
 
   return (
     <div className="tab-panel">
       <div className="detail-back">
-        <button type="button" className="btn-mini" onClick={() => setView('list')}>← 一覧に戻る</button>
-        {cur && <span className="detail-rec">レコード番号 {cur.recordNo}{cur.caseName ? ` ／ ${cur.caseName}` : ''}</span>}
-      </div>
-      {/* key でレコードごとに詳細の入力状態をリセット */}
-      <CaseDetail key={cur?.recordNo} rec={cur} />
-    </div>
-  )
-}
-
-// ------------------------------------------------------------
-// 詳細（従来の案件画面）
-//   一覧から開いたレコードの 案件ヘッダー番号・案件種別・案件ステータス・JAN を初期表示
-// ------------------------------------------------------------
-function CaseDetail({ rec }) {
-  const headerNo = rec?.caseNo ? rec.caseNo.slice(0, 6) : CASE_NO
-  const [caseHead, setCaseHead] = useState(() => ({
-    ...makeEmptyCaseHead(), caseType: rec?.caseType || '', caseStatus: rec?.caseStatus || '',
-  }))
-  const [product, setProduct] = useState(() => ({ ...makeEmptyProductInfo(), janCode: rec?.janCode || '' }))
-  const [attr, setAttr] = useState(makeEmptyProductAttr)
-  const [salesForm, setSalesForm] = useState(makeEmptySalesForm)
-  const [specCommon, setSpecCommon] = useState(makeEmptySpecCommon)
-  const [specRows, setSpecRows] = useState(() => [makeEmptySpec()])
-
-  // 共通の参照ボタン押下 → 個別明細（基本）へ仮入力
-  const seedSpec = (seed) => {
-    setSpecRows((rows) => {
-      if (rows.length === 0) {
-        const r = makeEmptySpec()
-        return [{ ...r, ...seed }]
-      }
-      return rows.map((r, idx) => (idx === 0 ? { ...r, ...seed } : r))
-    })
-  }
-
-  const setAttrField = (k, val) => setAttr({ ...attr, [k]: val })
-  const setSF = (key, patch) => setSalesForm({ ...salesForm, [key]: { ...salesForm[key], ...patch } })
-
-  return (
-    <div className="tab-panel">
-      {/* 最上部：基本情報番号（1件・自動採番） */}
-      <RecordHeader badge="基本情報" label="案件ヘッダー番号" no={headerNo} />
-
-      {/* 基本情報の上（アコーディオンなし）：案件種別・各種フラグ */}
-      <div className="fgroup casehead">
-        <div className="frow">
-          <div className="flabel">案件種別</div>
-          <div className="fbody">
-            <select className="inp" value={caseHead.caseType} onChange={(e) => setCaseHead({ ...caseHead, caseType: e.target.value })}>
-              <option value="">選択してください</option>
-              {caseTypeOptions.map((o) => <option key={o}>{o}</option>)}
-            </select>
-          </div>
-        </div>
-        <div className="frow">
-          <div className="flabel">承認フロー</div>
-          <div className="fbody">
-            <select className="inp" value={caseHead.approvalFlow} onChange={(e) => setCaseHead({ ...caseHead, approvalFlow: e.target.value })}>
-              <option value="">選択してください</option>
-              {approvalFlowOptions.map((o) => <option key={o}>{o}</option>)}
-            </select>
-          </div>
-        </div>
-        <div className="frow">
-          <div className="flabel">案件ステータス</div>
-          <div className="fbody">
-            <select className="inp" value={caseHead.caseStatus} onChange={(e) => setCaseHead({ ...caseHead, caseStatus: e.target.value })}>
-              <option value="">選択してください</option>
-              {caseStatusOptions.map((o) => <option key={o}>{o}</option>)}
-            </select>
-          </div>
-        </div>
+        <button type="button" className="btn-mini" onClick={onBack}>← 一覧に戻る</button>
+        <span className="detail-rec">
+          案件ヘッダー番号 {headerNo || '（新規・自動採番）'}{caseHead.companyName ? ` ／ ${caseHead.companyName}` : ''}
+        </span>
       </div>
 
-      {/* ① 基本情報（商品情報＋商品属性情報＋商品規格設定＋商品規格情報（共通）を統合） */}
-      <Accordion title="基本情報" defaultOpen={false}>
-        {/* 商品情報 */}
-        <ProductInfo value={product} onChange={setProduct} bare />
-
-        {/* 商品属性情報 */}
-        <div className="subhead lead">商品属性情報</div>
+      {/* ① 案件ヘッダー情報 */}
+      <Accordion title="案件ヘッダー情報" defaultOpen={true}>
+        {/* 基本情報の上：案件種別・承認フロー・案件ステータス・企業コード・企業名・営業担当 */}
         <div className="grid2">
-          {productAttrFields.map((f) => (
-            <div className="frow" key={f.key}>
-              <div className="flabel">{f.label}</div>
-              <div className="fbody">
-                {f.type === 'checkbox' ? (
-                  <label className="chk-inline"><input type="checkbox" checked={!!attr[f.key]} onChange={(e) => setAttrField(f.key, e.target.checked)} /><span>{f.boolLabel || 'ON'}</span></label>
-                ) : (
-                  <input className="inp" value={attr[f.key] ?? ''} onChange={(e) => setAttrField(f.key, e.target.value)} />
-                )}
-              </div>
-            </div>
+          {HEAD_FIELDS.map((f) => (
+            <Field key={f.key} field={f} value={caseHead[f.key]} onChange={setHead} />
           ))}
-        </div>
-        {/* プロモーション説明（新規作成フラグON時のみ活性・100字程度） */}
-        <div className="frow">
-          <div className="flabel">プロモーション説明</div>
-          <div className="fbody">
-            <textarea className="inp" rows={3} maxLength={120} disabled={!attr.newFlag}
-              placeholder={attr.newFlag ? '100字程度で入力' : '新規作成フラグをONにすると入力できます'}
-              value={attr.promoDesc || ''} onChange={(e) => setAttrField('promoDesc', e.target.value)} />
-            {attr.newFlag && <div className="fnote">{(attr.promoDesc || '').length} / 120</div>}
+          <Field field={{ key: 'companyCode', label: '企業コード', auto: true }} value={caseHead.companyCode} onChange={() => {}} />
+          <div className="frow">
+            <div className="flabel">企業名<span className="req">必須</span></div>
+            <div className="fbody">
+              <input className="inp" list="caseTabCompanyList" value={caseHead.companyName} placeholder="入力すると候補が表示されます"
+                onChange={(e) => setCompanyName(e.target.value)} />
+              <datalist id="caseTabCompanyList">{COMPANY_NAMES.map((o) => <option key={o} value={o} />)}</datalist>
+            </div>
           </div>
+          <Field field={{ key: 'salesRep', label: '営業担当', auto: true }} value={caseHead.salesRep} onChange={() => {}} />
         </div>
 
-        {/* 商品規格設定 */}
-        <div className="subhead lead">商品規格設定</div>
-        <table className="ptable">
-          <thead><tr><th>販売形態</th><th>利用</th><th>上限数</th></tr></thead>
-          <tbody>
-            {salesFormRows.map((sf) => (
-              <tr key={sf.key}>
-                <td className="pch">{sf.label}</td>
-                <td className="tc"><input type="checkbox" checked={salesForm[sf.key].enabled} onChange={(e) => setSF(sf.key, { enabled: e.target.checked })} /></td>
-                <td><input className="inp" type="number" value={salesForm[sf.key].limit} disabled={!salesForm[sf.key].enabled} onChange={(e) => setSF(sf.key, { limit: e.target.value })} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <KGroup title="基本情報" defaultOpen={true}>
+          {/* 商品情報 */}
+          <ProductInfo value={product} onChange={setProduct} bare />
 
-        {/* 商品規格情報（共通） */}
-        <SpecCommon value={specCommon} onChange={setSpecCommon} onSeedSpec={seedSpec} bare />
+          {/* 商品属性情報 */}
+          <div className="subhead lead">商品属性情報</div>
+          <div className="grid2">
+            {productAttrFields.map((f) => (
+              <Field key={f.key} field={f} value={attr[f.key]} onChange={setAttrField} />
+            ))}
+          </div>
+        </KGroup>
+
+        <KGroup title="商品規格情報" defaultOpen={true}>
+          <CaseSpecInfo value={spec} onChange={setSpec} />
+        </KGroup>
       </Accordion>
 
-      {/* ② 明細（商品規格・掲載履歴＝明細、枝番を自動採番） */}
-      <SpecList rows={specRows} setRows={setSpecRows} headerNo={headerNo} />
+      {/* ② 案件明細（掲載履歴・価格情報）＝ 1:多 */}
+      <CasePostList rows={postRows} setRows={setPostRows} headerNo={headerNo} />
     </div>
   )
 }
