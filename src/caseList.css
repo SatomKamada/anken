@@ -2,3 +2,7 @@
 .cl-list td { white-space: nowrap; }
 .cl-list td.cl-num { text-align: right; font-variant-numeric: tabular-nums; }
 .cl-list tbody tr { cursor: default; }
+
+/* ===== 案件 詳細 ===== */
+/* 必須・自動ラベルは一旦非表示（戻す場合はこの行を削除） */
+.case-detail .req, .case-detail .autotag { display: none; }

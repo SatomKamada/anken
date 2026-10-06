@@ -57,7 +57,7 @@ export default function ProductInfo({ value, onChange, defaultOpen = false, bare
     </>
   )
 
-  if (bare) return (<><div className="subhead lead">商品情報</div>{body}</>)
+  if (bare) return (<><div className="subhead">商品情報</div>{body}</>)
   return <Accordion title="商品情報（ヘッダー）" defaultOpen={defaultOpen}>{body}</Accordion>
 }
 
