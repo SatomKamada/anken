@@ -18,6 +18,7 @@ import {
   productSuggestFor,
   setProductName,
   lookupSpecPosts,
+  lookupSpecInfo,
   touch,
   createPageChangeInitial,
 } from './pageChangeFields.js'
@@ -83,7 +84,7 @@ function PageChangeDetail({ form, onChange }) {
 
   // 商品規格ID → 紐づく掲載履歴を呼び出し（Enter）
   const lookupSpec = () => {
-    const res = lookupSpecPosts(form)
+    const res = form.changeType === T.PAGE ? lookupSpecInfo(form) : lookupSpecPosts(form)
     setMsg({ t: res.ok ? 'ok' : 'warn', m: res.msg })
     if (res.ok) onChange(res.record)
   }
@@ -103,15 +104,21 @@ function PageChangeDetail({ form, onChange }) {
     </td>
   )
 
-  // 商品規格ID入力欄（期間設定・公開/非公開で共通）
+  // 商品規格ID入力欄（掲載ページ変更・期間設定・公開/非公開で共通）
+  //   掲載ページ変更：Enterで企業名・商品名のみ補完 / 期間・公開：Enterで紐づく掲載履歴を呼び出し
+  const isPage = form.changeType === T.PAGE
   const specIdRow = (
     <div className="frow">
-      <div className="flabel">商品規格ID<span className="req">必須</span></div>
+      <div className="flabel">商品規格ID{!isPage && <span className="req">必須</span>}</div>
       <div className="fbody">
         <input className="inp inp-code" value={form.specId} placeholder="商品規格ID入力→Enter"
           onChange={(e) => set({ specId: e.target.value })}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); lookupSpec() } }} />
-        <div className="fnote">Enterで紐づく掲載履歴を呼び出し（ダミー：{SPEC_ID_SAMPLES.join(' / ')}）。変更する掲載履歴の「変更対象」にチェックしてください（一覧にはチェックした掲載履歴のみ表示）。</div>
+        <div className="fnote">
+          {isPage
+            ? `Enterで企業名・商品名を補完（空欄の場合のみ）。ダミー：${SPEC_ID_SAMPLES.join(' / ')}`
+            : `Enterで紐づく掲載履歴を呼び出し（ダミー：${SPEC_ID_SAMPLES.join(' / ')}）。変更する掲載履歴の「変更対象」にチェックしてください（一覧にはチェックした掲載履歴のみ表示）。`}
+        </div>
       </div>
     </div>
   )
@@ -152,6 +159,8 @@ function PageChangeDetail({ form, onChange }) {
       {form.changeType === T.PAGE && (
         <section className="pc-section">
           <h3 className="pc-title">掲載ページ変更</h3>
+          {specIdRow}
+          <div className="pc-mt"></div>
           {form.pageRows.map((r, i) => (
             <div className="pc-row" key={i}>
               <div className="pc-cell pc-w-target">

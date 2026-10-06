@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {
   PAGE_CHANGE_LIST_COLS, PAGE_CHANGE_TYPE, PAGE_CHANGE_TARGET_GROUPS,
-  COMPANY_SUGGEST, productSuggestFor, setProductName, lookupSpecPosts,
+  COMPANY_SUGGEST, productSuggestFor, setProductName, lookupSpecPosts, lookupSpecInfo,
 } from './pageChangeFields.js'
 
 // 掲載ページ変更：一覧（検索画面）— 発注タブの OrderList と同じ kintone 風
@@ -51,7 +51,7 @@ export default function PageChangeList({ records, onOpen, onAdd, onDuplicate, on
     return setRec(i, { posts: r.posts.map((x, k) => (k === j ? { ...x, [c.key]: val } : x)) })
   }
   const enterSpec = (i) => {
-    const res = lookupSpecPosts(records[i])
+    const res = records[i].changeType === T.PAGE ? lookupSpecInfo(records[i]) : lookupSpecPosts(records[i])
     setMsg({ t: res.ok ? 'ok' : 'warn', m: `レコード ${records[i].recordNo}：${res.msg}` })
     if (res.ok) onUpdate(i, res.record)
   }
@@ -191,7 +191,7 @@ export default function PageChangeList({ records, onOpen, onAdd, onDuplicate, on
       <div className="fnote" style={{ marginTop: 8 }}>
         ※ 1レコードに複数の変更明細（掲載ページ変更の行・変更対象の掲載履歴・在庫移動の行）がある場合は明細の行数ぶん表示します。
         掲載履歴は詳細画面で「変更対象」にチェックしたもののみ表示します。
-        変更種別に関係しない項目はグレー表示です。商品規格IDは入力してEnterで掲載履歴を呼び出し。行頭アイコンで詳細へ。
+        変更種別に関係しない項目はグレー表示です。商品規格IDは入力してEnterで掲載履歴を呼び出し（掲載ページ変更は企業名・商品名のみ補完）。行頭アイコンで詳細へ。
       </div>
     </div>
   )

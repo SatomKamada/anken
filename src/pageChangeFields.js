@@ -191,7 +191,7 @@ export const createPageChangeInitial = (recordNo = '', assignee = CURRENT_USER, 
   productName: '',
   changeType: '',
   pageRows: [{ target: '', content: '' }],
-  specId: '',          // 期間設定・公開/非公開で使用
+  specId: '',          // 掲載ページ変更・期間設定・公開/非公開で使用
   posts: [],           // 商品規格IDに紐づく掲載履歴（変更後の値＋orig）
   stockRows: [{ fromId: '', toId: '', qty: '' }],
   memo: '',
@@ -236,6 +236,19 @@ export const lookupSpecPosts = (r) => {
   }
 }
 
+// 商品規格ID → 企業名・商品名のみ補完（掲載ページ変更で使用。掲載履歴は呼び出さない）
+export const lookupSpecInfo = (r) => {
+  const id = (r.specId || '').trim()
+  if (!id) return { ok: false, msg: '商品規格IDを入力してください' }
+  const m = SPEC_POST_MASTER[id]
+  if (!m) return { ok: false, msg: `商品規格IDに該当なし（${id}）。ダミー：${SPEC_ID_SAMPLES.join(' / ')}` }
+  return {
+    ok: true,
+    msg: `商品規格ID ${id}（${m.companyName} / ${m.productName}）`,
+    record: { ...r, companyName: r.companyName || m.companyName, productName: r.productName || m.productName },
+  }
+}
+
 // ------------------------------------------------------------
 // 一覧（検索画面）
 // ------------------------------------------------------------
@@ -248,7 +261,7 @@ export const PAGE_CHANGE_LIST_COLS = [
   { key: 'companyName', label: '企業名',       group: '共通', scope: 'rec', type: 'company' },
   { key: 'productName', label: '商品名',       group: '共通', scope: 'rec', type: 'product' },
   { key: 'changeType',  label: '変更種別',     group: '共通', scope: 'rec', type: 'select', options: Object.values(_T), req: true },
-  { key: 'specId',      label: '商品規格ID',   group: '共通', scope: 'rec', type: 'specId', types: [_T.PERIOD, _T.PUBLISH] },
+  { key: 'specId',      label: '商品規格ID',   group: '共通', scope: 'rec', type: 'specId', types: [_T.PAGE, _T.PERIOD, _T.PUBLISH] },
 
   { key: 'target',  label: '変更対象の項目', group: '掲載ページ変更', scope: 'page', type: 'target', types: [_T.PAGE] },
   { key: 'content', label: '変更内容',       group: '掲載ページ変更', scope: 'page', types: [_T.PAGE] },
@@ -291,6 +304,6 @@ export const PAGE_CHANGE_INIT = [
     specId: '20000002', posts: publishSample(), memo: 'Yahoo店のみ非公開に' }),
   mk('2', '伊波 篤', '2026-10-05 11:05', { companyName: '花王株式会社', productName: 'ビオレUV アクアリッチ ウォータリーエッセンス', changeType: PAGE_CHANGE_TYPE.PERIOD,
     specId: '20000001', posts: periodSample(), memo: '秋の再販の掲載終了を延長' }),
-  mk('1', '営業担当A', '2026-10-02 14:30', { companyName: '花王株式会社', productName: 'ビオレUV アクアリッチ ウォータリーエッセンス', changeType: PAGE_CHANGE_TYPE.PAGE,
+  mk('1', '営業担当A', '2026-10-02 14:30', { companyName: '花王株式会社', productName: 'ビオレUV アクアリッチ ウォータリーエッセンス', changeType: PAGE_CHANGE_TYPE.PAGE, specId: '20000001',
     pageRows: [{ target: '掲載履歴.postName', content: '「夏の日焼け止めフェア」→「夏のUVケアフェア」' }], memo: '' }),
 ]
