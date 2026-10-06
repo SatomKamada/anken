@@ -2,11 +2,13 @@ import React, { useState } from 'react'
 import CaseTab from './CaseTab.jsx'
 import SetProductTab from './SetProductTab.jsx'
 import OrderTab from './OrderTab.jsx'
+import PageChange from './PageChange.jsx'
 
 const TABS = [
   { key: 'case',  label: '案件' },
   { key: 'set',   label: '案件（セット商品）' },
   { key: 'order', label: '発注' },
+  { key: 'pageChange', label: '掲載ページ変更' },
 ]
 
 export default function App() {
@@ -33,7 +35,8 @@ export default function App() {
       <main className="content">
         {tab === 'case' ? <CaseTab />
           : tab === 'set' ? <SetProductTab />
-          : <OrderTab />}
+          : tab === 'order' ? <OrderTab />
+          : <PageChange />}
       </main>
     </div>
   )
