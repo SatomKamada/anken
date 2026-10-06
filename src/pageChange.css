@@ -2,22 +2,26 @@
 .pc-wrap { display: flex; flex-direction: column; gap: 12px; }
 .pc-section { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; background: var(--panel); }
 .pc-title { margin: 0 0 12px; font-size: 14px; font-weight: 700; color: var(--ink); border-left: 4px solid var(--brand); padding-left: 8px; }
-.pc-row { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+/* ラベルの高さを揃えるため上揃え。区切り記号・削除ボタン等は下揃え */
+.pc-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.pc-row > .pc-sep, .pc-row > .pc-del, .pc-row > .pc-err { align-self: flex-end; }
 .pc-cell { display: flex; flex-direction: column; gap: 4px; }
-.pc-label { font-size: 12px; color: var(--ink-soft); }
+.pc-label { font-size: 12px; color: var(--ink-soft); line-height: 1.4; }
 .pc-grow { flex: 1; min-width: 280px; }
 .pc-w-target { width: 260px; }
 .pc-w-qty { width: 110px; }
-.pc-rowhead { width: 70px; font-weight: 700; font-size: 13px; padding-bottom: 8px; }
 .pc-sep { padding-bottom: 8px; color: var(--auto); }
-.pc-err { color: var(--req); font-size: 12px; padding-bottom: 8px; }
+.pc-err { color: var(--req); font-size: 12px; }
 .pc-note { font-size: 12px; color: var(--warn-ink); margin: -4px 0 10px; }
 .pc-stock-box { background: var(--bg); border: 1px solid var(--line-strong); border-radius: 8px; padding: 12px 14px 2px; margin-bottom: 10px; }
 .pc-center { text-align: center; }
 .pc-accent { color: #e67e22; }
-.pc-table { border-collapse: collapse; font-size: 13px; }
-.pc-table th, .pc-table td { border: 1px solid var(--line); padding: 6px 16px; }
-.pc-table th { background: var(--bg); font-weight: 600; }
 .pc-add { border: 1px dashed var(--brand); color: var(--brand); background: var(--panel); border-radius: 5px; padding: 4px 12px; cursor: pointer; font-size: 12px; }
 .pc-del { border: none; background: transparent; color: var(--auto); font-size: 18px; cursor: pointer; padding-bottom: 6px; }
 .pc-del:hover { color: var(--req); }
+.pc-mt { margin-top: 10px; }
+/* 掲載履歴テーブル（期間・公開設定） */
+.pc-ptable .cell-inp { min-width: 130px; }
+.pc-ptable td.pc-changed { background: var(--warn-bg) !important; }
+.pc-before { font-size: 10px; color: var(--warn-ink); padding: 0 5px 2px; }
+.pc-ptable tbody tr { cursor: default; }
