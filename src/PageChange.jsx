@@ -10,11 +10,15 @@ import {
   PUBLISH_CHANNELS,
   PUBLISH_STATUS_OPTIONS,
   PAGE_CHANGE_TARGET_GROUPS,
-  SPEC_POST_MASTER,
+  PAGE_CHANGE_AUTO_FIELDS,
   SPEC_ID_SAMPLES,
   PERIOD_KEYS,
   PAGE_CHANGE_INIT,
-  toPostRows,
+  COMPANY_SUGGEST,
+  productSuggestFor,
+  setProductName,
+  lookupSpecPosts,
+  touch,
   createPageChangeInitial,
 } from './pageChangeFields.js'
 
@@ -28,9 +32,13 @@ export default function PageChange() {
 
   const add = () => { setRecords([createPageChangeInitial(nextNo()), ...records]) }
   const addAndOpen = () => { add(); setCur(0); setView('detail') }
-  const duplicate = (i) => setRecords([{ ...structuredClone(records[i]), recordNo: nextNo() }, ...records])
+  const duplicate = (i) => {
+    const base = createPageChangeInitial(nextNo())
+    setRecords([{ ...structuredClone(records[i]), recordNo: base.recordNo, assignee: base.assignee, createdAt: base.createdAt, updatedAt: base.updatedAt }, ...records])
+  }
   const remove = (i) => setRecords(records.filter((_, idx) => idx !== i))
-  const updateCur = (next) => setRecords(records.map((r, idx) => (idx === cur ? next : r)))
+  // 編集時は変更日時を更新
+  const update = (i, next) => setRecords((rs) => rs.map((r, idx) => (idx === i ? touch(next) : r)))
 
   if (view === 'list') {
     return (
@@ -41,6 +49,7 @@ export default function PageChange() {
           onAdd={addAndOpen}
           onDuplicate={duplicate}
           onDelete={remove}
+          onUpdate={update}
         />
       </div>
     )
@@ -51,7 +60,7 @@ export default function PageChange() {
       <div className="detail-back">
         <button type="button" className="btn-mini" onClick={() => setView('list')}>← 一覧に戻る</button>
       </div>
-      <PageChangeDetail form={records[cur]} onChange={updateCur} />
+      <PageChangeDetail form={records[cur]} onChange={(next) => update(cur, next)} />
     </div>
   )
 }
@@ -74,16 +83,9 @@ function PageChangeDetail({ form, onChange }) {
 
   // 商品規格ID → 紐づく掲載履歴を呼び出し（Enter）
   const lookupSpec = () => {
-    const id = (form.specId || '').trim()
-    if (!id) { setMsg({ t: 'warn', m: '商品規格IDを入力してください' }); return }
-    const m = SPEC_POST_MASTER[id]
-    if (!m) { setMsg({ t: 'warn', m: `商品規格IDに該当なし（${id}）。ダミー：${SPEC_ID_SAMPLES.join(' / ')}` }); return }
-    set({
-      posts: toPostRows(m.posts),
-      companyName: form.companyName || m.companyName,
-      productName: form.productName || m.productName,
-    })
-    setMsg({ t: 'ok', m: `商品規格ID ${id} に紐づく掲載履歴を ${m.posts.length}件 呼び出しました` })
+    const res = lookupSpecPosts(form)
+    setMsg({ t: res.ok ? 'ok' : 'warn', m: res.msg })
+    if (res.ok) onChange(res.record)
   }
   const setPost = (i, patch) => set({ posts: form.posts.map((p, idx) => (idx === i ? { ...p, ...patch } : p)) })
 
@@ -108,8 +110,25 @@ function PageChangeDetail({ form, onChange }) {
 
       {msg && <div className={'notice ' + msg.t}>{msg.m}</div>}
 
-      {/* 企業名・商品名・変更種別 */}
+      {/* 企業名・商品名（サジェスト）・変更種別 */}
       <section className="pc-section">
+        <div className="frow">
+          <div className="flabel">企業名</div>
+          <div className="fbody">
+            <input className="inp" list="pcDetailCompany" value={form.companyName} placeholder="入力すると候補が表示されます"
+              onChange={(e) => set({ companyName: e.target.value })} />
+            <datalist id="pcDetailCompany">{COMPANY_SUGGEST.map((o) => <option key={o} value={o} />)}</datalist>
+          </div>
+        </div>
+        <div className="frow">
+          <div className="flabel">商品名</div>
+          <div className="fbody">
+            <input className="inp" list="pcDetailProduct" value={form.productName} placeholder="入力すると候補が表示されます"
+              onChange={(e) => onChange(setProductName(form, e.target.value))} />
+            <datalist id="pcDetailProduct">{productSuggestFor(form.companyName).map((o) => <option key={o} value={o} />)}</datalist>
+            <div className="fnote">企業名を選択するとその企業の商品に絞り込み。商品名を選択すると、企業名が空欄の場合は自動入力。</div>
+          </div>
+        </div>
         {PAGE_CHANGE_FIELDS.map((fd) => (
           <Field key={fd.key} field={fd} value={form[fd.key]} onChange={onField} />
         ))}
@@ -270,6 +289,15 @@ function PageChangeDetail({ form, onChange }) {
       {/* メモ（一番下） */}
       <section className="pc-section">
         <Field field={PAGE_CHANGE_MEMO_FIELD} value={form.memo} onChange={onField} />
+      </section>
+
+      {/* 管理情報（自動・編集不可） */}
+      <section className="pc-section">
+        <div className="grid2">
+          {PAGE_CHANGE_AUTO_FIELDS.map((fd) => (
+            <Field key={fd.key} field={fd} value={form[fd.key]} onChange={() => {}} />
+          ))}
+        </div>
       </section>
     </div>
   )

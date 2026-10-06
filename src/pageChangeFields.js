@@ -3,7 +3,7 @@
 //   orderFields.js と同様に fields.js から分離
 // ============================================================
 import {
-  productAttrFields, salesFormRows,
+  productAttrFields, salesFormRows, companyNameOptions,
   specTopFields, specGroups, lotteryFields, surveyFields,
 } from './fields.js'
 
@@ -15,11 +15,16 @@ export const PAGE_CHANGE_TYPE = {
 }
 
 // 共通項目（Field.jsx で描画）※レコード番号はヘッダーバーに表示のみ
+//   企業名・商品名はサジェスト入力のため PageChange.jsx 側で描画
 export const PAGE_CHANGE_FIELDS = [
-  { key: 'companyName', label: '企業名', type: 'text' },
-  { key: 'productName', label: '商品名', type: 'text' },
   { key: 'changeType',  label: '変更種別', type: 'select', required: true,
     options: Object.values(PAGE_CHANGE_TYPE) },
+]
+// 管理情報（自動・編集不可）
+export const PAGE_CHANGE_AUTO_FIELDS = [
+  { key: 'assignee',  label: '担当者',   type: 'text', auto: true },
+  { key: 'createdAt', label: '作成日時', type: 'text', auto: true },
+  { key: 'updatedAt', label: '変更日時', type: 'text', auto: true },
 ]
 export const PAGE_CHANGE_MEMO_FIELD = { key: 'memo', label: 'メモ', type: 'textarea' }
 
@@ -167,8 +172,20 @@ export const PERIOD_KEYS = [
 // 商品規格ID参照結果 → 変更用の掲載履歴行（orig＝変更前の値を保持）
 export const toPostRows = (posts) => posts.map((p) => ({ ...structuredClone(p), orig: structuredClone(p) }))
 
-export const createPageChangeInitial = (recordNo = '') => ({
+// ログインユーザー・現在日時（ダミー）
+export const CURRENT_USER = '営業担当A'
+export const nowStr = () => {
+  const d = new Date(), z = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`
+}
+// 編集時に変更日時を更新
+export const touch = (r) => ({ ...r, updatedAt: nowStr() })
+
+export const createPageChangeInitial = (recordNo = '', assignee = CURRENT_USER, at = nowStr()) => ({
   recordNo,
+  assignee,
+  createdAt: at,
+  updatedAt: at,
   companyName: '',
   productName: '',
   changeType: '',
@@ -180,41 +197,80 @@ export const createPageChangeInitial = (recordNo = '') => ({
 })
 
 // ------------------------------------------------------------
-// 一覧（検索画面）
+// サジェスト候補（ダミー）：企業名・商品名
 // ------------------------------------------------------------
-export const PAGE_CHANGE_LIST_COLS = [
-  { key: 'recordNo', label: 'レコード番号' },
-  { key: 'companyName', label: '企業名' },
-  { key: 'productName', label: '商品名' },
-  { key: 'changeType', label: '変更種別' },
-  { key: 'specId', label: '商品規格ID' },
-  { key: 'summary', label: '変更内容（概要）' },
-  { key: 'memo', label: 'メモ' },
+export const PRODUCT_MASTER = [
+  ...Object.values(SPEC_POST_MASTER).map((m) => ({ productName: m.productName, companyName: m.companyName })),
+  { productName: 'ビオレ ザ ハンド 泡ハンドソープ', companyName: '花王株式会社' },
+  { productName: 'アタック ZERO 詰替 810g', companyName: '花王株式会社' },
+  { productName: 'よつ葉 北海道十勝 牛乳 1000ml', companyName: 'よつ葉乳業' },
+  { productName: 'よつ葉 ヨーグルト プレーン 400g', companyName: 'よつ葉乳業' },
+  { productName: '国産しらす干し 80g', companyName: '△△食品' },
+  { productName: 'ユースキンA 120g', companyName: 'ユースキン製薬株式会社' },
+  { productName: 'ミンティア ワイルド＆クール', companyName: 'アサヒグループ食品株式会社' },
 ]
+export const COMPANY_SUGGEST = [...new Set([...companyNameOptions, ...PRODUCT_MASTER.map((p) => p.companyName)])]
+// 企業名が候補に一致すればその企業の商品のみ、それ以外は全商品
+export const productSuggestFor = (companyName) => {
+  const hit = PRODUCT_MASTER.filter((p) => p.companyName === companyName)
+  return (hit.length ? hit : PRODUCT_MASTER).map((p) => p.productName)
+}
+export const companyOfProduct = (productName) => PRODUCT_MASTER.find((p) => p.productName === productName)?.companyName
 
-// 一覧に表示する変更内容の概要
-export const summarize = (r) => {
-  const T = PAGE_CHANGE_TYPE
-  if (r.changeType === T.PAGE) {
-    const ts = r.pageRows.filter((x) => x.target).map((x) => TARGET_LABEL[x.target] || x.target)
-    return ts.length ? ts.join('、') : ''
+// 商品名を選択したら、企業名が空欄の場合のみ企業名を補完
+export const setProductName = (r, productName) => ({
+  ...r, productName, companyName: r.companyName || companyOfProduct(productName) || '',
+})
+
+// 商品規格ID → 掲載履歴の呼び出し（詳細・一覧の Enter で共通利用）
+export const lookupSpecPosts = (r) => {
+  const id = (r.specId || '').trim()
+  if (!id) return { ok: false, msg: '商品規格IDを入力してください' }
+  const m = SPEC_POST_MASTER[id]
+  if (!m) return { ok: false, msg: `商品規格IDに該当なし（${id}）。ダミー：${SPEC_ID_SAMPLES.join(' / ')}` }
+  return {
+    ok: true,
+    msg: `商品規格ID ${id} に紐づく掲載履歴を ${m.posts.length}件 呼び出しました`,
+    record: { ...r, posts: toPostRows(m.posts), companyName: r.companyName || m.companyName, productName: r.productName || m.productName },
   }
-  if (r.changeType === T.PERIOD) {
-    const n = r.posts.filter((p) => PERIOD_KEYS.some(({ key }) => p[key] !== p.orig[key])).length
-    return r.posts.length ? `掲載履歴 ${n}/${r.posts.length}件 変更` : ''
-  }
-  if (r.changeType === T.PUBLISH) {
-    const n = r.posts.reduce((a, p) => a + PUBLISH_CHANNELS.filter((c) => p.publish[c] !== p.orig.publish[c]).length, 0)
-    return r.posts.length ? `公開設定 ${n}箇所 変更` : ''
-  }
-  if (r.changeType === T.STOCK) {
-    return r.stockRows.filter((x) => x.fromId || x.toId).map((x) => `${x.fromId}→${x.toId}×${x.qty}`).join('、')
-  }
-  return ''
 }
 
+// ------------------------------------------------------------
+// 一覧（検索画面）
+// ------------------------------------------------------------
+// scope: rec=レコード単位（行結合） / page=掲載ページ変更の行 / post・period・pub=掲載履歴の行 / stock=在庫移動の行
+// locked: 編集不可（レコード番号・担当者・作成日時・変更日時）
+// types : 対象の変更種別（それ以外の行はグレー表示・入力不可）
+const _T = PAGE_CHANGE_TYPE
+export const PAGE_CHANGE_LIST_COLS = [
+  { key: 'recordNo',    label: 'レコード番号', group: '共通', scope: 'rec', locked: true },
+  { key: 'companyName', label: '企業名',       group: '共通', scope: 'rec', type: 'company' },
+  { key: 'productName', label: '商品名',       group: '共通', scope: 'rec', type: 'product' },
+  { key: 'changeType',  label: '変更種別',     group: '共通', scope: 'rec', type: 'select', options: Object.values(_T), req: true },
+  { key: 'specId',      label: '商品規格ID',   group: '共通', scope: 'rec', type: 'specId', types: [_T.PERIOD, _T.PUBLISH] },
+
+  { key: 'target',  label: '変更対象の項目', group: '掲載ページ変更', scope: 'page', type: 'target', types: [_T.PAGE] },
+  { key: 'content', label: '変更内容',       group: '掲載ページ変更', scope: 'page', types: [_T.PAGE] },
+
+  { key: 'postCode', label: '掲載履歴コード', group: '掲載履歴', scope: 'post', types: [_T.PERIOD, _T.PUBLISH] },
+  { key: 'postName', label: '掲載名',         group: '掲載履歴', scope: 'post', types: [_T.PERIOD, _T.PUBLISH] },
+
+  ...PERIOD_KEYS.map((k) => ({ ...k, group: '掲載開始終了日/募集開始終了日', scope: 'period', type: 'date', types: [_T.PERIOD] })),
+
+  ...PUBLISH_CHANNELS.map((ch) => ({ key: ch, label: ch, group: '公開/非公開設定', scope: 'pub', type: 'select', options: PUBLISH_STATUS_OPTIONS, types: [_T.PUBLISH] })),
+
+  { key: 'fromId', label: 'はがす対象の商品規格ID',   group: '在庫移動', scope: 'stock', types: [_T.STOCK] },
+  { key: 'toId',   label: '移動する対象の商品規格ID', group: '在庫移動', scope: 'stock', types: [_T.STOCK] },
+  { key: 'qty',    label: '販売数',                   group: '在庫移動', scope: 'stock', type: 'number', types: [_T.STOCK] },
+
+  { key: 'memo',      label: 'メモ',     group: 'その他',   scope: 'rec' },
+  { key: 'assignee',  label: '担当者',   group: '管理情報', scope: 'rec', locked: true },
+  { key: 'createdAt', label: '作成日時', group: '管理情報', scope: 'rec', locked: true },
+  { key: 'updatedAt', label: '変更日時', group: '管理情報', scope: 'rec', locked: true },
+]
+
 // 一覧の初期データ（ダミー）
-const mk = (no, over) => ({ ...createPageChangeInitial(no), ...over })
+const mk = (no, assignee, at, over) => ({ ...createPageChangeInitial(no, assignee, at), ...over })
 const periodSample = () => {
   const posts = toPostRows(SPEC_POST_MASTER['20000001'].posts)
   posts[1].postEnd = '2026-11-15'
@@ -226,12 +282,12 @@ const publishSample = () => {
   return posts
 }
 export const PAGE_CHANGE_INIT = [
-  mk('4', { companyName: '△△食品', productName: '国産ちりめんじゃこ 50g', changeType: PAGE_CHANGE_TYPE.STOCK,
+  mk('4', '伊波 篤', '2026-10-06 09:12', { companyName: '△△食品', productName: '国産ちりめんじゃこ 50g', changeType: PAGE_CHANGE_TYPE.STOCK,
     stockRows: [{ fromId: '1001', toId: '1003', qty: '1' }], memo: '在庫を新規格へ移動' }),
-  mk('3', { companyName: 'よつ葉乳業', productName: 'よつ葉バター 125g', changeType: PAGE_CHANGE_TYPE.PUBLISH,
+  mk('3', '小宮 佳介', '2026-10-05 16:40', { companyName: 'よつ葉乳業', productName: 'よつ葉バター 125g', changeType: PAGE_CHANGE_TYPE.PUBLISH,
     specId: '20000002', posts: publishSample(), memo: 'Yahoo店のみ非公開に' }),
-  mk('2', { companyName: '花王株式会社', productName: 'ビオレUV アクアリッチ ウォータリーエッセンス', changeType: PAGE_CHANGE_TYPE.PERIOD,
+  mk('2', '伊波 篤', '2026-10-05 11:05', { companyName: '花王株式会社', productName: 'ビオレUV アクアリッチ ウォータリーエッセンス', changeType: PAGE_CHANGE_TYPE.PERIOD,
     specId: '20000001', posts: periodSample(), memo: '秋の再販の掲載終了を延長' }),
-  mk('1', { companyName: '花王株式会社', productName: 'ビオレUV アクアリッチ ウォータリーエッセンス', changeType: PAGE_CHANGE_TYPE.PAGE,
+  mk('1', '営業担当A', '2026-10-02 14:30', { companyName: '花王株式会社', productName: 'ビオレUV アクアリッチ ウォータリーエッセンス', changeType: PAGE_CHANGE_TYPE.PAGE,
     pageRows: [{ target: '掲載履歴.postName', content: '「夏の日焼け止めフェア」→「夏のUVケアフェア」' }], memo: '' }),
 ]

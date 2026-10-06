@@ -25,3 +25,10 @@
 .pc-ptable td.pc-changed { background: var(--warn-bg) !important; }
 .pc-before { font-size: 10px; color: var(--warn-ink); padding: 0 5px 2px; }
 .pc-ptable tbody tr { cursor: default; }
+/* 一覧（全項目表示） */
+.pc-list th.pc-grp { background: #e3e9ef; color: var(--ink); text-align: center; }
+.pc-list td.pc-na { background: #e9ecef; }
+.pc-list td.pc-changed { background: var(--warn-bg) !important; }
+.pc-list .cell-inp.pc-wide { min-width: 200px; }
+.pc-list tr.pc-rec-end > td { border-bottom: 2px solid var(--line-strong); }
+.pc-list td[rowspan] { vertical-align: top; }
