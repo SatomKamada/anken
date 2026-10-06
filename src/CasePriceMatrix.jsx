@@ -73,9 +73,6 @@ export default function CasePriceMatrix({ value, onChange }) {
           </tbody>
         ))}
       </table>
-      <div className="fnote" style={{ marginTop: 6 }}>
-        ※ グレーの値は計算項目（表示のみ・モックのためダミー値）。「—」は該当項目なし。セルにカーソルを当てると現行kintoneの項目名を表示します。
-      </div>
     </div>
   )
 }

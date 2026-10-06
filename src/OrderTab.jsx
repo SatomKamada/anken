@@ -108,7 +108,7 @@ export default function OrderTab() {
     // 案件番号：コード入力→Enterで確定・自動入力（参照ボタン不要）
     if (f.key === 'caseNo') {
       return (
-        <input className="cell-inp" value={row.caseNo ?? ''} placeholder="コード入力→Enter"
+        <input className="cell-inp" value={row.caseNo ?? ''}
           onChange={(e) => setRowField(i, 'caseNo', e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); const res = lookupCaseProduct(rows[i].caseNo); if (res.found) updateRow(i, { ...rows[i], ...res.values }) } }} />
       )
@@ -221,7 +221,6 @@ export default function OrderTab() {
             </table>
           </div>
         )}
-        <div className="fnote" style={{ marginTop: 6 }}>※「＋追加」で空行、「複製」で一番上の行を複製して追加します。案件番号を入力すると、商品名・メーカー名・医薬品・アルコール区分・発注ケース/ボール入数・商品カテゴリが自動入力されます（参照ボタンでも可）。</div>
       </Accordion>
     </div>
   )

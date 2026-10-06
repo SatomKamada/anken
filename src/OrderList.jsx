@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { makeEmptyOrderDetail } from './orderFields.js'
 import { lookupCaseProduct, caseMaster } from './dummyData.js'
+import { CASE_LIST_COLS, CASE_LIST_INIT, fmtCell } from './caseListFields.js'
 
 // 発注管理：一覧（検索結果の表）— kintone風。
 // props: onOpen(record) … record は { ...header, items:[明細...] }
@@ -108,7 +109,7 @@ const INIT = [
   ]),
 ]
 
-const RELATED = ['発注商品テーブル', '案件テーブル', '販売目標変更履歴テーブル']
+const RELATED = ['発注商品テーブル', '案件管理テーブル', '販売目標変更履歴テーブル']
 
 const IcoChart = () => (<svg viewBox="0 0 24 24" width="16" height="16"><polyline points="3,16 9,10 13,14 21,6" fill="none" stroke="currentColor" strokeWidth="2" /></svg>)
 const IcoFilter = () => (<svg viewBox="0 0 24 24" width="16" height="16"><polygon points="3,5 21,5 14,13 14,19 10,21 10,13" fill="none" stroke="currentColor" strokeWidth="2" /></svg>)
@@ -139,6 +140,10 @@ export default function OrderList({ onOpen }) {
     const res = lookupCaseProduct(r.caseNo)
     return res.found ? { ...r, ...res.values } : r
   }))
+
+  // 案件管理テーブル：選択中の発注の明細に紐づく案件（案件番号で照合・重複除外）
+  const linkedCaseNos = [...new Set(items.map((x) => x.caseNo).filter(Boolean))]
+  const linkedCases = linkedCaseNos.map((no) => CASE_LIST_INIT.find((c) => c.caseNo === no) || { caseNo: no })
 
   const ACTIONS = ['全画面表示', '元に戻す', 'やり直し', '再読み込み', '保存', '検索', 'フィルタ', 'エクスポート']
 
@@ -191,7 +196,7 @@ export default function OrderList({ onOpen }) {
         <div className="krel-tabs">
           <span className="krel-label">関連シート</span>
           {RELATED.map((t, i) => <button key={t} type="button" className={'krel-tab' + (rel === i ? ' active' : '')} onClick={() => setRel(i)}>{t}</button>)}
-          {rel === 0 && <span className="krel-note">（選択中：レコード {rows[sel]?.recordNo}）</span>}
+          {(rel === 0 || rel === 1) && <span className="krel-note">（選択中：レコード {rows[sel]?.recordNo}）</span>}
         </div>
         {rel === 0 && (
           <div className="ktable-scroll">
@@ -203,7 +208,7 @@ export default function OrderList({ onOpen }) {
                     {ITEM_COLS.map((c) => (
                       <td key={c.key} className="edit-cell" style={IS_NEW_ITEM(c.key) ? { backgroundColor: '#fff4e5' } : {}}>
                         {c.caseRef
-                          ? <input className="cell-inp" value={row.caseNo || ''} placeholder="コード入力→Enter" onChange={(e) => setItemCell(ii, 'caseNo', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); confirmCaseNo(ii) } }} />
+                          ? <input className="cell-inp" value={row.caseNo || ''} onChange={(e) => setItemCell(ii, 'caseNo', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); confirmCaseNo(ii) } }} />
                           : c.type === 'select'
                             ? <select className="cell-inp" value={row[c.key] || ''} onChange={(e) => setItemCell(ii, c.key, e.target.value)}><option value=""></option>{c.options.map((o) => <option key={o}>{o}</option>)}</select>
                             : <input className="cell-inp" type={c.type === 'date' ? 'date' : c.type === 'number' ? 'number' : 'text'} value={row[c.key] || ''} onChange={(e) => setItemCell(ii, c.key, e.target.value)} />}
@@ -215,13 +220,31 @@ export default function OrderList({ onOpen }) {
             </table>
           </div>
         )}
-        {rel === 1 && <div className="empty small">案件テーブル（サンプル省略）</div>}
+        {rel === 1 && (linkedCases.length === 0
+          ? <div className="empty small">紐づく案件はありません</div>
+          : (
+            <div className="ktable-scroll">
+              <table className="ktable">
+                <thead><tr>{CASE_LIST_COLS.map((c) => <th key={c.key}>{c.label}</th>)}</tr></thead>
+                <tbody>
+                  {linkedCases.map((r) => (
+                    <tr key={r.caseNo}>
+                      {CASE_LIST_COLS.map((c) => (
+                        <td key={c.key} className="locked-cell" style={c.type === 'money' || c.type === 'number' ? { textAlign: 'right' } : undefined}>
+                          {fmtCell(c, r[c.key])}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
         {rel === 2 && <div className="empty small">販売目標変更履歴テーブル（サンプル省略）</div>}
       </div>
 
       <datalist id="companyNameList">{COMPANY_NAMES.map((o) => <option key={o} value={o} />)}</datalist>
 
-      <div className="fnote" style={{ marginTop: 8 }}>※ 行をクリックすると選択され、下の発注商品テーブルが切り替わります。行頭アイコンで詳細へ（詳細の明細＝このレコードの発注商品テーブル）。案件番号はコードを入力しEnterで確定・自動入力。＋追加/複製/削除は上部ボタンを使用（複製は一番上に追加）。</div>
     </div>
   )
 }

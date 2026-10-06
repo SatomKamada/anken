@@ -19,24 +19,26 @@ export default function ProductInfo({ value, onChange, defaultOpen = false, bare
         <Label text="JANコード" />
         <div className="fbody has-right">
           <input className="inp inp-code" value={v.janCode} onChange={(e) => set('janCode', e.target.value)} placeholder="例：4908013230864" />
-          <div className="fnote">商品マスタ→無ければJICFSから連携</div>
         </div>
       </div>
 
       {/* カテゴリ（大・中・小／参照で自動・表示のみ） */}
       <div className="grid2">
-        <Row label="大カテゴリー"><input className="inp" value={v.categoryL} readOnly placeholder="参照で自動（表示のみ）" title="参照で自動・表示のみ" /></Row>
-        <Row label="中カテゴリー"><input className="inp" value={v.categoryM} readOnly placeholder="参照で自動（表示のみ）" title="参照で自動・表示のみ" /></Row>
-        <Row label="小カテゴリー"><input className="inp" value={v.categoryS} readOnly placeholder="参照で自動（表示のみ）" title="参照で自動・表示のみ" /></Row>
+        <Row label="大カテゴリー"><input className="inp" value={v.categoryL} readOnly /></Row>
+        <Row label="中カテゴリー"><input className="inp" value={v.categoryM} readOnly /></Row>
+        <Row label="小カテゴリー"><input className="inp" value={v.categoryS} readOnly /></Row>
       </div>
 
       <Row label="メーカー">
-        <input className="inp" value={v.maker} readOnly placeholder="表示のみ・入力不要" title="表示のみ（入力不要）" />
+        <input className="inp" value={v.maker} readOnly />
       </Row>
 
       <Row label="商品名">
-        <input className="inp" value={v.productName} readOnly placeholder="表示のみ・入力不要" title="表示のみ（入力不要）" />
+        <input className="inp" value={v.productName} readOnly />
       </Row>
+      <div className="fnote">
+        ※ カテゴリ（大・中・小）・メーカー・商品名はkintone上の項目です。AMPに連携する際、新規商品の場合は自動作成し、商品マスタに既にある商品は商品マスタから取得します。
+      </div>
 
       {/* 医薬品：ON + 区分ラジオ（未ONはグレー） */}
       <div className="frow">

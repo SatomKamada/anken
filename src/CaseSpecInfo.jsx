@@ -57,7 +57,7 @@ export default function CaseSpecInfo({ value, onChange }) {
       {/* 旧明細「基本」 */}
       <div className="grid2">
         {baseFields.map((f) => (
-          <Field key={f.key} field={f} value={v[f.key]} onChange={set} />
+          <Field key={f.key} field={{ ...f, note: undefined }} value={v[f.key]} onChange={set} />
         ))}
       </div>
 
@@ -76,7 +76,7 @@ export default function CaseSpecInfo({ value, onChange }) {
 function Disp({ label, val }) {
   return (
     <div className="frow"><div className="flabel">{label}<span className="autotag">自動</span></div>
-      <div className="fbody"><input className="inp" value={val ?? ''} readOnly placeholder="企業名の選択で自動" title="表示のみ（入力不要）" /></div>
+      <div className="fbody"><input className="inp" value={val ?? ''} readOnly /></div>
     </div>
   )
 }

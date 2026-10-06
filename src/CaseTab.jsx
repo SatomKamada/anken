@@ -55,8 +55,9 @@ export default function CaseTab() {
 
 // ------------------------------------------------------------
 // 詳細：発注タブと同じ構成
-//   ← 一覧に戻る ＋ 案件ヘッダー番号 ／ 企業名
-//   ① 商品・商品規格情報（案件種別〜営業担当 → 基本情報 → 商品規格情報）
+//   ← 一覧に戻る ＋ 案件番号
+//   案件種別〜営業担当（折りたたみの外・最上部）
+//   ① 商品・商品規格情報（基本情報 → 商品規格情報）
 //   ② 掲載履歴（価格以外）
 //   ③ 価格情報（チャネル別の1つの表）
 //   ※表示時はすべて閉じた状態
@@ -75,7 +76,7 @@ const makeCaseSpec = (specCode = '') => {
 }
 
 function CaseDetail({ rec, onBack }) {
-  const headerNo = rec?.caseNo ? rec.caseNo.slice(0, 6) : ''
+  const caseNo = rec?.caseNo || ''
 
   const [caseHead, setCaseHead] = useState(() => ({
     ...makeEmptyCaseHead(),
@@ -120,30 +121,28 @@ function CaseDetail({ rec, onBack }) {
     <div className="tab-panel case-detail">
       <div className="detail-back">
         <button type="button" className="btn-mini" onClick={onBack}>← 一覧に戻る</button>
-        <span className="detail-rec">
-          案件ヘッダー番号 {headerNo || '（新規・自動採番）'}{caseHead.companyName ? ` ／ ${caseHead.companyName}` : ''}
-        </span>
+        <span className="detail-rec">案件番号 {caseNo || '（新規）'}</span>
+      </div>
+
+      {/* 商品・商品規格情報の上：案件種別・承認フロー・案件ステータス・企業コード・企業名・営業担当 */}
+      <div className="fgroup casehead grid2">
+        {HEAD_FIELDS.map((f) => (
+          <Field key={f.key} field={f} value={caseHead[f.key]} onChange={setHead} />
+        ))}
+        <Field field={{ key: 'companyCode', label: '企業コード', auto: true }} value={caseHead.companyCode} onChange={() => {}} />
+        <div className="frow">
+          <div className="flabel">企業名<span className="req">必須</span></div>
+          <div className="fbody">
+            <input className="inp" list="caseTabCompanyList" value={caseHead.companyName}
+              onChange={(e) => setCompanyName(e.target.value)} />
+            <datalist id="caseTabCompanyList">{COMPANY_NAMES.map((o) => <option key={o} value={o} />)}</datalist>
+          </div>
+        </div>
+        <Field field={{ key: 'salesRep', label: '営業担当', auto: true }} value={caseHead.salesRep} onChange={() => {}} />
       </div>
 
       {/* ① 商品・商品規格情報 */}
       <Accordion title="商品・商品規格情報" defaultOpen={false}>
-        {/* 基本情報の上：案件種別・承認フロー・案件ステータス・企業コード・企業名・営業担当 */}
-        <div className="grid2">
-          {HEAD_FIELDS.map((f) => (
-            <Field key={f.key} field={f} value={caseHead[f.key]} onChange={setHead} />
-          ))}
-          <Field field={{ key: 'companyCode', label: '企業コード', auto: true }} value={caseHead.companyCode} onChange={() => {}} />
-          <div className="frow">
-            <div className="flabel">企業名<span className="req">必須</span></div>
-            <div className="fbody">
-              <input className="inp" list="caseTabCompanyList" value={caseHead.companyName} placeholder="入力すると候補が表示されます"
-                onChange={(e) => setCompanyName(e.target.value)} />
-              <datalist id="caseTabCompanyList">{COMPANY_NAMES.map((o) => <option key={o} value={o} />)}</datalist>
-            </div>
-          </div>
-          <Field field={{ key: 'salesRep', label: '営業担当', auto: true }} value={caseHead.salesRep} onChange={() => {}} />
-        </div>
-
         <KGroup title="基本情報" defaultOpen={false}>
           {/* 商品情報 */}
           <ProductInfo value={product} onChange={setProduct} bare />

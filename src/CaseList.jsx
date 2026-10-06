@@ -60,9 +60,6 @@ export default function CaseList({ records, onOpen, onAdd, onDuplicate, onDelete
         </table>
       </div>
 
-      <div className="fnote" style={{ marginTop: 8 }}>
-        ※ 一覧は表示のみです。行頭アイコン（またはダブルクリック）で詳細を開いて編集してください。
-      </div>
     </div>
   )
 }
