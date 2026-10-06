@@ -4,6 +4,9 @@ import ProductInfo from './ProductInfo.jsx'
 import SpecCommon from './SpecCommon.jsx'
 import SpecList from './SpecList.jsx'
 import { RecordHeader } from './RecordHeader.jsx'
+import CaseList from './CaseList.jsx'
+import { CASE_LIST_INIT, makeEmptyCaseListRow } from './caseListFields.js'
+import './caseList.css'
 import {
   makeEmptyProductInfo, makeEmptyProductAttr, productAttrFields,
   makeEmptySalesForm, salesFormRows, makeEmptySpecCommon, makeEmptySpec,
@@ -13,9 +16,59 @@ import {
 // 案件ヘッダー番号（自動採番のダミー・連番のみ）
 const CASE_NO = '000045'
 
+const nowStr = () => {
+  const d = new Date(), z = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`
+}
+
+// 案件タブ：最初は一覧（検索画面）→ 行頭アイコンで詳細
 export default function CaseTab() {
-  const [caseHead, setCaseHead] = useState(makeEmptyCaseHead)
-  const [product, setProduct] = useState(makeEmptyProductInfo)
+  const [view, setView] = useState('list')
+  const [records, setRecords] = useState(CASE_LIST_INIT)
+  const [cur, setCur] = useState(null)
+
+  const nextNo = () => String(Math.max(0, ...records.map((r) => Number(r.recordNo) || 0)) + 1)
+  const add = () => {
+    const r = makeEmptyCaseListRow(nextNo(), nowStr())
+    setRecords([r, ...records]); setCur(r); setView('detail')
+  }
+  const duplicate = (i) => {
+    const at = nowStr()
+    setRecords([{ ...records[i], recordNo: nextNo(), caseNo: '', createdAt: at, updatedAt: at, createdBy: '営業担当A' }, ...records])
+  }
+  const remove = (i) => setRecords(records.filter((_, idx) => idx !== i))
+
+  if (view === 'list') {
+    return (
+      <div className="tab-panel">
+        <CaseList records={records} onOpen={(i) => { setCur(records[i]); setView('detail') }}
+          onAdd={add} onDuplicate={duplicate} onDelete={remove} />
+      </div>
+    )
+  }
+
+  return (
+    <div className="tab-panel">
+      <div className="detail-back">
+        <button type="button" className="btn-mini" onClick={() => setView('list')}>← 一覧に戻る</button>
+        {cur && <span className="detail-rec">レコード番号 {cur.recordNo}{cur.caseName ? ` ／ ${cur.caseName}` : ''}</span>}
+      </div>
+      {/* key でレコードごとに詳細の入力状態をリセット */}
+      <CaseDetail key={cur?.recordNo} rec={cur} />
+    </div>
+  )
+}
+
+// ------------------------------------------------------------
+// 詳細（従来の案件画面）
+//   一覧から開いたレコードの 案件ヘッダー番号・案件種別・案件ステータス・JAN を初期表示
+// ------------------------------------------------------------
+function CaseDetail({ rec }) {
+  const headerNo = rec?.caseNo ? rec.caseNo.slice(0, 6) : CASE_NO
+  const [caseHead, setCaseHead] = useState(() => ({
+    ...makeEmptyCaseHead(), caseType: rec?.caseType || '', caseStatus: rec?.caseStatus || '',
+  }))
+  const [product, setProduct] = useState(() => ({ ...makeEmptyProductInfo(), janCode: rec?.janCode || '' }))
   const [attr, setAttr] = useState(makeEmptyProductAttr)
   const [salesForm, setSalesForm] = useState(makeEmptySalesForm)
   const [specCommon, setSpecCommon] = useState(makeEmptySpecCommon)
@@ -38,7 +91,7 @@ export default function CaseTab() {
   return (
     <div className="tab-panel">
       {/* 最上部：基本情報番号（1件・自動採番） */}
-      <RecordHeader badge="基本情報" label="案件ヘッダー番号" no={CASE_NO} />
+      <RecordHeader badge="基本情報" label="案件ヘッダー番号" no={headerNo} />
 
       {/* 基本情報の上（アコーディオンなし）：案件種別・各種フラグ */}
       <div className="fgroup casehead">
@@ -123,7 +176,7 @@ export default function CaseTab() {
       </Accordion>
 
       {/* ② 明細（商品規格・掲載履歴＝明細、枝番を自動採番） */}
-      <SpecList rows={specRows} setRows={setSpecRows} headerNo={CASE_NO} />
+      <SpecList rows={specRows} setRows={setSpecRows} headerNo={headerNo} />
     </div>
   )
 }
