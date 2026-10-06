@@ -1,25 +1,20 @@
 import React, { useState } from 'react'
 import Field from './Field.jsx'
-import * as F from './fields.js'
+import './pageChange.css'
 import {
   PAGE_CHANGE_FIELDS,
   PAGE_CHANGE_TYPE,
   PUBLISH_CHANNELS,
   PUBLISH_STATUS_OPTIONS,
-  getPageChangeTargets,
+  PAGE_CHANGE_TARGET_GROUPS,
   createPageChangeInitial,
-} from './fields.js'
-
-// 変更対象の項目の元になる案件タブのフィールド定義
-// TODO: fields.js の案件フィールド定義のexport名に差し替え
-const CASE_FIELDS = F.CASE_FIELDS ?? []
+} from './pageChangeFields.js'
 
 let seq = 0
 const nextRecordNo = () => String(++seq)
 
 export default function PageChange() {
   const [form, setForm] = useState(() => createPageChangeInitial(nextRecordNo()))
-  const targets = getPageChangeTargets(CASE_FIELDS)
 
   const onChange = (key, v) => setForm((f) => ({ ...f, [key]: v }))
   const set = (patch) => setForm((f) => ({ ...f, ...patch }))
@@ -51,7 +46,13 @@ export default function PageChange() {
                 <select className="inp" value={r.target}
                   onChange={(e) => updateRow('pageRows', i, { target: e.target.value })}>
                   <option value=""></option>
-                  {targets.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
+                  {PAGE_CHANGE_TARGET_GROUPS.map((g) => (
+                    <optgroup key={g.group} label={g.group}>
+                      {g.items.map((t) => (
+                        <option key={t.key} value={`${g.group}.${t.key}`}>{t.label}</option>
+                      ))}
+                    </optgroup>
+                  ))}
                 </select>
               </div>
               <div className="pc-cell pc-grow">
