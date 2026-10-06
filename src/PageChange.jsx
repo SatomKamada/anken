@@ -88,6 +88,20 @@ function PageChangeDetail({ form, onChange }) {
     if (res.ok) onChange(res.record)
   }
   const setPost = (i, patch) => set({ posts: form.posts.map((p, idx) => (idx === i ? { ...p, ...patch } : p)) })
+  const allSelected = form.posts.length > 0 && form.posts.every((p) => p.selected)
+  const selectAll = (on) => set({ posts: form.posts.map((p) => ({ ...p, selected: on })) })
+  const selHead = (
+    <th className="pc-selcol">
+      <label className="chk-inline" title="すべて選択/解除">
+        <input type="checkbox" checked={allSelected} onChange={(e) => selectAll(e.target.checked)} /><span>変更対象</span>
+      </label>
+    </th>
+  )
+  const selCell = (p, i) => (
+    <td className="edit-cell tc pc-selcol">
+      <input type="checkbox" checked={!!p.selected} onChange={(e) => setPost(i, { selected: e.target.checked })} />
+    </td>
+  )
 
   // 商品規格ID入力欄（期間設定・公開/非公開で共通）
   const specIdRow = (
@@ -97,7 +111,7 @@ function PageChangeDetail({ form, onChange }) {
         <input className="inp inp-code" value={form.specId} placeholder="商品規格ID入力→Enter"
           onChange={(e) => set({ specId: e.target.value })}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); lookupSpec() } }} />
-        <div className="fnote">Enterで紐づく掲載履歴を呼び出し（ダミー：{SPEC_ID_SAMPLES.join(' / ')}）。変更した箇所は色付きで表示されます。</div>
+        <div className="fnote">Enterで紐づく掲載履歴を呼び出し（ダミー：{SPEC_ID_SAMPLES.join(' / ')}）。変更する掲載履歴の「変更対象」にチェックしてください（一覧にはチェックした掲載履歴のみ表示）。</div>
       </div>
     </div>
   )
@@ -178,6 +192,7 @@ function PageChangeDetail({ form, onChange }) {
               <table className="ktable pc-ptable">
                 <thead>
                   <tr>
+                    {selHead}
                     <th>掲載履歴コード</th>
                     <th>掲載名</th>
                     {PERIOD_KEYS.map((k) => <th key={k.key}>{k.label}</th>)}
@@ -188,7 +203,8 @@ function PageChangeDetail({ form, onChange }) {
                   {form.posts.map((p, i) => {
                     const ng = (p.postStart && p.postEnd && p.postStart > p.postEnd) || (p.recruitStart && p.recruitEnd && p.recruitStart > p.recruitEnd)
                     return (
-                      <tr key={p.postCode}>
+                      <tr key={p.postCode} className={p.selected ? 'pc-selrow' : ''}>
+                        {selCell(p, i)}
                         <td className="locked-cell">{p.postCode}</td>
                         <td className="locked-cell">{p.postName}</td>
                         {PERIOD_KEYS.map(({ key }) => {
@@ -222,6 +238,7 @@ function PageChangeDetail({ form, onChange }) {
               <table className="ktable pc-ptable">
                 <thead>
                   <tr>
+                    {selHead}
                     <th>掲載履歴コード</th>
                     <th>掲載名</th>
                     {PUBLISH_CHANNELS.map((ch) => <th key={ch}>{ch}</th>)}
@@ -229,7 +246,8 @@ function PageChangeDetail({ form, onChange }) {
                 </thead>
                 <tbody>
                   {form.posts.map((p, i) => (
-                    <tr key={p.postCode}>
+                    <tr key={p.postCode} className={p.selected ? 'pc-selrow' : ''}>
+                        {selCell(p, i)}
                       <td className="locked-cell">{p.postCode}</td>
                       <td className="locked-cell">{p.postName}</td>
                       {PUBLISH_CHANNELS.map((ch) => {

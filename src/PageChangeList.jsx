@@ -5,7 +5,7 @@ import {
 } from './pageChangeFields.js'
 
 // 掲載ページ変更：一覧（検索画面）— 発注タブの OrderList と同じ kintone 風
-//   1レコード＝変更明細の行数ぶん表示（掲載ページ変更の行 / 掲載履歴 / 在庫移動の行）
+//   1レコード＝変更明細の行数ぶん表示（掲載ページ変更の行 / 変更対象の掲載履歴 / 在庫移動の行）
 //   レコード単位の項目は行結合。レコード番号・担当者・作成日時・変更日時以外は編集可
 // props: records, onOpen(i), onAdd(), onDuplicate(i), onDelete(i), onUpdate(i, next)
 const VIEW_OPTIONS = ['（すべて）', ...Object.values(PAGE_CHANGE_TYPE)]
@@ -21,11 +21,13 @@ const GROUPS = PAGE_CHANGE_LIST_COLS.reduce((acc, c) => {
   return acc
 }, [])
 
-// レコードの変更明細（行）
+// レコードの変更明細（行）：{ line, idx }（idx は元配列の位置）
+//   掲載履歴は「変更対象」にチェックしたもののみ
 const linesOf = (r) => {
-  if (r.changeType === T.PAGE) return r.pageRows
-  if (r.changeType === T.PERIOD || r.changeType === T.PUBLISH) return r.posts
-  if (r.changeType === T.STOCK) return r.stockRows
+  const wrap = (arr) => arr.map((line, idx) => ({ line, idx }))
+  if (r.changeType === T.PAGE) return wrap(r.pageRows)
+  if (r.changeType === T.PERIOD || r.changeType === T.PUBLISH) return wrap(r.posts).filter(({ line }) => line.selected)
+  if (r.changeType === T.STOCK) return wrap(r.stockRows)
   return []
 }
 
@@ -94,8 +96,6 @@ export default function PageChangeList({ records, onOpen, onAdd, onDuplicate, on
     if (na) return <td key={c.key} className="locked-cell pc-na"></td>
 
     const val = c.scope === 'pub' ? line.publish[c.key] : line[c.key]
-    const orig = c.scope === 'pub' ? line.orig?.publish[c.key] : c.scope === 'period' ? line.orig?.[c.key] : undefined
-    const changed = orig !== undefined && val !== orig
     const set = (v) => setLine(i, j, c, v)
 
     let inp
@@ -122,8 +122,7 @@ export default function PageChangeList({ records, onOpen, onAdd, onDuplicate, on
         value={val ?? ''} onChange={(e) => set(e.target.value)} />
     }
     return (
-      <td key={c.key} className={'edit-cell' + (changed ? ' pc-changed' : '')} title={changed ? `変更前：${orig}` : undefined}
-        onClick={(e) => e.stopPropagation()}>{inp}</td>
+      <td key={c.key} className="edit-cell" onClick={(e) => e.stopPropagation()}>{inp}</td>
     )
   }
 
@@ -178,7 +177,7 @@ export default function PageChangeList({ records, onOpen, onAdd, onDuplicate, on
                   {PAGE_CHANGE_LIST_COLS.map((c) => (
                     c.scope === 'rec'
                       ? (j === 0 ? recCell(c, r, i, n) : null)
-                      : lineCell(c, r, i, lines[j], j)
+                      : lineCell(c, r, i, lines[j]?.line, lines[j]?.idx)
                   ))}
                 </tr>
               ))
@@ -190,7 +189,8 @@ export default function PageChangeList({ records, onOpen, onAdd, onDuplicate, on
       <datalist id="pcCompanyList">{COMPANY_SUGGEST.map((o) => <option key={o} value={o} />)}</datalist>
 
       <div className="fnote" style={{ marginTop: 8 }}>
-        ※ 1レコードに複数の変更明細（掲載ページ変更の行・掲載履歴・在庫移動の行）がある場合は明細の行数ぶん表示します。
+        ※ 1レコードに複数の変更明細（掲載ページ変更の行・変更対象の掲載履歴・在庫移動の行）がある場合は明細の行数ぶん表示します。
+        掲載履歴は詳細画面で「変更対象」にチェックしたもののみ表示します。
         変更種別に関係しない項目はグレー表示です。商品規格IDは入力してEnterで掲載履歴を呼び出し。行頭アイコンで詳細へ。
       </div>
     </div>

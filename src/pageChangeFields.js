@@ -170,7 +170,8 @@ export const PERIOD_KEYS = [
 ]
 
 // 商品規格ID参照結果 → 変更用の掲載履歴行（orig＝変更前の値を保持）
-export const toPostRows = (posts) => posts.map((p) => ({ ...structuredClone(p), orig: structuredClone(p) }))
+// selected：変更対象の掲載履歴（チェックボックス）。一覧にはチェックした掲載履歴のみ表示
+export const toPostRows = (posts) => posts.map((p) => ({ ...structuredClone(p), selected: false, orig: structuredClone(p) }))
 
 // ログインユーザー・現在日時（ダミー）
 export const CURRENT_USER = '営業担当A'
@@ -238,7 +239,7 @@ export const lookupSpecPosts = (r) => {
 // ------------------------------------------------------------
 // 一覧（検索画面）
 // ------------------------------------------------------------
-// scope: rec=レコード単位（行結合） / page=掲載ページ変更の行 / post・period・pub=掲載履歴の行 / stock=在庫移動の行
+// scope: rec=レコード単位（行結合） / page=掲載ページ変更の行 / post・period・pub=変更対象にチェックした掲載履歴の行 / stock=在庫移動の行
 // locked: 編集不可（レコード番号・担当者・作成日時・変更日時）
 // types : 対象の変更種別（それ以外の行はグレー表示・入力不可）
 const _T = PAGE_CHANGE_TYPE
@@ -274,11 +275,13 @@ const mk = (no, assignee, at, over) => ({ ...createPageChangeInitial(no, assigne
 const periodSample = () => {
   const posts = toPostRows(SPEC_POST_MASTER['20000001'].posts)
   posts[1].postEnd = '2026-11-15'
+  posts[1].selected = true
   return posts
 }
 const publishSample = () => {
   const posts = toPostRows(SPEC_POST_MASTER['20000002'].posts)
   posts[0].publish = { ...posts[0].publish, 'Yahoo店': '非公開' }
+  posts[0].selected = true
   return posts
 }
 export const PAGE_CHANGE_INIT = [
