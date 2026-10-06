@@ -5,6 +5,7 @@ import { surveyFields } from './fields.js'
 // 案件：掲載履歴（価格以外）
 //   PostHistory.jsx（案件（セット商品）タブで使用）から価格関連を除いたもの
 //   追加：募集期間（開始・終了）、提供数
+//   当月出荷見込み数は価格情報の表へ移動
 //   削除：掲載履歴コード、販売期間、各種フラグ、掲載属性、掲載名・キャッチコピー・サブタイトル、
 //         期限種別・期限日・表示提供数、抽選（抽選人数・抽選合計・当選確定日時・抽選対象範囲区分）
 // props: value(postHistory object), onChange(nextObject)
@@ -26,13 +27,6 @@ export default function CasePostInfo({ value, onChange }) {
       <div className="grid2">
         <L label="提供数"><input className="inp" type="number" value={v.provideCount ?? ''} onChange={(e) => set({ provideCount: e.target.value })} /></L>
         <L label="完売想定日"><input className="inp" type="date" value={v.sellOutDate} onChange={(e) => set({ sellOutDate: e.target.value })} /></L>
-      </div>
-
-      {/* 当月出荷見込み数 */}
-      <div className="grid2">
-        <L label="本店当月出荷見込み数"><input className="inp" type="number" value={v.shipForecastHonten} onChange={(e) => set({ shipForecastHonten: e.target.value })} /></L>
-        <L label="dサンプル当月出荷見込み数"><input className="inp" type="number" value={v.shipForecastDsample} onChange={(e) => set({ shipForecastDsample: e.target.value })} /></L>
-        <L label="d払い当月出荷見込み数"><input className="inp" type="number" value={v.shipForecastDpay} onChange={(e) => set({ shipForecastDpay: e.target.value })} /></L>
       </div>
 
       {/* アンケート */}

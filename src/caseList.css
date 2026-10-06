@@ -6,3 +6,30 @@
 /* ===== 案件 詳細 ===== */
 /* 必須・自動ラベルは一旦非表示（戻す場合はこの行を削除） */
 .case-detail .req, .case-detail .autotag { display: none; }
+
+/* ===== 案件 価格情報（1つの表） ===== */
+.pm-table { font-size: 12px; }
+.pm-table th { text-align: center; white-space: nowrap; }
+.pm-table .pm-item { position: sticky; left: 0; z-index: 1; background: var(--panel); text-align: left; white-space: nowrap; min-width: 190px; }
+.pm-table thead .pm-item { background: inherit; z-index: 2; }
+.pm-table th.pm-total, .pm-table td.pm-total { background: #f3f6f9; font-weight: 700; }
+.pm-sec > td { background: #e3e9ef; font-weight: 700; color: var(--ink); cursor: pointer; position: sticky; left: 0; }
+.pm-sec.common > td { background: #eef1f4; color: var(--ink-soft); }
+.pm-sec.profit > td { background: #dff0e5; color: #1e6b3d; }
+.pm-caret { display: inline-block; width: 18px; color: var(--ink-soft); }
+.pm-cell { text-align: right; white-space: nowrap; min-width: 110px; }
+.pm-cell.calc { background: #f7f8fa; }
+.pm-cell.pm-common { text-align: left; }
+.pm-na { color: #c3c9cf; text-align: center; background: #fafbfc; }
+.pm-val { font-variant-numeric: tabular-nums; }
+.pm-neg { color: var(--req); }
+.pm-sub .pm-item { padding-left: 22px; color: var(--ink-soft); }
+.pm-sub .pm-val { color: var(--ink-soft); }
+.pm-strong .pm-item, .pm-strong .pm-val { font-weight: 700; }
+.pm-profit.pm-strong > td { background: #eef8f1; }
+.pm-profit.pm-strong .pm-val { color: #1e6b3d; }
+.pm-inp-wrap { display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
+.pm-inp-wrap.pm-yen::before { content: '¥'; color: var(--ink-soft); }
+.pm-inp-wrap.pm-pct::after { content: '%'; color: var(--ink-soft); }
+.pm-cell.pm-common .pm-inp-wrap { justify-content: flex-start; }
+.pm-table .cell-inp.pm-inp { width: 90px; min-width: 0; text-align: right; }

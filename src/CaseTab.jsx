@@ -5,8 +5,8 @@ import Field from './Field.jsx'
 import ProductInfo from './ProductInfo.jsx'
 import CaseSpecInfo from './CaseSpecInfo.jsx'
 import CasePostInfo from './CasePostInfo.jsx'
-import CasePriceTable from './CasePriceTable.jsx'
-import FinanceSection from './FinanceSection.jsx'
+import CasePriceMatrix from './CasePriceMatrix.jsx'
+import { makePriceInit } from './casePriceFields.js'
 import CaseList from './CaseList.jsx'
 import {
   makeEmptyProductInfo, makeEmptyProductAttr, productAttrFields,
@@ -56,9 +56,10 @@ export default function CaseTab() {
 // ------------------------------------------------------------
 // 詳細：発注タブと同じ構成
 //   ← 一覧に戻る ＋ 案件ヘッダー番号 ／ 企業名
-//   ① 案件ヘッダー情報（案件種別〜営業担当 → 基本情報 → 商品規格情報）
+//   ① 商品・商品規格情報（案件種別〜営業担当 → 基本情報 → 商品規格情報）
 //   ② 掲載履歴（価格以外）
-//   ③ 価格情報（上代〜試算＋チャネル別価格）
+//   ③ 価格情報（チャネル別の1つの表）
+//   ※表示時はすべて閉じた状態
 //   ※必須・自動ラベルは一旦非表示（caseList.css の .case-detail で制御）
 // ------------------------------------------------------------
 const HEAD_FIELDS = [
@@ -98,7 +99,7 @@ function CaseDetail({ rec, onBack }) {
     recruitPeriodFrom: rec?.recruitStart || '', recruitPeriodTo: '',
     provideCount: rec?.provideCount ?? '',
   }))
-  const [finance, setFinance] = useState({})
+  const [price, setPrice] = useState(makePriceInit)
 
   const setHead = (k, val) => setCaseHead({ ...caseHead, [k]: val })
   const setAttrField = (k, val) => setAttr({ ...attr, [k]: val })
@@ -124,8 +125,8 @@ function CaseDetail({ rec, onBack }) {
         </span>
       </div>
 
-      {/* ① 案件ヘッダー情報 */}
-      <Accordion title="案件ヘッダー情報" defaultOpen={true}>
+      {/* ① 商品・商品規格情報 */}
+      <Accordion title="商品・商品規格情報" defaultOpen={false}>
         {/* 基本情報の上：案件種別・承認フロー・案件ステータス・企業コード・企業名・営業担当 */}
         <div className="grid2">
           {HEAD_FIELDS.map((f) => (
@@ -143,7 +144,7 @@ function CaseDetail({ rec, onBack }) {
           <Field field={{ key: 'salesRep', label: '営業担当', auto: true }} value={caseHead.salesRep} onChange={() => {}} />
         </div>
 
-        <KGroup title="基本情報" defaultOpen={true}>
+        <KGroup title="基本情報" defaultOpen={false}>
           {/* 商品情報 */}
           <ProductInfo value={product} onChange={setProduct} bare />
 
@@ -156,29 +157,19 @@ function CaseDetail({ rec, onBack }) {
           </div>
         </KGroup>
 
-        <KGroup title="商品規格情報" defaultOpen={true}>
+        <KGroup title="商品規格情報" defaultOpen={false}>
           <CaseSpecInfo value={spec} onChange={setSpec} />
         </KGroup>
       </Accordion>
 
       {/* ② 掲載履歴（価格以外） */}
-      <Accordion title="掲載履歴" defaultOpen={true}>
+      <Accordion title="掲載履歴" defaultOpen={false}>
         <CasePostInfo value={post} onChange={setPost} />
       </Accordion>
 
-      {/* ③ 価格情報：上代〜試算。チャネル別価格は「上代」の直下 */}
-      <Accordion title="価格情報" defaultOpen={true}>
-        <FinanceSection
-          finance={finance}
-          onChange={setFinance}
-          afterGroups={{
-            '上代': (
-              <Accordion level="sub" defaultOpen={false} title="チャネル別価格">
-                <CasePriceTable value={post} onChange={setPost} />
-              </Accordion>
-            ),
-          }}
-        />
+      {/* ③ 価格情報：チャネル別の1つの表 */}
+      <Accordion title="価格情報" defaultOpen={false}>
+        <CasePriceMatrix value={price} onChange={setPrice} />
       </Accordion>
     </div>
   )
