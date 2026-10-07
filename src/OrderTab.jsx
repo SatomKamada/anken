@@ -6,7 +6,10 @@ import Field from './Field.jsx'
 import { branchCode } from './RecordHeader.jsx'
 import {
   orderDetailGroups, makeEmptyOrderDetail,
+  caseTypeLOptions, caseTypeMOptions, caseTypeSOptions, orderCategoryOptions, productTypeOptions,
+  stockLinkOptions,
 } from './orderFields.js'
+import AttrSelect from './AttrSelect.jsx'
 import { lookupOrderDetailByProduct, lookupCaseProduct, lookupCompany } from './dummyData.js'
 
 const COMPANY_BY_NAME = {
@@ -20,13 +23,13 @@ const COMPANY_NAMES = Object.keys(COMPANY_BY_NAME)
 // 検索画面で見えている発注ヘッダーレコードの項目を詳細画面にも定義
 const HEADER_COLS = [
   { key: 'status', label: '発注ステータス', required: true, type: 'select', options: ['入力中', '登録済', '申請中', '承認済', '発注済', '一部入荷', '全部入荷', '差戻', 'NG'] },
-  { key: 'caseTypeL', label: '案件種別（大）', type: 'select', options: ['在庫', '受発注', '通常', 'その他'] },
-  { key: 'caseTypeM', label: '案件種別（中）', type: 'select', options: ['試算あり', '試算なし', '倉庫間移動', 'その他'] },
-  { key: 'caseTypeS', label: '案件種別（小）', type: 'select', options: ['メーカー滞留品', 'NBプロパー', 'TC', 'AAS', 'キャンペーン・抽選', '代品・過受注', '代品'] },
+  { key: 'caseTypeL', label: '案件種別（大）', type: 'select', options: caseTypeLOptions },
+  { key: 'caseTypeM', label: '案件種別（中）', type: 'select', options: caseTypeMOptions },
+  { key: 'caseTypeS', label: '案件種別（小）', type: 'select', options: caseTypeSOptions },
   { key: 'companyId', label: '企業コード', auto: true, required: true },
   { key: 'client', label: '企業名', type: 'companyName', required: true },
-  { key: 'orderCat', label: '受発注発注区分', type: 'select', options: ['-', '個別発注', '一斉発注'] },
-  { key: 'prodType', label: '商品種別', type: 'select', options: ['その他', '食品', '日用品', '医薬品'] },
+  { key: 'orderCat', label: '受発注発注区分', type: 'select', options: orderCategoryOptions },
+  { key: 'prodType', label: '商品種別', type: 'select', options: productTypeOptions },
   { key: 'promo', label: 'プロモーションコード' },
   { key: 'payTerms', label: '支払条件', type: 'select', options: ['末締め翌月末払い', '15日締め払い', '末締め翌月15日払い', '日付指定'] },
   { key: 'payDue', label: '支払期日', type: 'date' },
@@ -46,7 +49,7 @@ const DETAIL_COLS = []
 for (const f of RAW_DETAIL_COLS) {
   if (f.key === 'attrCode') {
     DETAIL_COLS.push({ key: 'saleType', label: '規格区分', type: 'select', options: ['通常','わけあり（B品）','わけあり（期限）','抽選・発送あり','抽選・発送なし','先着・発送あり','先着・発送なし','イベント・発送あり','イベント・発送なし','代品','初試し','企画1','企画2','企画3'] })
-    DETAIL_COLS.push({ key: 'stockLinkFlag', label: '在庫自動紐づけフラグ', type: 'select', options: ['ON', 'OFF'] })
+    DETAIL_COLS.push({ key: 'stockLinkFlag', label: '在庫紐づけ', type: 'select', options: stockLinkOptions })
     DETAIL_COLS.push({ ...f, required: true })
   } else if (f.key === 'bestBeforeDate') {
     DETAIL_COLS.push({ key: 'bestBeforeType', label: '期限種別', type: 'select', options: ['賞味期限', '消費期限', '製造日', 'なし'] })
@@ -113,6 +116,8 @@ export default function OrderTab() {
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); const res = lookupCaseProduct(rows[i].caseNo); if (res.found) updateRow(i, { ...rows[i], ...res.values }) } }} />
       )
     }
+    // 商品属性情報コード：JANに紐づく「商品属性コード：備考」から選択
+    if (f.key === 'attrCode') return <AttrSelect jan={row.janCode} value={row.attrCode} onChange={(v) => setRowField(i, 'attrCode', v)} />
     let inp
     if (f.type === 'select') {
       inp = (
@@ -225,3 +230,4 @@ export default function OrderTab() {
     </div>
   )
 }
+

@@ -5,6 +5,8 @@
 //   type: text | number | select | checkbox | date | datetime | textarea
 // ============================================================
 
+import { choppleTypeOptions } from './fields.js'
+
 // ---- ヘッダー（発注書単位・共通）----------------------------
 export const orderHeaderGroups = [
   {
@@ -19,7 +21,7 @@ export const orderHeaderGroups = [
         options: ['入力中','登録済','申請中','承認済','発注済','一部入荷','全部入荷','差戻','NG'],
         note: '登録済の段階で倉庫に連携',
       },
-      { key: 'orderCategory', label: '受発注発注区分', type: 'select', options: ['-','個別発注','一斉発注'] },
+      { key: 'orderCategory', label: '受発注発注区分', type: 'select', options: ['個別発注','一斉発注'] },
       { key: 'ecLinkFlag',    label: 'EC基盤自動連携フラグ', type: 'select', options: ['未済','済'], note: '現行：Spica登録状況' },
     ],
   },
@@ -79,15 +81,35 @@ export function makeEmptyOrderHeader() {
   o.assignee = '営業担当A'
   o.createdAt = '2026-08-31T10:00'
   o.orderStatus = '入力中'
-  o.orderCategory = '-'
+  o.orderCategory = ''
   o.ecLinkFlag = '未済'
   return o
 }
 
-// ---- 案件種別 選択肢（発注明細の案件リンク）------------------
-export const caseTypeLOptions = ['在庫','受発注','通常','その他']
-export const caseTypeMOptions = ['試算あり','試算なし','倉庫間移動','その他']
+// ---- ヘッダー選択肢（発注タブの詳細・一覧で共通利用）------------
+// 案件種別（大）＝ちょっプル種別
+export const caseTypeLOptions = choppleTypeOptions
+export const caseTypeMOptions = ['ちょっプル','抽選サンプル','イベント','プロモーション','スグーマ','ドルチェ']
 export const caseTypeSOptions = ['メーカー滞留品','NBプロパー','TC','AAS','キャンペーン・抽選','代品・過受注','代品']
+export const orderCategoryOptions = ['個別発注','一斉発注']          // 1:個別発注, 2:一斉発注
+export const productTypeOptions  = ['医薬','薬類','その他']          // 1:医薬, 2:薬類, 3:その他
+// 明細：在庫紐づけ
+export const stockLinkOptions = ['紐づけあり','紐づけなし']
+
+// ---- 商品属性情報コード：JANに紐づく選択肢（ダミー）---------------
+//   表示は「商品属性コード：備考」、値は商品属性コード
+const ATTR_BY_JAN = {
+  '4908013230864': [{ code: '10001234001', note: '通常品' }, { code: '10001234002', note: 'わけあり（期限）' }, { code: '10001234003', note: '初試し用' }],
+  '4901301390546': [{ code: '10004567001', note: '通常品' }, { code: '10004567002', note: '2個セット' }],
+}
+export function attrOptionsForJan(jan) {
+  const j = (jan || '').trim()
+  if (!j) return []
+  if (ATTR_BY_JAN[j]) return ATTR_BY_JAN[j]
+  // 未登録のJANはダミーの選択肢を生成
+  const base = '1' + j.slice(-7) + '0'
+  return [{ code: base + '01', note: '通常品' }, { code: base + '02', note: 'わけあり（期限）' }]
+}
 
 // ---- 明細（1:多）--------------------------------------------
 export const orderDetailGroups = [
@@ -107,9 +129,6 @@ export const orderDetailGroups = [
       { key: 'attrCode',     label: '商品属性情報コード', type: 'text', ref: '商品属性情報マスタ' },
       { key: 'caseJanCode',  label: 'ケースJANコード',  type: 'text' },
       { key: 'itfCode',      label: 'ITFコード',        type: 'text' },
-      { key: 'medicineType', label: '医薬品',           type: 'select', options: ['対象外','要指導医薬品','第1類医薬品','第2類医薬品','第3類医薬品','医薬部外品','医薬品未分類'] },
-      { key: 'alcoholType',  label: 'アルコール区分',   type: 'select', options: ['対象外','お酒','ノンアルコール','みりん'] },
-      { key: 'autoStockLink', label: '在庫自動紐づけフラグ', type: 'checkbox' },
     ],
   },
   {

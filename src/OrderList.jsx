@@ -1,5 +1,8 @@
 import React, { useState } from 'react'
-import { makeEmptyOrderDetail } from './orderFields.js'
+import {
+  makeEmptyOrderDetail, caseTypeLOptions, caseTypeMOptions, caseTypeSOptions, orderCategoryOptions, productTypeOptions, stockLinkOptions,
+} from './orderFields.js'
+import AttrSelect from './AttrSelect.jsx'
 import { lookupCaseProduct, caseMaster } from './dummyData.js'
 import { CASE_LIST_COLS, CASE_LIST_INIT, fmtCell } from './caseListFields.js'
 
@@ -21,13 +24,13 @@ const COLS = [
   { key: 'recordNo', label: 'レコード番号', locked: true },
   { key: 'orderNo', label: '発注ヘッダー番号', locked: true },
   { key: 'status', label: '発注ステータス', req: true, type: 'select', options: ['入力中', '登録済', '申請中', '承認済', '発注済', '一部入荷', '全部入荷', '差戻', 'NG'] },
-  { key: 'caseTypeL', label: '案件種別（大）', type: 'select', options: ['在庫', '受発注', '通常', 'その他'] },
-  { key: 'caseTypeM', label: '案件種別（中）', type: 'select', options: ['試算あり', '試算なし', '倉庫間移動', 'その他'] },
-  { key: 'caseTypeS', label: '案件種別（小）', type: 'select', options: ['メーカー滞留品', 'NBプロパー', 'TC', 'AAS', 'キャンペーン・抽選', '代品・過受注', '代品'] },
+  { key: 'caseTypeL', label: '案件種別（大）', type: 'select', options: caseTypeLOptions },
+  { key: 'caseTypeM', label: '案件種別（中）', type: 'select', options: caseTypeMOptions },
+  { key: 'caseTypeS', label: '案件種別（小）', type: 'select', options: caseTypeSOptions },
   { key: 'companyId', label: '企業コード', locked: true, req: true },
   { key: 'client', label: '企業名', type: 'companyName', req: true },
-  { key: 'orderCat', label: '受発注発注区分', type: 'select', options: ['-', '個別発注', '一斉発注'] },
-  { key: 'prodType', label: '商品種別', type: 'select', options: ['その他', '食品', '日用品', '医薬品'] },
+  { key: 'orderCat', label: '受発注発注区分', type: 'select', options: orderCategoryOptions },
+  { key: 'prodType', label: '商品種別', type: 'select', options: productTypeOptions },
   { key: 'promo', label: 'プロモーションコード' },
   { key: 'payTerms', label: '支払条件', type: 'select', options: ['末締め翌月末払い', '15日締め払い', '末締め翌月15日払い', '日付指定'] },
   { key: 'payDue', label: '支払期日', type: 'date' },
@@ -54,7 +57,7 @@ const ITEM_COLS = [
   { key: 'makerId', label: 'メーカーID' },
   { key: 'makerName', label: 'メーカー名' },
   { key: 'saleType', label: '規格区分', type: 'select', options: ['通常','わけあり（B品）','わけあり（期限）','抽選・発送あり','抽選・発送なし','先着・発送あり','先着・発送なし','イベント・発送あり','イベント・発送なし','代品','初試し','企画1','企画2','企画3'] },
-  { key: 'stockLinkFlag', label: '在庫自動紐づけフラグ', type: 'select', options: ['ON', 'OFF'] },
+  { key: 'stockLinkFlag', label: '在庫紐づけ', type: 'select', options: stockLinkOptions },
   { key: 'attrCode', label: '商品属性情報コード', req: true },
   { key: 'warehouse', label: '倉庫', type: 'select', options: ['佐川（花見川）', '日通倉庫', '自社倉庫'] },
   { key: 'bestBeforeType', label: '期限種別', type: 'select', options: ['賞味期限', '消費期限', '製造日', 'なし'] },
@@ -83,7 +86,6 @@ const itemFromCase = (branchNo, caseNo, extra = {}) => {
   return mkItem(branchNo, {
     caseNo, janCode: c.janCode || '', productId: c.productId || '', productName: c.productName || '', makerId: c.makerId || '', makerName: c.makerName || '',
     categoryL: c.categoryL || '', categoryM: c.categoryM || '', categoryS: c.categoryS || '',
-    medicineType: c.medicineType || '', alcoholType: c.alcoholType || '',
     orderCaseCount: c.orderCaseCount || '', orderBallCount: c.orderBallCount || '', refPriceEx: c.refPriceEx || '',
     warehouse: '佐川（花見川）', bestBeforeDate: '2027-05-08', deliveryDate: '2026-10-08',
     taxRate: '8%', ...extra,
@@ -92,16 +94,16 @@ const itemFromCase = (branchNo, caseNo, extra = {}) => {
 
 // サンプルデータを5件に削減、案件番号が入っていない発注明細を追加
 const INIT = [
-  H('48931', '00048931', '', '入力中', '伊波 篤', '2026-10-06 10:00', '6281', '路興商事株式会社', '在庫', '試算あり', 'メーカー滞留品', '個別発注', [
+  H('48931', '00048931', '', '入力中', '伊波 篤', '2026-10-06 10:00', '6281', '路興商事株式会社', '仕入（通常）', 'ちょっプル', 'メーカー滞留品', '個別発注', [
     mkItem('1', { caseNo: '', orderCaseQty: '10', totalPieceQty: '120', unitPriceEx: '500', amountEx: '5000', productName: '手動入力商品サンプル' })
   ]),
-  H('48930', '00048930', 'PR-2605-01', '入力中', '伊波 篤', '2026-10-05 12:45', '6281', '路興商事株式会社', '在庫', '試算あり', 'メーカー滞留品', '個別発注', [
+  H('48930', '00048930', 'PR-2605-01', '入力中', '伊波 篤', '2026-10-05 12:45', '6281', '路興商事株式会社', '仕入（通常）', 'ちょっプル', 'メーカー滞留品', '個別発注', [
     itemFromCase('1', '000048', { orderCaseQty: '2', totalPieceQty: '40', unitPriceEx: '700', amountEx: '28000' }),
     itemFromCase('2', '000049', { orderCaseQty: '3', totalPieceQty: '72', unitPriceEx: '230', amountEx: '16560' }),
   ]),
-  H('48929', '00048929', '', '入力中', '伊波 篤', '2026-10-05 12:38', '2576', 'コンフェックス株式会社', '在庫', '試算あり', 'メーカー滞留品', '個別発注', [itemFromCase('1', '000045', { orderCaseQty: '1', totalPieceQty: '24', unitPriceEx: '150', amountEx: '3600' })]),
-  H('48928', '00048928', '', '発注済', '伊波 篤', '2026-10-05 12:32', '6318', '株式会社八天堂', '受発注', '試算あり', 'TC', '一斉発注', [itemFromCase('1', '000047', { orderCaseQty: '5', totalPieceQty: '100', unitPriceEx: '450', amountEx: '45000' })]),
-  H('48927', '00048927', 'Y501', '入力中', '小宮 佳介', '2026-10-05 11:36', '4749', 'DKSHジャパン株式会社', '在庫', '試算あり', 'メーカー滞留品', '一斉発注', [
+  H('48929', '00048929', '', '入力中', '伊波 篤', '2026-10-05 12:38', '2576', 'コンフェックス株式会社', '仕入（通常）', 'ちょっプル', 'メーカー滞留品', '個別発注', [itemFromCase('1', '000045', { orderCaseQty: '1', totalPieceQty: '24', unitPriceEx: '150', amountEx: '3600' })]),
+  H('48928', '00048928', '', '発注済', '伊波 篤', '2026-10-05 12:32', '6318', '株式会社八天堂', '受発注（通常）', '抽選サンプル', 'TC', '一斉発注', [itemFromCase('1', '000047', { orderCaseQty: '5', totalPieceQty: '100', unitPriceEx: '450', amountEx: '45000' })]),
+  H('48927', '00048927', 'Y501', '入力中', '小宮 佳介', '2026-10-05 11:36', '4749', 'DKSHジャパン株式会社', '仕入（プロパー）', 'プロモーション', 'メーカー滞留品', '一斉発注', [
     itemFromCase('1', '000045', { orderCaseQty: '50', totalPieceQty: '600', unitPriceEx: '600', amountEx: '360000' }),
     itemFromCase('2', '000046', { orderCaseQty: '10', totalPieceQty: '120', unitPriceEx: '1100', amountEx: '132000' }),
     itemFromCase('3', '000047', { orderCaseQty: '8', totalPieceQty: '160', unitPriceEx: '450', amountEx: '72000' }),
@@ -206,7 +208,9 @@ export default function OrderList({ onOpen }) {
                   <tr key={ii}>
                     {ITEM_COLS.map((c) => (
                       <td key={c.key} className="edit-cell" style={IS_NEW_ITEM(c.key) ? { backgroundColor: '#fff4e5' } : {}}>
-                        {c.caseRef
+                        {c.key === 'attrCode'
+                          ? <AttrSelect jan={row.janCode} value={row.attrCode} onChange={(v) => setItemCell(ii, 'attrCode', v)} />
+                          : c.caseRef
                           ? <input className="cell-inp" value={row.caseNo || ''} onChange={(e) => setItemCell(ii, 'caseNo', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); confirmCaseNo(ii) } }} />
                           : c.type === 'select'
                             ? <select className="cell-inp" value={row[c.key] || ''} onChange={(e) => setItemCell(ii, c.key, e.target.value)}><option value=""></option>{c.options.map((o) => <option key={o}>{o}</option>)}</select>
