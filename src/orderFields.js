@@ -106,10 +106,6 @@ export const orderDetailGroups = [
       { key: 'makerName',    label: 'メーカー名',           type: 'text', auto: true, ref: '商品マスタ→メーカーマスタ.メーカー名' },
       { key: 'attrCode',     label: '商品属性情報コード', type: 'text', ref: '商品属性情報マスタ' },
       { key: 'caseJanCode',  label: 'ケースJANコード',  type: 'text' },
-      { key: 'jicfsCode',    label: 'JICFS分類コード',  type: 'text' },
-      { key: 'jicfsKanji',   label: 'JICFS分類名（漢字）', type: 'text' },
-      { key: 'jicfsKana',    label: 'JICFS分類名（カナ）', type: 'text' },
-      { key: 'jicfsShort',   label: 'JICFS分類名（略称）', type: 'text' },
       { key: 'itfCode',      label: 'ITFコード',        type: 'text' },
       { key: 'medicineType', label: '医薬品',           type: 'select', options: ['対象外','要指導医薬品','第1類医薬品','第2類医薬品','第3類医薬品','医薬部外品','医薬品未分類'] },
       { key: 'alcoholType',  label: 'アルコール区分',   type: 'select', options: ['対象外','お酒','ノンアルコール','みりん'] },
@@ -166,14 +162,6 @@ export const orderDetailGroups = [
       { key: 'finalUnitEx',    label: '決着単価（税抜）',   type: 'number', auto: true, note: '単価-リベート-調整+プロモ' },
       { key: 'finalTotalEx',   label: '決着合計金額（税抜）', type: 'number', auto: true, note: '決着単価×ピース数' },
       { key: 'paymentDate',    label: '支払日',             type: 'date' },
-      { key: 'invoiceCheck',   label: '請求書チェック（営業アシスタント）', type: 'checkbox' },
-    ],
-  },
-  {
-    title: '販売目標情報',
-    fields: [
-      { key: 'salesTarget',        label: '販売目標',           type: 'text', note: '例：2026/4/27' },
-      { key: 'salesTargetManual',  label: '販売目標手動設定フラグ', type: 'select', options: ['手動','自動'] },
     ],
   },
 ]
@@ -187,27 +175,10 @@ export function makeEmptyOrderDetail() {
   }
   o.branchMaxNo = '1'
   o.branchNo = ''            // 発注明細番号（枝番）：入力可・追加/複製で自動採番
-  // 販売目標変更履歴（サブテーブル）
-  o.targetHistory = []
   return o
 }
 
 // ---- 案件番号リンク（明細内・複数可）------------------------
 export function makeEmptyCaseLink() {
   return { caseNo: '', caseTypeL: '', caseTypeM: '', caseTypeS: '', refPriceEx: '' }
-}
-
-// ---- 販売目標変更履歴（明細内サブテーブル）------------------
-export const targetHistoryFields = [
-  { key: 'orderNo',      label: '発注ヘッダー番号',    type: 'text', auto: true },
-  { key: 'branchNo',     label: '発注明細番号（枝番）', type: 'text', auto: true },
-  { key: 'targetBefore', label: '販売目標（変更前）', type: 'text', auto: true },
-  { key: 'changedBy',    label: '変更者',          type: 'text', auto: true },
-  { key: 'changedAt',    label: '変更日付',        type: 'text', auto: true },
-]
-
-export function makeEmptyTargetHistory() {
-  const o = {}
-  for (const f of targetHistoryFields) o[f.key] = ''
-  return o
 }

@@ -6,7 +6,7 @@ import { CASE_LIST_COLS, CASE_LIST_INIT, fmtCell } from './caseListFields.js'
 // 発注管理：一覧（検索結果の表）— kintone風。
 // props: onOpen(record) … record は { ...header, items:[明細...] }
 
-const VIEW_OPTIONS = ['請求書消込', '営業', 'オペ', 'ロジ', '発注情報出力', '入荷実績', '営業アシスタント', '開発確認用', '仕入実績管理用', '販売目標出力', 'JICFS作業用', '仕入型発注情報抽出用', '（すべて）']
+const VIEW_OPTIONS = ['請求書消込', '営業', 'オペ', 'ロジ', '発注情報出力', '入荷実績', '営業アシスタント', '開発確認用', '仕入実績管理用', '仕入型発注情報抽出用', '（すべて）']
 const OUTPUT_OPTIONS = ['出力する書類', '発注書（通常）']
 
 const COMPANY_BY_NAME = {
@@ -60,7 +60,6 @@ const ITEM_COLS = [
   { key: 'bestBeforeType', label: '期限種別', type: 'select', options: ['賞味期限', '消費期限', '製造日', 'なし'] },
   { key: 'bestBeforeDate', label: '消費/賞味/使用期限', type: 'date' },
   { key: 'deliveryDate', label: '納品日', type: 'date' },
-  { key: 'salesTarget', label: '販売目標' },
   { key: 'itfCode', label: 'ITFコード' },
   { key: 'orderCaseCount', label: '発注ケース入数', type: 'number' },
   { key: 'orderBallCount', label: '発注ボール入数', type: 'number' },
@@ -86,7 +85,7 @@ const itemFromCase = (branchNo, caseNo, extra = {}) => {
     categoryL: c.categoryL || '', categoryM: c.categoryM || '', categoryS: c.categoryS || '',
     medicineType: c.medicineType || '', alcoholType: c.alcoholType || '',
     orderCaseCount: c.orderCaseCount || '', orderBallCount: c.orderBallCount || '', refPriceEx: c.refPriceEx || '',
-    warehouse: '佐川（花見川）', bestBeforeDate: '2027-05-08', deliveryDate: '2026-10-08', salesTarget: '2027-01-06',
+    warehouse: '佐川（花見川）', bestBeforeDate: '2027-05-08', deliveryDate: '2026-10-08',
     taxRate: '8%', ...extra,
   })
 }
@@ -109,7 +108,7 @@ const INIT = [
   ]),
 ]
 
-const RELATED = ['発注商品テーブル', '案件管理テーブル', '販売目標変更履歴テーブル']
+const RELATED = ['発注商品テーブル', '案件管理テーブル']
 
 const IcoChart = () => (<svg viewBox="0 0 24 24" width="16" height="16"><polyline points="3,16 9,10 13,14 21,6" fill="none" stroke="currentColor" strokeWidth="2" /></svg>)
 const IcoFilter = () => (<svg viewBox="0 0 24 24" width="16" height="16"><polygon points="3,5 21,5 14,13 14,19 10,21 10,13" fill="none" stroke="currentColor" strokeWidth="2" /></svg>)
@@ -240,7 +239,6 @@ export default function OrderList({ onOpen }) {
               </table>
             </div>
           ))}
-        {rel === 2 && <div className="empty small">販売目標変更履歴テーブル（サンプル省略）</div>}
       </div>
 
       <datalist id="companyNameList">{COMPANY_NAMES.map((o) => <option key={o} value={o} />)}</datalist>
