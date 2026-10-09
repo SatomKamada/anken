@@ -128,7 +128,14 @@ function PageChangeDetail({ form, onChange }) {
 
       {msg && <div className={'notice ' + msg.t}>{msg.m}</div>}
 
-      {/* 商品規格ID → 企業名・商品名（紐づく値を表示。サジェストで修正も可）・変更種別 */}
+      {/* 1段目：変更種別 */}
+      <section className="pc-section">
+        {PAGE_CHANGE_FIELDS.map((fd) => (
+          <Field key={fd.key} field={fd} value={form[fd.key]} onChange={onField} />
+        ))}
+      </section>
+
+      {/* 2段目：商品規格ID → 企業名・商品名（紐づく値を表示。サジェストで修正も可） */}
       <section className="pc-section">
         {specIdRow}
         <div className="frow">
@@ -147,9 +154,6 @@ function PageChangeDetail({ form, onChange }) {
             <datalist id="pcDetailProduct">{productSuggestFor(form.companyName).map((o) => <option key={o} value={o} />)}</datalist>
           </div>
         </div>
-        {PAGE_CHANGE_FIELDS.map((fd) => (
-          <Field key={fd.key} field={fd} value={form[fd.key]} onChange={onField} />
-        ))}
       </section>
 
       {/* ── 掲載ページ変更 ── */}

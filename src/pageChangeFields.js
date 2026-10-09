@@ -246,10 +246,10 @@ export const lookupSpecPosts = (r) => {
 const _T = PAGE_CHANGE_TYPE
 export const PAGE_CHANGE_LIST_COLS = [
   { key: 'recordNo',    label: 'レコード番号', group: '共通', scope: 'rec', locked: true },
+  { key: 'changeType',  label: '変更種別',     group: '共通', scope: 'rec', type: 'select', options: Object.values(_T), req: true },
   { key: 'specId',      label: '商品規格ID',   group: '共通', scope: 'rec', type: 'specId' },
   { key: 'companyName', label: '企業名',       group: '共通', scope: 'rec', type: 'company' },
   { key: 'productName', label: '商品名',       group: '共通', scope: 'rec', type: 'product' },
-  { key: 'changeType',  label: '変更種別',     group: '共通', scope: 'rec', type: 'select', options: Object.values(_T), req: true },
 
   { key: 'target',  label: '変更対象の項目', group: '掲載ページ変更', scope: 'page', type: 'target', types: [_T.PAGE] },
   { key: 'content', label: '変更内容',       group: '掲載ページ変更', scope: 'page', types: [_T.PAGE] },
