@@ -7,7 +7,6 @@ import { branchCode } from './RecordHeader.jsx'
 import {
   orderDetailGroups, makeEmptyOrderDetail,
   caseTypeLOptions, caseTypeMOptions, caseTypeSOptions, orderCategoryOptions, productTypeOptions,
-  stockLinkOptions,
 } from './orderFields.js'
 import AttrSelect from './AttrSelect.jsx'
 import { lookupOrderDetailByProduct, lookupCaseProduct, lookupCompany } from './dummyData.js'
@@ -33,31 +32,19 @@ const HEADER_COLS = [
   { key: 'promo', label: 'プロモーションコード' },
   { key: 'payTerms', label: '支払条件', type: 'select', options: ['末締め翌月末払い', '15日締め払い', '末締め翌月15日払い', '日付指定'] },
   { key: 'payDue', label: '支払期日', type: 'date' },
-  { key: 'totalCase', label: 'ケース数合計', auto: true },
-  { key: 'totalPiece', label: 'ピース数合計', auto: true },
-  { key: 'amountIn', label: '発注金額合計（税込み）', auto: true },
+  { key: 'totalCase', label: '発注総ケース数', auto: true },
+  { key: 'totalPiece', label: '発注総ピース数', auto: true },
+  { key: 'totalPieceActual', label: '発注総ピース数（実績）', auto: true },
+  { key: 'amountEx', label: '発注金額合計（税抜）', auto: true },
   { key: 'tax8', label: '消費税（8%）' },
   { key: 'tax10', label: '消費税（10%）' },
-  { key: 'amountEx', label: '発注金額合計（税抜）', auto: true },
-  { key: 'assignee', label: '担当者', auto: true },
+  { key: 'amountIn', label: '発注金額合計（税込）', auto: true },
+  { key: 'assignee', label: '担当者名', auto: true },
   { key: 'createdAt', label: '作成日時', auto: true },
 ]
 
-// 明細の全項目（表の列）。発注番号（枝番）Max No は枝番で表現するため除外。
-const RAW_DETAIL_COLS = orderDetailGroups.flatMap((g) => g.fields).filter((f) => !['branchMaxNo', 'saleType', 'stockLinkFlag', 'bestBeforeType'].includes(f.key))
-const DETAIL_COLS = []
-for (const f of RAW_DETAIL_COLS) {
-  if (f.key === 'attrCode') {
-    DETAIL_COLS.push({ key: 'saleType', label: '規格区分', type: 'select', options: ['通常','わけあり（B品）','わけあり（期限）','抽選・発送あり','抽選・発送なし','先着・発送あり','先着・発送なし','イベント・発送あり','イベント・発送なし','代品','初試し','企画1','企画2','企画3'] })
-    DETAIL_COLS.push({ key: 'stockLinkFlag', label: '在庫紐づけ', type: 'select', options: stockLinkOptions })
-    DETAIL_COLS.push({ ...f, required: true })
-  } else if (f.key === 'bestBeforeDate') {
-    DETAIL_COLS.push({ key: 'bestBeforeType', label: '期限種別', type: 'select', options: ['賞味期限', '消費期限', '製造日', 'なし'] })
-    DETAIL_COLS.push(f)
-  } else {
-    DETAIL_COLS.push(f)
-  }
-}
+// 明細の全項目（表の列）。並び順・項目名はテーブル定義書（発注明細）に準拠。発注番号（枝番）Max No は枝番で表現するため除外。
+const DETAIL_COLS = orderDetailGroups.flatMap((g) => g.fields).filter((f) => f.key !== 'branchMaxNo')
 
 const IS_NEW_ITEM = (k) => ['caseNo', 'saleType', 'stockLinkFlag', 'attrCode', 'bestBeforeType'].includes(k);
 

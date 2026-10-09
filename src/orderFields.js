@@ -112,6 +112,10 @@ export function attrOptionsForJan(jan) {
 }
 
 // ---- 明細（1:多）--------------------------------------------
+// 並び順・項目名・選択肢はテーブル定義書（発注明細）に合わせる
+export const saleTypeOptions = ['通常','わけあり（B品）','わけあり（期限）','抽選・発送あり','抽選・発送なし','先着・発送あり','先着・発送なし','イベント・発送あり','イベント・発送なし']
+export const bestBeforeTypeOptions = ['なし','賞味期限','消費期限','製造日']
+
 export const orderDetailGroups = [
   {
     title: '商品情報',
@@ -119,38 +123,36 @@ export const orderDetailGroups = [
       { key: 'branchMaxNo',  label: '発注番号（枝番）Max No', type: 'text', auto: true },
       { key: 'caseNo',       label: '案件番号',         type: 'text', reflink: 'case', ref: '案件管理.id' },
       { key: 'janCode',      label: 'JANコード',       type: 'text', reflink: 'jan', ref: 'JAN基本情報.JAN / 商品マスタ.JAN' },
+      { key: 'caseJanCode',  label: 'ケースJANコード',  type: 'text' },
       { key: 'productId',    label: '商品ID',           type: 'text', ref: '商品マスタ.id' },
       { key: 'productName',  label: '商品名',           type: 'text' },
       { key: 'categoryL',    label: '商品カテゴリー（大）', type: 'text', ref: 'カテゴリマスタ' },
       { key: 'categoryM',    label: '商品カテゴリー（中）', type: 'text', ref: 'カテゴリマスタ' },
       { key: 'categoryS',    label: '商品カテゴリー（小）', type: 'text', ref: 'カテゴリマスタ' },
-      { key: 'makerId',      label: 'メーカーID',           type: 'text', ref: 'メーカーマスタ.id' },
+      { key: 'makerId',      label: 'メーカーコード',       type: 'text', ref: 'メーカーマスタ' },
       { key: 'makerName',    label: 'メーカー名',           type: 'text', auto: true, ref: '商品マスタ→メーカーマスタ.メーカー名' },
-      { key: 'attrCode',     label: '商品属性情報コード', type: 'text', ref: '商品属性情報マスタ' },
-      { key: 'caseJanCode',  label: 'ケースJANコード',  type: 'text' },
+      { key: 'attrCode',     label: '商品属性情報コード', type: 'text', required: true, ref: '商品属性情報マスタ' },
+      { key: 'saleType',     label: '規格区分',         type: 'select', options: saleTypeOptions },
+      { key: 'stockLinkFlag', label: '在庫自動紐づけ',  type: 'select', options: stockLinkOptions },
       { key: 'itfCode',      label: 'ITFコード',        type: 'text' },
     ],
   },
   {
     title: '規格・期限',
     fields: [
-      {
-        key: 'saleType', label: '規格区分', type: 'select',
-        options: ['通常','わけあり（B品）','わけあり（期限）','抽選・発送あり','抽選・発送なし','先着・発送あり','先着・発送なし','イベント・発送あり','イベント・発送なし','代品','企画1','企画2','企画3'],
-      },
-      { key: 'bestBeforeType', label: '期限種別',   type: 'select', options: ['使用期限','賞味期限','消費期限'] },
+      { key: 'bestBeforeType', label: '期限種別',   type: 'select', options: bestBeforeTypeOptions },
       { key: 'bestBeforeDate', label: '消費/賞味/使用期限', type: 'date' },
+      { key: 'bestBeforeDateActual', label: '消費/賞味/使用期限（実績）', type: 'date', auto: true },
       { key: 'bestBeforeDiffFlag', label: '賞味期限差異フラグ', type: 'checkbox' },
     ],
   },
   {
     title: '発注情報',
     fields: [
-      { key: 'orderCaseCount', label: '発注ケース入数', type: 'number', note: '現行：ケース入数' },
-      { key: 'orderBallCount', label: '発注ボール入数', type: 'number', note: '現行：ボール入数' },
-      { key: 'orderCaseQty',   label: '発注ケース数',   type: 'number', note: '例：2ケース,5ケース' },
-      { key: 'totalPieceQty',  label: '発注総ピース数', type: 'number', auto: true, note: 'ケース入数×ケース数' },
-      { key: 'totalPieceActual', label: '発注総ピース数（実績）', type: 'number', auto: true, ref: 'WMS.ピース数' },
+      { key: 'orderCaseCount', label: '発注ケース入数', type: 'number' },
+      { key: 'orderBallCount', label: '発注ボール入数', type: 'number' },
+      { key: 'orderCaseQty',   label: '発注ケース数',   type: 'number' },
+      { key: 'totalPieceQty',  label: '発注ピース数',   type: 'number', auto: true, note: '発注ケース入数×発注ケース数' },
     ],
   },
   {
