@@ -18,7 +18,6 @@ import {
   productSuggestFor,
   setProductName,
   lookupSpecPosts,
-  lookupSpecInfo,
   touch,
   createPageChangeInitial,
 } from './pageChangeFields.js'
@@ -82,9 +81,11 @@ function PageChangeDetail({ form, onChange }) {
   const removeRow = (key, i) =>
     form[key].length > 1 && set({ [key]: form[key].filter((_, idx) => idx !== i) })
 
-  // 商品規格ID → 紐づく掲載履歴を呼び出し（Enter）
+  // 商品規格ID → 紐づく企業名・商品名・掲載履歴を呼び出し（Enter／入力欄から離れたとき）
+  const [lastSpec, setLastSpec] = useState(form.specId)
   const lookupSpec = () => {
-    const res = form.changeType === T.PAGE ? lookupSpecInfo(form) : lookupSpecPosts(form)
+    setLastSpec(form.specId)
+    const res = lookupSpecPosts(form)
     setMsg({ t: res.ok ? 'ok' : 'warn', m: res.msg })
     if (res.ok) onChange(res.record)
   }
@@ -104,25 +105,21 @@ function PageChangeDetail({ form, onChange }) {
     </td>
   )
 
-  // 商品規格ID入力欄（掲載ページ変更・期間設定・公開/非公開で共通）
-  //   掲載ページ変更：Enterで企業名・商品名のみ補完 / 期間・公開：Enterで紐づく掲載履歴を呼び出し
-  const isPage = form.changeType === T.PAGE
+  // 商品規格ID入力欄（全変更種別で共通・最上部）
+  const specRequired = form.changeType === T.PERIOD || form.changeType === T.PUBLISH
   const specIdRow = (
     <div className="frow">
-      <div className="flabel">商品規格ID{!isPage && <span className="req">必須</span>}</div>
+      <div className="flabel">商品規格ID{specRequired && <span className="req">必須</span>}</div>
       <div className="fbody">
         <input className="inp inp-code" value={form.specId} placeholder="商品規格ID入力→Enter"
           onChange={(e) => set({ specId: e.target.value })}
-          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); lookupSpec() } }} />
-        <div className="fnote">
-          {isPage
-            ? `Enterで企業名・商品名を補完（空欄の場合のみ）。ダミー：${SPEC_ID_SAMPLES.join(' / ')}`
-            : `Enterで紐づく掲載履歴を呼び出し（ダミー：${SPEC_ID_SAMPLES.join(' / ')}）。変更する掲載履歴の「変更対象」にチェックしてください（一覧にはチェックした掲載履歴のみ表示）。`}
-        </div>
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); lookupSpec() } }}
+          onBlur={() => { if ((form.specId || '').trim() && form.specId !== lastSpec) lookupSpec() }} />
+        <div className="fnote">入力すると紐づく企業名・商品名・掲載履歴を表示（ダミー：{SPEC_ID_SAMPLES.join(' / ')}）</div>
       </div>
     </div>
   )
-  const noPosts = form.posts.length === 0 && <div className="empty small">商品規格IDを入力してEnterを押してください。</div>
+  const noPosts = form.posts.length === 0 && <div className="empty small">上部の商品規格IDを入力してください。</div>
 
   return (
     <div className="pc-wrap">
@@ -131,8 +128,9 @@ function PageChangeDetail({ form, onChange }) {
 
       {msg && <div className={'notice ' + msg.t}>{msg.m}</div>}
 
-      {/* 企業名・商品名（サジェスト）・変更種別 */}
+      {/* 商品規格ID → 企業名・商品名（紐づく値を表示。サジェストで修正も可）・変更種別 */}
       <section className="pc-section">
+        {specIdRow}
         <div className="frow">
           <div className="flabel">企業名</div>
           <div className="fbody">
@@ -147,7 +145,6 @@ function PageChangeDetail({ form, onChange }) {
             <input className="inp" list="pcDetailProduct" value={form.productName} placeholder="入力すると候補が表示されます"
               onChange={(e) => onChange(setProductName(form, e.target.value))} />
             <datalist id="pcDetailProduct">{productSuggestFor(form.companyName).map((o) => <option key={o} value={o} />)}</datalist>
-            <div className="fnote">企業名を選択するとその企業の商品に絞り込み。商品名を選択すると、企業名が空欄の場合は自動入力。</div>
           </div>
         </div>
         {PAGE_CHANGE_FIELDS.map((fd) => (
@@ -159,8 +156,6 @@ function PageChangeDetail({ form, onChange }) {
       {form.changeType === T.PAGE && (
         <section className="pc-section">
           <h3 className="pc-title">掲載ページ変更</h3>
-          {specIdRow}
-          <div className="pc-mt"></div>
           {form.pageRows.map((r, i) => (
             <div className="pc-row" key={i}>
               <div className="pc-cell pc-w-target">
@@ -194,7 +189,6 @@ function PageChangeDetail({ form, onChange }) {
       {form.changeType === T.PERIOD && (
         <section className="pc-section">
           <h3 className="pc-title">掲載開始終了日 / 募集開始終了日設定</h3>
-          {specIdRow}
           {noPosts}
           {form.posts.length > 0 && (
             <div className="ktable-scroll pc-mt">
@@ -240,7 +234,6 @@ function PageChangeDetail({ form, onChange }) {
       {form.changeType === T.PUBLISH && (
         <section className="pc-section">
           <h3 className="pc-title">公開 / 非公開設定</h3>
-          {specIdRow}
           {noPosts}
           {form.posts.length > 0 && (
             <div className="ktable-scroll pc-mt">

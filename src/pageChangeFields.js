@@ -191,7 +191,7 @@ export const createPageChangeInitial = (recordNo = '', assignee = CURRENT_USER, 
   productName: '',
   changeType: '',
   pageRows: [{ target: '', content: '' }],
-  specId: '',          // 掲載ページ変更・期間設定・公開/非公開で使用
+  specId: '',          // 全変更種別で共通（企業名・商品名の呼び出し元）
   posts: [],           // 商品規格IDに紐づく掲載履歴（変更後の値＋orig）
   stockRows: [{ fromId: '', toId: '', qty: '' }],
   memo: '',
@@ -223,7 +223,8 @@ export const setProductName = (r, productName) => ({
   ...r, productName, companyName: r.companyName || companyOfProduct(productName) || '',
 })
 
-// 商品規格ID → 掲載履歴の呼び出し（詳細・一覧の Enter で共通利用）
+// 商品規格ID → 企業名・商品名・掲載履歴の呼び出し（詳細・一覧の Enter で共通利用）
+//   企業名・商品名は商品規格IDに紐づく値で上書き
 export const lookupSpecPosts = (r) => {
   const id = (r.specId || '').trim()
   if (!id) return { ok: false, msg: '商品規格IDを入力してください' }
@@ -231,21 +232,8 @@ export const lookupSpecPosts = (r) => {
   if (!m) return { ok: false, msg: `商品規格IDに該当なし（${id}）。ダミー：${SPEC_ID_SAMPLES.join(' / ')}` }
   return {
     ok: true,
-    msg: `商品規格ID ${id} に紐づく掲載履歴を ${m.posts.length}件 呼び出しました`,
-    record: { ...r, posts: toPostRows(m.posts), companyName: r.companyName || m.companyName, productName: r.productName || m.productName },
-  }
-}
-
-// 商品規格ID → 企業名・商品名のみ補完（掲載ページ変更で使用。掲載履歴は呼び出さない）
-export const lookupSpecInfo = (r) => {
-  const id = (r.specId || '').trim()
-  if (!id) return { ok: false, msg: '商品規格IDを入力してください' }
-  const m = SPEC_POST_MASTER[id]
-  if (!m) return { ok: false, msg: `商品規格IDに該当なし（${id}）。ダミー：${SPEC_ID_SAMPLES.join(' / ')}` }
-  return {
-    ok: true,
-    msg: `商品規格ID ${id}（${m.companyName} / ${m.productName}）`,
-    record: { ...r, companyName: r.companyName || m.companyName, productName: r.productName || m.productName },
+    msg: `商品規格ID ${id}（${m.companyName} / ${m.productName}）に紐づく掲載履歴を ${m.posts.length}件 呼び出しました`,
+    record: { ...r, posts: toPostRows(m.posts), companyName: m.companyName, productName: m.productName },
   }
 }
 
@@ -258,10 +246,10 @@ export const lookupSpecInfo = (r) => {
 const _T = PAGE_CHANGE_TYPE
 export const PAGE_CHANGE_LIST_COLS = [
   { key: 'recordNo',    label: 'レコード番号', group: '共通', scope: 'rec', locked: true },
+  { key: 'specId',      label: '商品規格ID',   group: '共通', scope: 'rec', type: 'specId' },
   { key: 'companyName', label: '企業名',       group: '共通', scope: 'rec', type: 'company' },
   { key: 'productName', label: '商品名',       group: '共通', scope: 'rec', type: 'product' },
   { key: 'changeType',  label: '変更種別',     group: '共通', scope: 'rec', type: 'select', options: Object.values(_T), req: true },
-  { key: 'specId',      label: '商品規格ID',   group: '共通', scope: 'rec', type: 'specId', types: [_T.PAGE, _T.PERIOD, _T.PUBLISH] },
 
   { key: 'target',  label: '変更対象の項目', group: '掲載ページ変更', scope: 'page', type: 'target', types: [_T.PAGE] },
   { key: 'content', label: '変更内容',       group: '掲載ページ変更', scope: 'page', types: [_T.PAGE] },
