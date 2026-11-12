@@ -18,7 +18,6 @@ const nowStr = () => {
   const d = new Date(), z = (x) => String(x).padStart(2, '0')
   return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`
 }
-const KIND_OF = Object.fromEntries(DEFS.map((d) => [d.vkey, d.kind]))
 
 export default function CaseSimpleTab() {
   const [view, setView] = useState('list')
@@ -76,8 +75,8 @@ function CaseSimpleList({ records, onOpen, onAdd }) {
                   <button type="button" className="detail-ico" title="レコードの詳細を表示する" onClick={() => onOpen(r)}><IcoDetail /></button>
                 </td>
                 {CS_LIST_COLS.map((c) => {
-                  const kind = c.type || KIND_OF[c.name]
-                  return <td key={c.name} className={kind === 'money' ? 'cl-num' : ''}>{fmtVal(kind, r[c.name])}</td>
+                  const cls = ['money', 'pct', 'num'].includes(c.kind) ? 'cl-num' : c.kind === 'checkbox' ? 'cs-center' : ''
+                  return <td key={c.name} className={cls}>{fmtVal(c.kind, r[c.name])}</td>
                 })}
               </tr>
             ))}

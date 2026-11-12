@@ -43,13 +43,23 @@ export const CATEGORY_MASTER = {
 // ============================================================
 // 画面レイアウト調整（定義書の順序・グループに対する画面上の並べ替え）
 // ============================================================
-const EXCLUDE = new Set(['非会員申込可否'])                                     // 画面に出さない
+const EXCLUDE = new Set([                                                     // 画面に出さない
+  '非会員申込可否', '種別',
+  'お試し費用（税込）＋5%を手入力する[お試し費用（税込）＋5%を手入力する]',
+])
+const RENAME = { '掲載ID': '商品規格ID', '掲載変更種別': '種別' }               // 画面上の名称
+const MOVE_BEFORE = { '掲載確定日': '掲載時間' }                                  // 同じグループ内で前へ
 const MOVE_TO_GROUP_TOP = { '掲載変更ステータス': '確定情報（オペ・営業企画入力）' } // 別グループの先頭へ
 const AFTER_CATEGORY = ['酒類', '医薬', '過去実績/類似商品実績']                  // カテゴリーの下へ
 const GROUP_FIRST = ['商品', '商品規格', '掲載履歴']                             // 最上部の次に並べる
 
 function arrange(defs) {
-  let list = defs.filter((d) => !EXCLUDE.has(d.name))
+  let list = defs.filter((d) => !EXCLUDE.has(d.name)).map((d) => (RENAME[d.name] ? { ...d, label: RENAME[d.name] } : d))
+  for (const [name, before] of Object.entries(MOVE_BEFORE)) {
+    const d = list.find((x) => x.name === name)
+    list = list.filter((x) => x !== d)
+    list.splice(list.findIndex((x) => x.name === before), 0, d)
+  }
   for (const [name, g] of Object.entries(MOVE_TO_GROUP_TOP)) {
     const d = list.find((x) => x.name === name)
     list = list.filter((x) => x !== d)
@@ -106,19 +116,19 @@ export const MANUAL_FLAG = {
   '社販コムお試し費用（税込）': '社販コムお試し費用（変更フラグ）[社販コムお試し費用を手入力する]',
   '会員コムお試し費用（税込）': '会員コムお試し費用（変更フラグ）[会員コムお試し費用を手入力する]',
   'Y店お試し費用（税込）': 'Y店お試し費用（変更フラグ）[Y店お試し費用を手入力する]',
-  'お試し費用（税抜）+5%': 'お試し費用（税込）＋5%を手入力する[お試し費用（税込）＋5%を手入力する]',
 }
 
-// ---- 一覧の列（現行 kintone の一覧に合わせる）
+// ---- 一覧の列：詳細と同じ名称で、指定グループの項目＋個別項目（倉庫）を並べる
+//   ''＝最上部（グループ外）の項目
+const LIST_GROUPS = ['', '商品', 'お試し費用', '粗利', '掲載チャネル']
+const LIST_EXTRA = ['倉庫']
 export const CS_LIST_COLS = [
-  { name: 'レコード番号' }, { name: '案件No' }, { name: '案件ステータス' }, { name: '掲載ID' },
-  { name: '前回ID' }, { name: '掲載確定日' }, { name: '掲載予定日' }, { name: '納品日' },
-  { name: '作成者ID', label: '作成者' }, { name: '掲載変更種別', label: '種別' },
-  { name: '仕入れタイプ' }, { name: '企業名', label: 'クライアント名' }, { name: '掲載名' },
-  { name: '賞味期限' }, { name: '上代合計（税込）', type: 'money' }, { name: 'お試し費用（税込）', type: 'money' },
-]
+  ...LIST_GROUPS.flatMap((g) => DEFS.filter((d) => d.group === g)),
+  ...LIST_EXTRA.map((nm) => DEFS.find((d) => d.name === nm)).filter(Boolean),
+].map((d) => ({ name: d.vkey, label: d.label, kind: d.kind }))
 
 export const fmtVal = (kind, v) => {
+  if (kind === 'checkbox') return v ? '✓' : ''
   if (v === '' || v === null || v === undefined) return ''
   if (kind === 'money') return '¥' + Number(v).toLocaleString()
   if (kind === 'pct') return Number(v).toLocaleString(undefined, { maximumFractionDigits: 1 }) + '%'

@@ -42,3 +42,4 @@
 .cs-chtable .cs-cell { width: 116px; }
 .cs-chtable .cs-chrow { width: max-content; min-width: 100%; }
 .cs-chtable .cs-chname { padding-top: 0; align-self: center; }
+.cl-list td.cs-center { text-align: center; }
