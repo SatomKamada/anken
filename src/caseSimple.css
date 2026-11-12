@@ -10,5 +10,35 @@
 .cs-detail .cs-unit { color: var(--ink-soft); font-size: 12px; }
 .cs-detail .fbody.has-right { flex-wrap: nowrap; }
 .cs-detail .fbody.has-right .fnote { flex-basis: auto; }
-.cs-new { display: inline-block; margin-left: 6px; background: #fff4e5; color: #8a5300; border: 1px solid #f1d3a6;
-  font-size: 10px; padding: 0 5px; border-radius: 3px; vertical-align: middle; font-weight: 600; }
+
+
+/* ラベル上・入力下のセル（チャネル別の行・総額／単価・カテゴリー） */
+.cs-row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: flex-start; padding: 4px 0; }
+.cs-cell { width: 150px; min-width: 0; flex: 0 0 auto; }
+.cs-cell.wide { width: 100%; }
+.cs-clabel { font-size: 11.5px; color: var(--ink-soft); font-weight: 600; margin-bottom: 3px; line-height: 1.35; }
+.cs-cbox { display: flex; align-items: center; gap: 4px; }
+.cs-cbox .inp { flex: 1; min-width: 0; }
+.cs-detail .cs-num { text-align: right; }
+.cs-links { display: inline-flex; gap: 12px; margin-left: 4px; }
+.cs-links button { border: none; background: none; color: var(--brand); cursor: pointer; padding: 2px 0; font-size: 12px; }
+.cs-cell:has(.cs-links) { width: auto; display: flex; align-items: center; gap: 0 10px; flex-wrap: wrap; }
+.cs-cell:has(.cs-links) .cs-clabel { width: 100%; }
+.cs-cell:has(.cs-links) .cs-cbox { width: 150px; }
+/* チャネル別の行 */
+.cs-chrow { display: flex; gap: 10px; align-items: flex-start; border-bottom: 1px dashed #e2e7ec; padding: 4px 0; }
+.cs-chrow:last-child { border-bottom: none; }
+.cs-chname { flex: 0 0 76px; padding-top: 26px; font-weight: 700; color: var(--brand-d); }
+.cs-chrow .cs-row { flex: 1; }
+/* 総額・単価のマトリクス */
+.cs-matrix { display: grid; gap: 6px 18px; margin-top: 4px; }
+.cs-mcell { min-width: 0; }
+.cs-pair { display: flex; gap: 8px; }
+.cs-pair .cs-cell { flex: 1; width: auto; }
+.cs-pair.indent { padding-left: 22px; }
+/* チャネル行は折り返さず横一列（はみ出す分は横スクロール） */
+.cs-chtable { overflow-x: auto; }
+.cs-row.nowrap { flex-wrap: nowrap; align-items: flex-end; }
+.cs-chtable .cs-cell { width: 116px; }
+.cs-chtable .cs-chrow { width: max-content; min-width: 100%; }
+.cs-chtable .cs-chname { padding-top: 0; align-self: center; }

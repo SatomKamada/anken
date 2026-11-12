@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import KGroup from './KGroup.jsx'
 import Field from './Field.jsx'
 import {
-  CASE_DEFS, CS_LIST_COLS, CS_RECORDS_INIT, OPTION_OVERRIDES, LOOKUPS, MANUAL_FLAG,
-  fmtVal, recalc, makeEmptyCase,
+  DEFS, GROUPS, DEF_BY_NAME, CS_LIST_COLS, CS_RECORDS_INIT, OPTION_OVERRIDES, PAIRS, MANUAL_FLAG,
+  CATEGORY_MASTER, CHANNELS, CHANNEL_ROW_GROUPS, CHANNEL_SLOTS, MATRIX, fmtVal, recalc, makeEmptyCase,
 } from './caseSimpleFields.js'
 import { caseStatusOptions } from './fields.js'
 import './caseList.css'
@@ -18,7 +18,7 @@ const nowStr = () => {
   const d = new Date(), z = (x) => String(x).padStart(2, '0')
   return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`
 }
-const KIND_OF = Object.fromEntries(CASE_DEFS.map((d) => [d.name, d.kind]))
+const KIND_OF = Object.fromEntries(DEFS.map((d) => [d.vkey, d.kind]))
 
 export default function CaseSimpleTab() {
   const [view, setView] = useState('list')
@@ -90,43 +90,165 @@ function CaseSimpleList({ records, onOpen, onAdd }) {
 
 // ------------------------------------------------------------
 // 詳細：備考欄のグループごとに表示（グループ外＝最上部）
+//   並び順の調整は caseSimpleFields.js の「画面レイアウト調整」
 // ------------------------------------------------------------
-const GROUPS = [...new Set(CASE_DEFS.map((d) => d.group))].filter((g) => g !== '')
-const HEAD_DEFS = CASE_DEFS.filter((d) => d.group === '')
+const HEAD_DEFS = DEFS.filter((d) => d.group === '')
+const CATEGORY = ['カテゴリーコード', '大カテゴリー', '中カテゴリー', '小カテゴリー']
+const INPUT_TYPE = { select: 'select', checkbox: 'checkbox', date: 'date', textarea: 'textarea', money: 'number', pct: 'number', num: 'number' }
+const numFmt = (v) => (v === '' || v === null || v === undefined ? '' : Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 }))
+
+// kintone風のセル（ラベル上・入力下）。チャネル別の行・総額／単価・カテゴリーで使用
+function Cell({ d, label, vals, change, isAuto, wide, extra }) {
+  const v = vals[d.vkey]
+  const lab = label ?? d.label
+  if (d.kind === 'checkbox') {
+    return (
+      <div className="cs-cell">
+        <div className="cs-clabel">{lab}</div>
+        <label className="chk-inline"><input type="checkbox" checked={!!v} onChange={(e) => change(d.vkey, e.target.checked)} />
+          <span>{d.boolLabel || d.label}</span></label>
+      </div>
+    )
+  }
+  const opts = d.options || OPTION_OVERRIDES[d.name] || []
+  const input = d.kind === 'select' && !isAuto
+    ? <select className="inp" value={v ?? ''} onChange={(e) => change(d.vkey, e.target.value)}>
+        <option value="">-----</option>{opts.map((o) => <option key={o}>{o}</option>)}
+      </select>
+    : <input className={'inp' + (['money', 'pct', 'num'].includes(d.kind) ? ' cs-num' : '')} readOnly={isAuto}
+        type={isAuto ? 'text' : (INPUT_TYPE[d.kind] || 'text')}
+        value={isAuto && ['money', 'pct', 'num'].includes(d.kind) ? numFmt(v) : (v ?? '')}
+        onChange={(e) => change(d.vkey, e.target.value)} />
+  return (
+    <div className={'cs-cell' + (wide ? ' wide' : '')}>
+      <div className="cs-clabel" title={d.note || ''}>{lab}</div>
+      <div className="cs-cbox">
+        {d.kind === 'money' && <span className="cs-unit">¥</span>}
+        {input}
+        {d.kind === 'pct' && <span className="cs-unit">%</span>}
+      </div>
+      {extra}
+    </div>
+  )
+}
 
 function CaseSimpleDetail({ rec, onBack, onSave }) {
   const [vals, setVals] = useState(rec)
   const [openAll, setOpenAll] = useState({ on: true, n: 0 })   // n を変えて KGroup を開き直す
 
   const change = (name, v) => setVals((s) => recalc({ ...s, [name]: v }))
-  const doLookup = (d) => {
-    const lk = LOOKUPS[d.name]
-    if (!lk) return
-    change(lk.target, lk.table[String(vals[d.name] ?? '').trim()] ?? '')
-  }
+  const autoOf = (d) => !!(d.auto || (MANUAL_FLAG[d.name] && !vals[MANUAL_FLAG[d.name]]))
 
+  // ラベル左・入力右の行（既存 Field）
   const renderField = (d) => {
-    const isAuto = d.auto || (MANUAL_FLAG[d.name] && !vals[MANUAL_FLAG[d.name]])
-    const label = d.isNew ? <>{d.label}<span className="cs-new">次期新規</span></> : d.label
-    const options = d.options || OPTION_OVERRIDES[d.name] || []
-    const v = vals[d.name]
+    const isAuto = autoOf(d)
+    const v = vals[d.vkey]
+    if (d.kind === 'suggest') {            // 名称入力（候補付き）→ コード自動
+      const listId = `cs-list-${d.key}`
+      return (
+        <div className="frow" key={d.key}>
+          <div className="flabel">{d.label}</div>
+          <div className="fbody">
+            <input className="inp" list={listId} value={v ?? ''} onChange={(e) => change(d.vkey, e.target.value)} />
+            <datalist id={listId}>{Object.keys(PAIRS[d.name].table).map((o) => <option key={o} value={o} />)}</datalist>
+          </div>
+        </div>
+      )
+    }
     let field, value = v
     if (isAuto) {
-      field = { key: d.name, label, auto: true, note: d.note }
+      field = { key: d.vkey, label: d.label, auto: true, note: d.note }
       value = fmtVal(d.kind, v)
     } else {
-      const type = { select: 'select', checkbox: 'checkbox', date: 'date', textarea: 'textarea',
-        money: 'number', pct: 'number', num: 'number' }[d.kind] || 'text'
-      field = { key: d.name, label, type, options, boolLabel: d.boolLabel || d.label, note: d.note }
+      const options = d.options || OPTION_OVERRIDES[d.name] || []
+      field = { key: d.vkey, label: d.label, type: INPUT_TYPE[d.kind] || 'text', options, boolLabel: d.boolLabel || d.label, note: d.note }
     }
-    const right = d.kind === 'lookup'
-      ? <button type="button" className="btn-ref" onClick={() => doLookup(d)}>取得</button>
-      : !isAuto && d.kind === 'money' ? <span className="cs-unit">円</span>
+    const right = !isAuto && d.kind === 'money' ? <span className="cs-unit">円</span>
       : !isAuto && d.kind === 'pct' ? <span className="cs-unit">%</span> : null
     return <Field key={d.key} field={field} value={value} onChange={change} right={right} />
   }
 
+  // カテゴリー：コード入力（取得／クリア）＋大・中・小（自動）
+  const renderCategory = () => {
+    const code = DEF_BY_NAME['カテゴリーコード']
+    const get = () => {
+      const m = CATEGORY_MASTER[String(vals['カテゴリーコード'] ?? '').trim()] || ['', '', '']
+      setVals((s) => recalc({ ...s, '大カテゴリー': m[0], '中カテゴリー': m[1], '小カテゴリー': m[2] }))
+    }
+    const clear = () => setVals((s) => recalc({ ...s, 'カテゴリーコード': '', '大カテゴリー': '', '中カテゴリー': '', '小カテゴリー': '' }))
+    return (
+      <KGroup key="cat" title="カテゴリー" defaultOpen>
+        <div className="cs-row">
+          <Cell d={code} vals={vals} change={change} isAuto={false}
+            extra={<span className="cs-links"><button type="button" onClick={get}>取得</button><button type="button" onClick={clear}>クリア</button></span>} />
+        </div>
+        <div className="cs-row">
+          {CATEGORY.slice(1).map((nm) => <Cell key={nm} d={DEF_BY_NAME[nm]} vals={vals} change={change} isAuto />)}
+        </div>
+      </KGroup>
+    )
+  }
+
+  // 費用関連：チャネルごとに横一列（列＝CHANNEL_SLOTS の項目、ない項目は空欄）
+  const renderChannelRows = (g, defs) => {
+    const fallback = CHANNEL_ROW_GROUPS[g]
+    const chOf = (d) => CHANNELS.find((c) => d.name.startsWith(c)) || fallback
+    const suffix = (d) => { const ch = chOf(d); return d.label.startsWith(ch) && d.label !== ch ? d.label.slice(ch.length) : d.label }
+    const slots = CHANNEL_SLOTS[g] || []
+    const rowCell = (d) => (
+      <Cell key={d.key} d={{ ...d, boolLabel: d.boolLabel ? d.boolLabel.replace(/^.*を/, '') : '' }}
+        label={suffix(d)} vals={vals} change={change} isAuto={autoOf(d)} />
+    )
+    const rows = [fallback, ...CHANNELS.filter((c) => c !== fallback)]
+    return (
+      <div className="cs-chtable">
+        {rows.map((ch) => {
+          const list = defs.filter((d) => chOf(d) === ch)
+          if (!list.length) return null
+          // 共通行（接頭辞なしの項目が他チャネルと別物の場合）は定義書の順のまま
+          const aligned = ch !== '共通'
+          const extra = aligned ? list.filter((d) => !slots.includes(suffix(d))) : list
+          return (
+            <div className="cs-chrow" key={ch}>
+              <div className="cs-chname">{ch}</div>
+              <div className="cs-row nowrap">
+                {aligned && slots.map((sl) => {
+                  const d = list.find((x) => suffix(x) === sl)
+                  return d ? rowCell(d) : <div key={sl} className="cs-cell" />
+                })}
+                {extra.map(rowCell)}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  // 総額・単価：チャネルを列、指標を行
+  const renderMatrix = (g) => {
+    const mx = MATRIX[g]
+    const cell = (vk, wide) => (DEF_BY_NAME[vk]
+      ? <Cell key={vk} d={DEF_BY_NAME[vk]} vals={vals} change={change} isAuto={autoOf(DEF_BY_NAME[vk])} wide={wide} />
+      : <div key={vk} className="cs-cell" />)
+    return (
+      <>
+        {mx.top.length > 0 && <div className="cs-row">{mx.top.map((vk) => cell(vk))}</div>}
+        <div className="cs-matrix" style={{ gridTemplateColumns: `repeat(${mx.cols.length}, minmax(0, 1fr))` }}>
+          {mx.cols.map((ch) => <div key={ch} className="cs-mcell">{cell(g === '単価' ? `${mx.head(ch)}` : mx.head(ch), true)}</div>)}
+          {mx.rows.map((r, i) => mx.cols.map((ch) => (
+            <div key={`${i}-${ch}`} className={'cs-mcell cs-pair' + (r.indent ? ' indent' : '')}>
+              {r.cells(ch).map((vk) => cell(vk))}
+            </div>
+          )))}
+        </div>
+      </>
+    )
+  }
+
   const renderBody = (g, defs) => {
+    if (MATRIX[g]) return renderMatrix(g)
+    if (CHANNEL_ROW_GROUPS[g]) return renderChannelRows(g, defs)
     // 掲載チャネル：チェックボックスを1行にまとめる
     if (defs.every((d) => d.kind === 'checkbox' && !d.boolLabel)) {
       return (
@@ -135,7 +257,7 @@ function CaseSimpleDetail({ rec, onBack, onSave }) {
           <div className="fbody chk-grid">
             {defs.map((d) => (
               <label key={d.key} className="chk-inline">
-                <input type="checkbox" checked={!!vals[d.name]} onChange={(e) => change(d.name, e.target.checked)} />
+                <input type="checkbox" checked={!!vals[d.vkey]} onChange={(e) => change(d.vkey, e.target.checked)} />
                 <span>{d.label}</span>
               </label>
             ))}
@@ -152,6 +274,20 @@ function CaseSimpleDetail({ rec, onBack, onSave }) {
           <div className="grid2">{defs.filter((d) => d.sub === s).map(renderField)}</div>
         </React.Fragment>
       ))
+    }
+    // カテゴリーを含むグループ（商品）：前 → カテゴリー → 後
+    const ci = defs.findIndex((d) => d.name === 'カテゴリーコード')
+    if (ci >= 0) {
+      const rest = defs.filter((d) => !CATEGORY.includes(d.name))
+      const before = rest.filter((d) => defs.indexOf(d) < ci)
+      const after = rest.filter((d) => defs.indexOf(d) > ci)
+      return (
+        <>
+          <div className="grid2">{before.map(renderField)}</div>
+          {renderCategory()}
+          <div className="grid2">{after.map(renderField)}</div>
+        </>
+      )
     }
     return <div className="grid2">{defs.map(renderField)}</div>
   }
@@ -172,7 +308,7 @@ function CaseSimpleDetail({ rec, onBack, onSave }) {
 
       {GROUPS.map((g) => (
         <KGroup key={`${g}-${openAll.n}`} title={g} defaultOpen={openAll.on}>
-          {renderBody(g, CASE_DEFS.filter((d) => d.group === g))}
+          {renderBody(g, DEFS.filter((d) => d.group === g))}
         </KGroup>
       ))}
     </div>

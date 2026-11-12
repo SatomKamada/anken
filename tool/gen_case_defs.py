@@ -20,14 +20,17 @@ SHEET = "案件管理"
 HEAD = ""                 # 備考が空欄 → 詳細最上部（グループの外）
 OPTION = "オプション設定"
 
-LOOKUP = {"企業コード", "倉庫ID", "配送除外地域ID", "配送料種別ID", "JAN", "カテゴリーコード",
-          "掲載登録担当者", "dサンプル加算料率マスタ", "d払い加算料率マスタ", "Y店加算料率マスタ"}
-LOOKUP_COPY = {"企業名", "倉庫", "配送除外地域", "大カテゴリー", "中カテゴリー", "小カテゴリー",
+LOOKUP = {"カテゴリーコード"}                       # コード入力＋取得／クリア
+CODE_AUTO = {"企業コード", "倉庫ID", "配送除外地域ID", "配送料種別ID"}   # 名称を入れるとコードが自動
+SUGGEST = {"企業名", "倉庫", "配送除外地域"}            # 名称入力（候補リスト付き）
+LOOKUP_COPY = {"大カテゴリー", "中カテゴリー", "小カテゴリー",
                "dサンプル加算料率", "d払い加算料率", "Y店加算料率",
-               "dサンプル加算料率（%）", "d払い加算料率（%）", "Y店加算料率（%）"}
+               "dサンプル加算料率（%）", "d払い加算料率（%）", "Y店加算料率（%）",
+               "dサンプル加算料率マスタ", "d払い加算料率マスタ", "Y店加算料率マスタ"}
 CHECKS = {"会員限定", "非会員申込可否", "抽選可否", "軽減税率フラグ", "通知フラグ"}
 SELECTS = {"種別", "酒類", "ドライアイス", "制作ステータス", "ショッピング広告掲載", "申込可能個数",
-           "販売形態", "掲載変更ステータス", "配送方法名称", "承認フロー"}
+           "販売形態", "掲載変更ステータス", "配送方法名称", "承認フロー", "掲載時間"}
+EDITABLE = {"本店売上比率"}                          # 計算グループ内でも入力可
 TEXTAREA = {"備考(営業部内宛)", "備考(オペ宛)", "メモ", "過去実績/類似商品実績"}
 CALC_GROUPS = {"粗利", "総額", "単価", "システム項目"}
 CALC_NAMES = {"レコード番号", "案件No", "上代合計（税込）", "上代合計（税抜）", "参考価格（税込）",
@@ -59,6 +62,10 @@ def kind_of(name, group, has_bool, options):
         return "checkbox"
     if name in LOOKUP:
         return "lookup"
+    if name in SUGGEST:
+        return "suggest"
+    if name in CODE_AUTO or name in LOOKUP_COPY:
+        return "text"
     if options or name in SELECTS:
         return "select"
     if name in TEXTAREA:
@@ -67,6 +74,8 @@ def kind_of(name, group, has_bool, options):
         return "text"
     if name.endswith("日") or name == "賞味期限":
         return "date"
+    if "枚数" in name:
+        return "num"
     if "率" in name and "マスタ" not in name:
         return "pct"
     if group == "変動" or (any(w in name for w in MONEY) and not name.endswith("数")):
@@ -106,7 +115,8 @@ def main(xlsx, out):
             label, bool_label = m.group(1), m.group(2)
         options = parse_options(ws.cell(r, 8).value)
         kind = kind_of(name, group, bool(bool_label), options)
-        auto = (kind != "checkbox" and (name in LOOKUP_COPY or group in CALC_GROUPS
+        auto = (kind != "checkbox" and name not in EDITABLE and (
+                name in LOOKUP_COPY or name in CODE_AUTO or group in CALC_GROUPS
                 or name in CALC_NAMES or (group == "変動" and name != "調整費")))
         d = {"key": f"r{r}", "name": name, "label": label, "group": group, "kind": kind}
         if sub: d["sub"] = sub
@@ -122,7 +132,7 @@ def main(xlsx, out):
         "// 案件管理（現行踏襲）項目定義 ※自動生成ファイル。直接編集しない\n"
         f"//   生成元: {Path(xlsx).name}「{SHEET}」シート\n"
         "//   再生成: python tools/gen_case_defs.py <定義書.xlsx>\n"
-        "//   kind: text/textarea/select/checkbox/date/money/pct/num/lookup\n"
+        "//   kind: text/textarea/select/checkbox/date/money/pct/num/lookup/suggest\n"
         "//   group: 空文字＝詳細最上部（グループ外） / auto: 計算・ルックアップ項目（入力不可）\n"
         "// ============================================================\n"
         f"export const CASE_DEFS = [\n{body},\n]\n", encoding="utf-8")
