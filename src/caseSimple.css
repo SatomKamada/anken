@@ -1,0 +1,14 @@
+/* ===== 案件（現行踏襲・シンプル版） ===== */
+.cs-detail .detail-back { flex-wrap: wrap; }
+.cs-detail .cs-spacer { flex: 1; }
+/* 計算・ルックアップ項目（入力不可）はグレー（.kgroup .inp の白背景を上書き） */
+/* ※select は :read-only に一致するため input / textarea に限定 */
+.cs-detail input.inp:read-only, .cs-detail textarea.inp:read-only,
+.cs-detail .inp:disabled { background: #e9edf1; color: var(--ink-soft); }
+.cs-detail select.inp { background: #fff; color: var(--ink); }
+.cs-detail .inp[type="number"] { text-align: right; }
+.cs-detail .cs-unit { color: var(--ink-soft); font-size: 12px; }
+.cs-detail .fbody.has-right { flex-wrap: nowrap; }
+.cs-detail .fbody.has-right .fnote { flex-basis: auto; }
+.cs-new { display: inline-block; margin-left: 6px; background: #fff4e5; color: #8a5300; border: 1px solid #f1d3a6;
+  font-size: 10px; padding: 0 5px; border-radius: 3px; vertical-align: middle; font-weight: 600; }

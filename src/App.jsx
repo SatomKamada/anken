@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import CaseTab from './CaseTab.jsx'
+import CaseSimpleTab from './CaseSimpleTab.jsx'   // 現行踏襲・シンプル版（旧: CaseTab.jsx）
 import SetProductTab from './SetProductTab.jsx'
 import OrderTab from './OrderTab.jsx'
 import PageChange from './PageChange.jsx'
@@ -33,7 +33,7 @@ export default function App() {
       </nav>
 
       <main className="content">
-        {tab === 'case' ? <CaseTab />
+        {tab === 'case' ? <CaseSimpleTab />
           : tab === 'set' ? <SetProductTab />
           : tab === 'order' ? <OrderTab />
           : <PageChange />}
