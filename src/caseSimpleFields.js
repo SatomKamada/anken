@@ -44,11 +44,10 @@ export const CATEGORY_MASTER = {
 // 画面レイアウト調整（定義書の順序・グループに対する画面上の並べ替え）
 // ============================================================
 const EXCLUDE = new Set([                                                     // 画面に出さない
-  '非会員申込可否', '種別',
   'お試し費用（税込）＋5%を手入力する[お試し費用（税込）＋5%を手入力する]',
 ])
-const RENAME = { '掲載ID': '商品規格ID', '掲載変更種別': '種別' }               // 画面上の名称
-const MOVE_BEFORE = { '掲載確定日': '掲載時間' }                                  // 同じグループ内で前へ
+const RENAME = {}                                                            // 画面上の名称（定義書と変える場合）
+const MOVE_BEFORE = {}                                                       // 同じグループ内で前へ { 項目: この項目の前 }
 const MOVE_TO_GROUP_TOP = { '掲載変更ステータス': '確定情報（オペ・営業企画入力）' } // 別グループの先頭へ
 const AFTER_CATEGORY = ['酒類', '医薬', '過去実績/類似商品実績']                  // カテゴリーの下へ
 const GROUP_FIRST = ['商品', '商品規格', '掲載履歴']                             // 最上部の次に並べる
@@ -57,11 +56,13 @@ function arrange(defs) {
   let list = defs.filter((d) => !EXCLUDE.has(d.name)).map((d) => (RENAME[d.name] ? { ...d, label: RENAME[d.name] } : d))
   for (const [name, before] of Object.entries(MOVE_BEFORE)) {
     const d = list.find((x) => x.name === name)
+    if (!d) continue
     list = list.filter((x) => x !== d)
     list.splice(list.findIndex((x) => x.name === before), 0, d)
   }
   for (const [name, g] of Object.entries(MOVE_TO_GROUP_TOP)) {
     const d = list.find((x) => x.name === name)
+    if (!d || d.group === g) continue
     list = list.filter((x) => x !== d)
     list.splice(list.findIndex((x) => x.group === g), 0, { ...d, group: g })
   }
@@ -180,10 +181,13 @@ export function recalc(src) {
 
   const tEx = t === null ? null : Math.floor(t / tax)
   v['お試し費用（税抜）'] = tEx ?? ''
-  const y = n(v['Y店お試し費用（税込）'])
-  v['Y店お試し費用（税抜）'] = y === null ? '' : Math.floor(y / tax)
+  for (const ch of ['dサンプル', 'd払い', '社販コム', '会員コム', 'Y店']) {   // チャネル別の税抜
+    const x = n(v[`${ch}お試し費用（税込）`])
+    v[`${ch}お試し費用（税抜）`] = x === null ? '' : Math.floor(x / tax)
+  }
   v['お試し費用単価（税込）'] = t === null ? '' : Math.round(t / (pieces || 1))
   set('お試し費用（税抜）+5%', tEx === null ? '' : Math.round(tEx * 1.05))
+  v['お試し費用（税込）+5%'] = t === null ? '' : Math.round(t * 1.05)
   v['総売上（税込）'] = t === null ? '' :
     t * (n(v['本店当月出荷見込み数']) ?? 0)
     + (n(v['dサンプルお試し費用（税込）']) ?? 0) * (n(v['dサンプル当月出荷見込み数']) ?? 0)
@@ -221,7 +225,7 @@ export const makeEmptyCase = (recordNo = '', user = CURRENT_USER) => recalc({
 
 export const CS_RECORDS_INIT = base.map(([no, caseNo, st, chg, type, comp, name, post, recruit, ref, pieces, sets, cost, trial, user, jan, cat], i) => recalc({
   ...makeEmptyCase(no, user),
-  '案件No': caseNo, '案件ステータス': st, '掲載変更種別': chg, '案件タイプ': type, '承認フロー': '通常',
+  '案件No': caseNo, '案件ステータス': st, '種別': chg, '案件タイプ': type, '承認フロー': '通常',
   '企業名': comp, '掲載名': name, '制作ステータス': ['営業確認待', '画像UP待', '制作済', 'PV済'][i % 4],
   'JAN': jan, 'カテゴリーコード': cat, '大カテゴリー': CATEGORY_MASTER[cat][0],
   '中カテゴリー': CATEGORY_MASTER[cat][1], '小カテゴリー': CATEGORY_MASTER[cat][2],
@@ -229,7 +233,7 @@ export const CS_RECORDS_INIT = base.map(([no, caseNo, st, chg, type, comp, name,
   '仕入れタイプ': i % 2 ? '仕入れ' : '通常', '倉庫': ['柏倉庫', '厚木倉庫', '大阪倉庫'][i % 3],
   '配送方法名称': type.includes('冷') ? 'クール便' : '通常', '配送形態': '佐川10kg未満',
   '掲載予定日': post, '掲載終了日': addDays(post, 14), '募集予定日': recruit, '募集終了日': addDays(recruit, 7),
-  '掲載ID': ['確定済', '承認済'].includes(st) ? `P${caseNo}` : '', '前回ID': '0',
+  '商品規格ID': ['確定済', '承認済'].includes(st) ? `P${caseNo}` : '', '前回ID': '0',
   '掲載確定日': ['確定済', '承認済'].includes(st) ? addDays(post, -10) : '',
   '納品日': addDays(post, -14), '賞味期限': addDays(post, 365),
   '参考価格（税抜）': ref, '販売ピース数': pieces, '販売ピース総数': pieces * sets,
